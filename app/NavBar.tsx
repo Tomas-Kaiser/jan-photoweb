@@ -1,19 +1,22 @@
 import { faInstagram, faFacebook } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
+import JHLogo from './components/JHLogo'
+import Link from 'next/link'
 
 const NavBar = () => {
     return (
         <div className="navbar bg-base-100 shadow-sm">
             <div className="navbar-start">
-                <a className="btn btn-ghost text-xl">HOME</a>
+                <Link href='/' className="mr-1"><JHLogo /></Link>
+
                 <a
                     href="https://www.facebook.com/share/jpVp8s9n6sw2aGfd"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-ghost btn-circle"
                 >
-                    <FontAwesomeIcon icon={faFacebook} className="w-6 h-6 text-pink-500" />
+                    <FontAwesomeIcon icon={faFacebook} className="w-6 h-6 text-black" />
                 </a>
                 <a
                     href="https://www.instagram.com/yenhighjack/?igsh=Yzl0eW1wMGkxN3po&utm_source=qr"
@@ -21,7 +24,7 @@ const NavBar = () => {
                     rel="noopener noreferrer"
                     className="btn btn-ghost btn-circle"
                 >
-                    <FontAwesomeIcon icon={faInstagram} className="w-6 h-6 text-pink-500" />
+                    <FontAwesomeIcon icon={faInstagram} className="w-6 h-6 text-black" />
                 </a>
             </div>
             <div className="navbar-center hidden lg:flex">
