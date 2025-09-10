@@ -32,7 +32,7 @@ const NavBar = () => {
             </div>
             <div className="navbar-end">
                 <ul className="menu menu-horizontal px-1 hidden lg:flex">
-                    <li><a>Item 1</a></li>
+                    <li><Link href={'/albums'}>Albums</Link></li>
                     <li>
                         <details>
                             <summary>Parent</summary>
