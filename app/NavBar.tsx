@@ -9,7 +9,6 @@ const NavBar = () => {
         <div className="navbar bg-base-100 shadow-sm">
             <div className="navbar-start">
                 <Link href='/' className="mr-1"><JHLogo /></Link>
-
                 <a
                     href="https://www.facebook.com/share/jpVp8s9n6sw2aGfd"
                     target="_blank"
