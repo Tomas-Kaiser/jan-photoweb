@@ -101,7 +101,7 @@ const photoCoverAlbums = [
     },
 ];
 
-const AlbumHeroGrid = () => {
+const AlbumsGrid = () => {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-0 p-0">
             {photoCoverAlbums.map((album, index) => (
@@ -127,4 +127,4 @@ const AlbumHeroGrid = () => {
     );
 }
 
-export default AlbumHeroGrid
+export default AlbumsGrid
