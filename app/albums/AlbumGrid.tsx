@@ -1,5 +1,8 @@
+'use client';
 import Image from 'next/image';
-import React from 'react';
+import React, { useState } from 'react';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 interface photo {
     imgSrc: string;
@@ -11,6 +14,12 @@ interface Props {
 }
 
 const AlbumGrid = ({ photos }: Props) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [photoIndex, setPhotoIndex] = useState(0);
+    const slides = photos.map(photo => ({
+        src: photo.imgSrc,
+    }));
+
     const getGridColsClass = (count: number) => {
         if (count >= 5) return 'xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1';
         if (count === 4) return 'lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1';
@@ -20,20 +29,30 @@ const AlbumGrid = ({ photos }: Props) => {
     };
 
     return (
-        <div className={`grid ${getGridColsClass(photos.length)} gap-0 p-0`}>
-            {photos.map((photo, index) => (
-                <Image
-                    key={index}
-                    src={photo.imgSrc}
-                    alt={index.toString()}
-                    width={400}
-                    height={300}
-                    style={{ objectPosition: photo.objectPosition }}
-                    className={`object-cover w-full h-100 transition-transform duration-300 group-hover:scale-105 cursor-pointer`}
-                />
-            ))}
-        </div>
-    );
-}
+        <>
+            <div className={`grid ${getGridColsClass(photos.length)} gap-0 p-0`}>
+                {photos.map((photo, index) => (
+                    <div key={index} onClick={() => { setPhotoIndex(index); setIsOpen(true); }} className="cursor-pointer">
+                        <Image
+                            src={photo.imgSrc}
+                            alt={`Photo ${index}`}
+                            width={400}
+                            height={300}
+                            style={{ objectPosition: photo.objectPosition }}
+                            className="object-cover w-full h-100 transition-transform duration-300 hover:scale-105"
+                        />
+                    </div>
+                ))}
+            </div>
+            <Lightbox
+                open={isOpen}
+                close={() => setIsOpen(false)}
+                slides={slides}
+                index={photoIndex}
+            />
 
-export default AlbumGrid
+        </>
+    );
+};
+
+export default AlbumGrid;
