@@ -38,7 +38,7 @@ const Footer = () => {
                     </a>
                 </div>
                 <div className="text-sm text-gray-600">
-                    © {year} Hajek Jan | created by Tomas Kaiser
+                    © {year} Jan Hajek | created by Tomas Kaiser
                 </div>
             </div>
         </footer>
