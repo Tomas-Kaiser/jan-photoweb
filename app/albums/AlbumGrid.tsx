@@ -50,7 +50,6 @@ const AlbumGrid = ({ photos }: Props) => {
                 slides={slides}
                 index={photoIndex}
             />
-
         </>
     );
 };
