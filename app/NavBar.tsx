@@ -27,21 +27,13 @@ const NavBar = () => {
                 </a>
             </div>
             <div className="navbar-center hidden lg:flex">
-                <p>Jan</p>
+                <p className='text-3xl font-semibold'>Jan Hajek</p>
             </div>
             <div className="navbar-end">
-                <ul className="menu menu-horizontal px-1 hidden lg:flex">
+                <ul className="menu menu-horizontal px-1 hidden lg:flex font-semibold">
                     <li><Link href={'/albums'}>Albums</Link></li>
-                    <li>
-                        <details>
-                            <summary>Parent</summary>
-                            <ul className="p-2">
-                                <li><a>Submenu 1</a></li>
-                                <li><a>Submenu 2</a></li>
-                            </ul>
-                        </details>
-                    </li>
-                    <li><a>Item 3</a></li>
+                    <li><Link href={'/about'}>About</Link></li>
+                    <li><Link href={'/contact'}>Contact</Link></li>
                 </ul>
                 <div className="dropdown lg:hidden">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -51,15 +43,9 @@ const NavBar = () => {
                         tabIndex={0}
                         className="menu dropdown-content absolute right-0 bg-base-100 rounded-box mt-3 w-52 p-2 shadow z-50"
                     >
-                        <li><a>Item 1</a></li>
-                        <li>
-                            <a>Parent</a>
-                            <ul className="p-2">
-                                <li><a>Submenu 1</a></li>
-                                <li><a>Submenu 2</a></li>
-                            </ul>
-                        </li>
-                        <li><a>Item 3</a></li>
+                        <li><Link href={'/albums'}>Albums</Link></li>
+                        <li><Link href={'/about'}>About</Link></li>
+                        <li><Link href={'/contact'}>Contact</Link></li>
                     </ul>
                 </div>
             </div>
