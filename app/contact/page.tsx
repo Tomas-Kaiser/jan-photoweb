@@ -1,7 +1,26 @@
 'use client';
-import React from 'react'
+import React, { useRef } from 'react';
 
 const ContactPage = () => {
+    const formRef = useRef<HTMLFormElement>(null);
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            alert('Message sent!');
+            formRef.current?.reset(); // ✅ Safely reset the form
+        } else {
+            alert('Something went wrong.');
+        }
+    }
+
     return (
         <section className="px-6 py-12 max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold mb-6 text-center">Let’s Connect</h1>
@@ -9,7 +28,8 @@ const ContactPage = () => {
                 Whether you’re looking to collaborate, book a shoot, or just say hello — I’d love to hear from you.
             </p>
 
-            <form className="space-y-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+                {/* Name */}
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-800 mb-1">
                         Name
@@ -23,6 +43,7 @@ const ContactPage = () => {
                     />
                 </div>
 
+                {/* Email */}
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-800 mb-1">
                         Email
@@ -36,6 +57,7 @@ const ContactPage = () => {
                     />
                 </div>
 
+                {/* Message */}
                 <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-800 mb-1">
                         Message
@@ -49,6 +71,7 @@ const ContactPage = () => {
                     />
                 </div>
 
+                {/* Submit Button */}
                 <div className="flex justify-center">
                     <button
                         type="submit"
@@ -60,6 +83,6 @@ const ContactPage = () => {
             </form>
         </section>
     );
-}
+};
 
-export default ContactPage
+export default ContactPage;
