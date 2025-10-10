@@ -1,5 +1,7 @@
+import Link from "next/link";
 import AlbumsGrid from "./albums/AlbumsGrid";
 import HeroImage from "./components/HeroImage";
+import Image from "next/image";
 
 type ObjectPosition = {
   top: string;
@@ -34,7 +36,53 @@ export default function Home() {
       {images.map(({ visibility, src }, index) => (
         <HeroImage key={index} visibility={visibility} src={src} />
       ))}
-      <div className="text-center py-8 px-4 md:px-12 lg:px-24">
+      <section className="px-6 py-12 max-w-6xl mx-auto bg-gray-50">
+        <div className="flex flex-col lg:flex-row gap-10 items-start">
+          {/* Text Block */}
+          <div className="w-full lg:w-1/2 text-gray-800 order-1 lg:order-2">
+            <h2 className="text-3xl font-bold mb-4">Meet Your Photographer</h2>
+            <p className="text-lg text-gray-700 mb-6">
+              With a passion for capturing emotion and elegance, I specialize in
+              fashion, weddings, and editorial storytelling. Every shoot is a
+              collaboration — let’s create something timeless.
+            </p>
+
+            {/* Photo appears after intro on mobile, beside text on desktop */}
+            <div className="block lg:hidden mb-6">
+              <Image
+                src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
+                alt="Jan Hajek"
+                width={600}
+                height={800}
+                className="rounded-lg object-cover shadow-lg w-full h-auto"
+                priority
+              />
+            </div>
+
+            <div className="flex justify-center lg:justify-start">
+              <Link
+                href="/contact"
+                className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition"
+              >
+                Send a Query
+              </Link>
+            </div>
+          </div>
+
+          {/* Photo for desktop view */}
+          <div className="w-full lg:w-1/2 hidden lg:block order-2 lg:order-1">
+            <Image
+              src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
+              alt="Jan Hajek"
+              width={600}
+              height={800}
+              className="rounded-lg object-cover shadow-lg w-full h-auto"
+              priority
+            />
+          </div>
+        </div>
+      </section>
+      <section className="text-center py-8 px-4 md:px-12 lg:px-24">
         <h2 className="text-3xl font-bold mb-4">
           Explore Our Signature Albums
         </h2>
@@ -42,7 +90,7 @@ export default function Home() {
           Each collection below captures a unique story, mood, and moment.
           Browse through to discover the artistry behind every frame.
         </p>
-      </div>
+      </section>
     </>
   );
 }
