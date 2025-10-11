@@ -1,7 +1,8 @@
 import Link from "next/link";
-import AlbumsGrid from "./albums/AlbumsGrid";
 import HeroImage from "./components/HeroImage";
 import Image from "next/image";
+import SwiperWrapper from "./components/SwiperWrapper";
+import GoogleReviews from "./components/GoogleReviews";
 
 type ObjectPosition = {
   top: string;
@@ -31,6 +32,12 @@ export default function Home() {
     },
   ];
 
+  const photos = [
+    "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/2f2f9811-e3a0-4562-8ed7-efeb265b1500/public",
+    "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/da6a911f-e6cf-421d-995f-23f0ca73ea00/public",
+    "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/a8865897-a6b4-4a87-53cf-f101a5ef8100/public",
+    "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/92f6f6c1-e85f-498d-e175-a0c71c6efd00/public",
+  ];
   return (
     <>
       {images.map(({ visibility, src }, index) => (
@@ -79,6 +86,16 @@ export default function Home() {
               className="rounded-lg object-cover shadow-lg w-full h-auto"
               priority
             />
+          </div>
+        </div>
+      </section>
+      <section className="px-6 py-12 max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-8">
+          Portfolio Highlights
+        </h2>
+        <div className="flex justify-center">
+          <div className="w-full xl:w-[500px]">
+            <SwiperWrapper photos={photos} />
           </div>
         </div>
       </section>
