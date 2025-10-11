@@ -108,6 +108,10 @@ export default function Home() {
           Browse through to discover the artistry behind every frame.
         </p>
       </section>
+      <section className="text-center py-8 px-4 md:px-12 lg:px-24">
+        <h2 className="text-3xl font-bold mb-4">Client Testimonials</h2>
+        <GoogleReviews />
+      </section>
     </>
   );
 }
