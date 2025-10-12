@@ -55,15 +55,17 @@ export default function Home() {
             </p>
 
             {/* Photo appears after intro on mobile, beside text on desktop */}
-            <div className="block lg:hidden mb-6">
-              <Image
-                src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
-                alt="Jan Hajek"
-                width={600}
-                height={800}
-                className="rounded-lg object-cover shadow-lg w-full h-auto"
-                priority
-              />
+            <div className="flex justify-center ">
+              <div className="block md:w-1/2 lg:hidden mb-6">
+                <Image
+                  src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
+                  alt="Jan Hajek"
+                  width={600}
+                  height={800}
+                  className="rounded-lg object-cover shadow-lg w-full h-auto"
+                  priority
+                />
+              </div>
             </div>
 
             <div className="flex justify-center lg:justify-start">
