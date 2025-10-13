@@ -17,7 +17,7 @@ const GoogleReviews = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-1">
       <div
         className="elfsight-app-ade3bbaf-2454-46f0-b1ad-107b4e0c243b"
         data-elfsight-app-lazy

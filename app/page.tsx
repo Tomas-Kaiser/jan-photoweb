@@ -106,9 +106,15 @@ export default function Home() {
           Explore Our Signature Albums
         </h2>
         <p className="text-lg text-gray-600">
-          Each collection below captures a unique story, mood, and moment.
-          Browse through to discover the artistry behind every frame.
+          Each collection captures a unique story, mood, and moment. Browse
+          through to discover the artistry behind every frame.
         </p>
+        <Link
+          href="/albums"
+          className="mt-4 inline-block bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition"
+        >
+          View All Albums
+        </Link>
       </section>
       <section className="text-center py-8 px-4 md:px-12 lg:px-24">
         <h2 className="text-3xl font-bold mb-4">Client Testimonials</h2>
