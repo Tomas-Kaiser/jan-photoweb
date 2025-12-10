@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   EffectCoverflow,
@@ -64,7 +65,7 @@ const SwiperWrapper = ({ photos }: Props) => {
           >
             ×
           </button>
-          <img
+          <Image
             src={selectedPhoto}
             alt="Enlarged"
             className="max-h-[90%] max-w-[90%] rounded-lg"
