@@ -47,7 +47,9 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row gap-10 items-start">
           {/* Text Block */}
           <div className="w-full lg:w-1/2 text-gray-800 order-1 lg:order-2">
-            <h2 className="text-3xl font-bold mb-4">Meet Your Photographer</h2>
+            <h2 className="text-center text-3xl font-bold mb-4">
+              Meet Your Photographer
+            </h2>
             <p className="text-lg text-gray-700 mb-6">
               With a passion for capturing emotion and elegance, I specialize in
               fashion, weddings, and editorial storytelling. Every shoot is a
@@ -101,7 +103,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="text-center py-8 px-4 md:px-12 lg:px-24">
+      <section className="text-center py-8 px-4 md:px-12 lg:px-24  bg-gray-50">
         <h2 className="text-3xl font-bold mb-4">
           Explore Our Signature Albums
         </h2>
