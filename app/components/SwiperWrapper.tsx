@@ -11,6 +11,7 @@ import {
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import "./SwiperWrapper.module.css";
 
 interface Props {
   photos: string[];

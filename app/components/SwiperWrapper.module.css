@@ -1,0 +1,13 @@
+:global(.swiper-button-next),
+:global(.swiper-button-prev) {
+  color: #111 !important;
+}
+
+:global(.swiper-pagination-bullet) {
+  background-color: #aaa !important;
+  opacity: 1 !important;
+}
+
+:global(.swiper-pagination-bullet-active) {
+  background-color: #111 !important;
+}
