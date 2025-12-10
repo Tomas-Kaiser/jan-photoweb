@@ -68,7 +68,9 @@ const SwiperWrapper = ({ photos }: Props) => {
           <Image
             src={selectedPhoto}
             alt="Enlarged"
-            className="max-h-[90%] max-w-[90%] rounded-lg"
+            width={800}
+            height={600}
+            className=" rounded-lg"
           />
         </div>
       )}
