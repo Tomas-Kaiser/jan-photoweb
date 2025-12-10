@@ -38,7 +38,7 @@ const SwiperWrapper = ({ photos }: Props) => {
       className="w-full max-w-6xl mx-auto"
     >
       {photos.map((src, index) => (
-        <SwiperSlide key={index} className="!w-[300px]">
+        <SwiperSlide key={index} className="w-[200px]! sm:w-[300px]!">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
