@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 
-import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   EffectCoverflow,
@@ -40,6 +39,7 @@ const SwiperWrapper = ({ photos }: Props) => {
     >
       {photos.map((src, index) => (
         <SwiperSlide key={index} className="!w-[300px]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={`Photo ${index + 1}`}
