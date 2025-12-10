@@ -5,6 +5,11 @@ import React from "react";
 import JHLogo from "./components/JHLogo";
 import Link from "next/link";
 
+const blur = () => {
+  const el = document.activeElement as HTMLElement | null;
+  if (el) el.blur();
+};
+
 const NavBar = () => {
   return (
     <div className="navbar bg-base-100 shadow-sm">
@@ -67,35 +72,17 @@ const NavBar = () => {
             className="menu dropdown-content absolute right-0 bg-base-100 rounded-box mt-3 w-52 p-2 shadow z-50"
           >
             <li>
-              <Link
-                href={"/albums"}
-                onClick={() => {
-                  const el = document.activeElement as HTMLElement | null;
-                  if (el) el.blur();
-                }}
-              >
+              <Link href={"/albums"} onClick={blur}>
                 Albums
               </Link>
             </li>
             <li>
-              <Link
-                href={"/about"}
-                onClick={() => {
-                  const el = document.activeElement as HTMLElement | null;
-                  if (el) el.blur();
-                }}
-              >
+              <Link href={"/about"} onClick={blur}>
                 About
               </Link>
             </li>
             <li>
-              <Link
-                href={"/contact"}
-                onClick={() => {
-                  const el = document.activeElement as HTMLElement | null;
-                  if (el) el.blur();
-                }}
-              >
+              <Link href={"/contact"} onClick={blur}>
                 Contact
               </Link>
             </li>
