@@ -27,3 +27,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* === SWIPER GLOBAL OVERRIDES === */
+
+/* Navigation arrows */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #111 !important;   
+}
+
+/* Pagination bullets */
+.swiper-pagination-bullet {
+  background-color: #aaa !important; 
+  opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #111 !important; 
+}
