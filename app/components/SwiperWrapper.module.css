@@ -1,4 +1,7 @@
-:global(.swiper-button-next),
+:global(.swiper-button-next) {
+  color: #111 !important;
+}
+
 :global(.swiper-button-prev) {
   color: #111 !important;
 }
