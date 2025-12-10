@@ -29,7 +29,11 @@ const Footer = () => {
             rel="noopener noreferrer"
             className="btn btn-ghost btn-circle"
           >
-            <FontAwesomeIcon icon={faFacebook} className="w-6 h-6 text-black" />
+            <FontAwesomeIcon
+              icon={faFacebook}
+              size="2x"
+              className="text-black"
+            />
           </a>
           <a
             href="https://www.instagram.com/yenhighjack/?igsh=Yzl0eW1wMGkxN3po&utm_source=qr"
@@ -39,7 +43,8 @@ const Footer = () => {
           >
             <FontAwesomeIcon
               icon={faInstagram}
-              className="w-6 h-6 text-black"
+              size="2x"
+              className="text-black"
             />
           </a>
         </div>
