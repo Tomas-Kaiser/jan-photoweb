@@ -18,9 +18,6 @@ const NavBar = () => {
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
-        <Link href="/" className="mr-1">
-          <JHLogo />
-        </Link>
         <a
           href="https://www.facebook.com/share/jpVp8s9n6sw2aGfd"
           target="_blank"
@@ -42,8 +39,10 @@ const NavBar = () => {
           />
         </a>
       </div>
-      <div className="navbar-center hidden lg:flex">
-        <p className="text-xl font-semibold">Jan Hajek</p>
+      <div className="navbar-center lg:flex">
+        <Link href="/" className="mr-1 text-xl font-semibold">
+          Jan Hajek
+        </Link>
       </div>
       <div className="navbar-end">
         <ul className="menu menu-horizontal px-1 hidden lg:flex font-semibold">
