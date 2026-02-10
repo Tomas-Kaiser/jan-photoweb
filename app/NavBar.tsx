@@ -24,7 +24,11 @@ const NavBar = () => {
           rel="noopener noreferrer"
           className="btn btn-ghost btn-circle"
         >
-          <FontAwesomeIcon icon={faFacebook} size="lg" className="text-black" />
+          <FontAwesomeIcon
+            icon={faFacebook}
+            size="2xl"
+            className="text-black"
+          />
         </a>
         <a
           href="https://www.instagram.com/yenhighjack/?igsh=Yzl0eW1wMGkxN3po&utm_source=qr"
@@ -34,7 +38,7 @@ const NavBar = () => {
         >
           <FontAwesomeIcon
             icon={faInstagram}
-            size="lg"
+            size="2xl"
             className="text-black"
           />
         </a>
