@@ -1,0 +1,9 @@
+{
+    "welcome": "Welcome to my app",
+    "common": {
+        "albums": "Albums",
+        "about": "About",
+        "contact": "Contact",
+        "photos": "Photos"
+    }
+}

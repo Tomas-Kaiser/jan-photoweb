@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import JHLogo from "./components/JHLogo";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const blur = () => {
   const el = document.activeElement as HTMLElement | null;
@@ -11,6 +13,8 @@ const blur = () => {
 };
 
 const NavBar = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
@@ -39,20 +43,23 @@ const NavBar = () => {
         </a>
       </div>
       <div className="navbar-center hidden lg:flex">
-        <p className="text-3xl font-semibold">Jan Hajek</p>
+        <p className="text-xl font-semibold">Jan Hajek</p>
       </div>
       <div className="navbar-end">
         <ul className="menu menu-horizontal px-1 hidden lg:flex font-semibold">
           <li>
-            <Link href={"/albums"}>Albums</Link>
+            <Link href={"/albums"}>{t("common.albums")}</Link>
           </li>
           <li>
-            <Link href={"/about"}>About</Link>
+            <Link href={"/about"}>{t("common.about")}</Link>
           </li>
           <li>
-            <Link href={"/contact"}>Contact</Link>
+            <Link href={"/contact"}>{t("common.contact")}</Link>
           </li>
         </ul>
+        <div className="hidden lg:flex">
+          <LanguageSwitcher />
+        </div>
         <div className="dropdown lg:hidden">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
             <svg
@@ -77,19 +84,20 @@ const NavBar = () => {
           >
             <li>
               <Link href={"/albums"} onClick={blur}>
-                Albums
+                {t("common.albums")}
               </Link>
             </li>
             <li>
               <Link href={"/about"} onClick={blur}>
-                About
+                {t("common.about")}
               </Link>
             </li>
             <li>
               <Link href={"/contact"} onClick={blur}>
-                Contact
+                {t("common.contact")}
               </Link>
             </li>
+            <LanguageSwitcher />
           </ul>
         </div>
       </div>

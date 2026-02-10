@@ -18,7 +18,8 @@ interface Props {
 
 const SwiperWrapper = ({ photos }: Props) => {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
-
+  // TODO: optimize for accessibility and keyboard navigation
+  // TODO: Does not work properly on laptop
   return (
     <>
       <Swiper
