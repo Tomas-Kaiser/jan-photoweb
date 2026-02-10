@@ -1,9 +1,12 @@
 {
-    "welcome": "Vitejte v mé aplikaci",
-    "common": {
-        "albums": "Alba",
-        "about": "O mně",
-        "contact": "Kontakt",
-        "photos": "Fotky"
-    }
+  "welcome": "Vitejte v mé aplikaci",
+  "common": {
+    "albums": "Alba",
+    "about": "O mně",
+    "contact": "Kontakt",
+    "photos": "Fotky"
+  },
+  "hero": {
+    "CTAbtn": "Prozkoumat alba"
+  }
 }

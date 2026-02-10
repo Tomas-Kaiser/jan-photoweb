@@ -1,9 +1,12 @@
 {
-    "welcome": "Welcome to my app",
-    "common": {
-        "albums": "Albums",
-        "about": "About",
-        "contact": "Contact",
-        "photos": "Photos"
-    }
+  "welcome": "Welcome to my app",
+  "common": {
+    "albums": "Albums",
+    "about": "About",
+    "contact": "Contact",
+    "photos": "Photos"
+  },
+  "hero": {
+    "CTAbtn": "Explore Albums"
+  }
 }
