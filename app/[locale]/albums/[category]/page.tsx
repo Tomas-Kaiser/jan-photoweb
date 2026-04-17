@@ -1,5 +1,5 @@
 import React from "react";
-import { objectPosition } from "@/app/page";
+import { objectPosition } from "@/app/[locale]/page";
 import AlbumsGrid from "../AlbumsGrid";
 import AlbumGrid from "../AlbumGrid";
 

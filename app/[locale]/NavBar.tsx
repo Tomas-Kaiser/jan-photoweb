@@ -2,9 +2,10 @@
 import { faInstagram, faFacebook } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import Link from "next/link";
-import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "./components/LanguageSwitcher";
+import { Link } from "../i18n/routing";
+
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useTranslations } from "next-intl";
 
 const blur = () => {
   const el = document.activeElement as HTMLElement | null;
@@ -12,7 +13,12 @@ const blur = () => {
 };
 
 const NavBar = () => {
-  const { t } = useTranslation();
+  const t = useTranslations("common");
+
+  // ADD THESE TWO LINES:
+  const locale =
+    typeof window !== "undefined" ? window.location.pathname.split("/")[1] : "";
+  console.log(">>>>> Current URL locale is:", locale);
 
   return (
     <div className="navbar bg-base-100 shadow-sm">
@@ -50,13 +56,13 @@ const NavBar = () => {
       <div className="navbar-end">
         <ul className="menu menu-horizontal px-1 hidden lg:flex font-semibold">
           <li>
-            <Link href={"/albums"}>{t("common.albums")}</Link>
+            <Link href={"/albums"}>{t("albums")}</Link>
           </li>
           <li>
-            <Link href={"/about"}>{t("common.about")}</Link>
+            <Link href={"/about"}>{t("about")}</Link>
           </li>
           <li>
-            <Link href={"/contact"}>{t("common.contact")}</Link>
+            <Link href={"/contact"}>{t("contact")}</Link>
           </li>
         </ul>
         <div className="hidden lg:flex">
@@ -86,17 +92,17 @@ const NavBar = () => {
           >
             <li>
               <Link href={"/albums"} onClick={blur}>
-                {t("common.albums")}
+                {t("albums")}
               </Link>
             </li>
             <li>
               <Link href={"/about"} onClick={blur}>
-                {t("common.about")}
+                {t("about")}
               </Link>
             </li>
             <li>
               <Link href={"/contact"} onClick={blur}>
-                {t("common.contact")}
+                {t("contact")}
               </Link>
             </li>
             <LanguageSwitcher />

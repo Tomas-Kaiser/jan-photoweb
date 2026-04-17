@@ -1,43 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import i18n from "../i18n/i18n";
+import { useLocale } from "next-intl";
+import { usePathname, useRouter } from "../i18n/routing"; // Use the navigation from your routing file
 import { IoEarth } from "react-icons/io5";
 
 export default function LanguageSwitcher() {
-  const [open, setOpen] = useState(false);
-  const current = i18n.language; // "en" or "cs"
+  const locale = useLocale(); // Gets current lang ("en" or "cs")
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const changeToEnglish = () => {
-    i18n.changeLanguage("en");
-    setOpen(false);
-  };
-  const changeToCzech = () => {
-    i18n.changeLanguage("cs");
-    setOpen(false);
+  const changeLanguage = (nextLocale: "en" | "cs") => {
+    // This updates the URL (e.g., /en/dashboard -> /cs/dashboard)
+    router.replace(pathname, { locale: nextLocale });
   };
 
   return (
     <div className="dropdown dropdown-end">
-      <label tabIndex={0} role="button" className="btn btn-ghost btn-circle">
+      <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
         <IoEarth className="h-5 w-5" />
-      </label>
+      </div>
       <ul
         tabIndex={0}
         className="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-40 z-50"
       >
         <li>
           <button
-            onClick={changeToEnglish}
-            className={current === "en" ? "active bg-base-300" : ""}
+            onClick={() => changeLanguage("en")}
+            className={locale === "en" ? "active bg-base-300" : ""}
           >
             🇬🇧 English
           </button>
         </li>
         <li>
           <button
-            onClick={changeToCzech}
-            className={current === "cs" ? "active bg-base-300" : ""}
+            onClick={() => changeLanguage("cs")}
+            className={locale === "cs" ? "active bg-base-300" : ""}
           >
             🇨🇿 Čeština
           </button>

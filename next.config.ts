@@ -1,20 +1,22 @@
+import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
-import { i18n } from "./next-i18next.config";
+
+const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'imagedelivery.net',
+        protocol: "https",
+        hostname: "imagedelivery.net",
       },
       {
-        protocol: 'https',
-        hostname: 'img.freepik.com',
+        protocol: "https",
+        hostname: "img.freepik.com",
       },
     ],
   },
-  i18n
 };
 
-export default nextConfig;
+// Wrap the config with the plugin
+export default withNextIntl(nextConfig);

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import HeroImage from "./components/HeroImage";
+import HeroImage from "../components/HeroImage";
 import Image from "next/image";
-import SwiperWrapper from "./components/SwiperWrapper";
-import GoogleReviews from "./components/GoogleReviews";
+import SwiperWrapper from "../components/SwiperWrapper";
+import GoogleReviews from "../components/GoogleReviews";
 
 type ObjectPosition = {
   top: string;
@@ -43,7 +43,7 @@ export default function Home() {
       {images.map(({ visibility, src }, index) => (
         <HeroImage key={index} visibility={visibility} src={src} />
       ))}
-      <section className="px-6 py-12 max-w-6xl mx-auto bg-gray-50">
+      <section className="px-6 py-12 max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-10 items-start">
           {/* Text Block */}
           <div className="w-full lg:w-1/2 text-gray-800 order-1 lg:order-2">

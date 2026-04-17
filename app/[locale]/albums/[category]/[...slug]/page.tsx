@@ -1,6 +1,6 @@
 import React from "react";
 import AlbumGrid from "../../AlbumGrid";
-import { objectPosition } from "@/app/page";
+import { objectPosition } from "@/app/[locale]/page";
 
 export interface Photo {
   name: string;
