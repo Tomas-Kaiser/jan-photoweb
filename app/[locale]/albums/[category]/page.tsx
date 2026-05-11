@@ -178,6 +178,54 @@ const photoCoverAlbumsByCatogery: Record<string, PhotoAlbum[]> = {
   ],
   portraits: [
     {
+      name: "New Portait 09",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/71a2dd68-df7a-494e-eb73-dbbafb7e3800/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "New Portait 08",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/770617be-5d4b-4fa0-2dbe-72a5da91c400/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "New Portait 06",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/8274b47b-1722-4bb7-95ec-32d23861d200/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "New Portait 05",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/d70a9f6b-cc76-44ab-ddc6-49eae892ca00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "New Portait 04",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/70a28fef-d961-440b-c2cd-7b4b959c6700/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "New Portait 03",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/4fc44b1b-3b93-410b-4942-371ffb7f0300/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "New Portait 02",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/16f10ff3-5c79-4a1a-fb64-7a2932507400/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "New Portait 01",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/96348369-7303-4b6a-e18c-06d8a5149300/public",
+      objectPosition: objectPosition.top,
+    },
+    {
       name: "Port 10",
       imgSrc:
         "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/935a93ce-f8d4-40a0-800f-511c81c6be00/public",
