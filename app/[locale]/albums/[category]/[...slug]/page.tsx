@@ -673,6 +673,166 @@ const photos: Record<string, Photo[]> = {
       objectPosition: objectPosition.top,
     },
   ],
+  "mara-a-market": [
+    {
+      name: "Mara a Market 01",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/bf132444-3436-41c1-b11f-0b35e98b2500/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 02",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/6e4feacc-0181-4ab2-72b6-b559be1f2c00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 03",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/1f7cd461-2d50-4684-9500-b438ac2a4200/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 04",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/41486dd8-25d2-43b4-cac1-b0e4c8c07d00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 05",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/68cdb2a4-72eb-479b-f89a-1a4980f0ed00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 06",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/5fefadb3-5c3b-4379-ff48-f768cb600100/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 07",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/7a627c4b-5b87-4cc0-0445-86ffb0936b00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 08",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/b04d55f6-f959-4026-4ae6-6b64731eb000/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 09",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/29b99b41-b595-4d09-2782-d382f6d85600/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 10",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/fbc210f5-a6df-447f-7a71-147b290c8800/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Mara a Market 11",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/30cda42d-2aff-4a89-0b78-4a379d29d800/public",
+      objectPosition: objectPosition.top,
+    },
+  ],
+  "dasa-a-filip": [
+    {
+      name: "Dasa a Filip 01",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/0e326f64-ae5d-486f-5bd1-4a703196b400/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 02",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/c1beb1f2-bee6-433d-b064-72ad31762d00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 03",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/73658a6f-2dae-44d8-fc59-3011e3f1be00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 04",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/b0c89a90-2f5c-47e2-6b7b-eb2ec7f6be00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 05",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/24fd4078-288b-4461-c3f1-3086762dc700/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 06",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/f4c76a25-05f2-4114-6f5c-b3e171d5ef00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 07",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/85c489f7-6674-46ad-8152-737bb634c900/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 08",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/26958ec2-f5f0-4071-b345-cccb89c6d100/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 09",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/94aa7965-9871-4f2f-6f4a-1b8ffe68af00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 10",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/8644402e-ed7d-4938-2701-8be25d2ccd00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 11",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/302f0c15-eec3-4117-9d5b-34b80556fe00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 12",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/042d25fe-e7b5-42ed-175a-eb5b58982300/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 13",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3b88dfc9-08cb-47bb-b03b-0bd002878100/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 14",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/45aa83c2-9ca3-47bb-6131-94af80dfbf00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Dasa a Filip 15",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/dac7c1c7-5a52-4ccf-6ecf-22119e072f00/public",
+      objectPosition: objectPosition.top,
+    }
+  ],
 };
 
 interface Props {

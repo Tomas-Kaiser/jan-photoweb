@@ -392,16 +392,16 @@ const photoCoverAlbumsByCatogery: Record<string, PhotoAlbum[]> = {
   ],
   couples: [
     {
-      name: "Honza a Ondra",
+      name: "Mara a Market",
       imgSrc:
-        "https://img.freepik.com/free-vector/coming-soon-background-with-focus-light-effect-design_1017-27277.jpg?w=2000",
-      link: "/albums/couples/honza-a-ondra",
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/5fefadb3-5c3b-4379-ff48-f768cb600100/public",
+      link: "/albums/couples/mara-a-market",
       objectPosition: objectPosition.top,
     },
     {
       name: "Dasa a Filip",
       imgSrc:
-        "https://img.freepik.com/free-vector/coming-soon-background-with-focus-light-effect-design_1017-27277.jpg?w=2000",
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/302f0c15-eec3-4117-9d5b-34b80556fe00/public",
       link: "/albums/couples/dasa-a-filip",
       objectPosition: objectPosition.top,
     },
