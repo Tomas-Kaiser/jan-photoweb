@@ -14,6 +14,13 @@ interface PhotoAlbum {
 const photoCoverAlbumsByCatogery: Record<string, PhotoAlbum[]> = {
   "brands-and-campaign": [
     {
+      name: "Fine Furs",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3eef17ee-9681-4644-5fcd-1460f61bf900/public",
+      link: "/albums/brands-and-campaign/fine-furs",
+      objectPosition: objectPosition.top,
+    },
+    {
       title: "Janine Made by Love",
       name: "Vanguard Collection 2025",
       imgSrc:

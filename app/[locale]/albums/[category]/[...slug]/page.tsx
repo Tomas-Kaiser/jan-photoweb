@@ -913,6 +913,50 @@ const photos: Record<string, Photo[]> = {
       objectPosition: objectPosition.top,
     }
   ],
+  "fine-furs": [
+    {
+      name: "Fine Furs 1",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3eef17ee-9681-4644-5fcd-1460f61bf900/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Fine Furs 2",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3bab1222-816e-443d-536c-473f98263600/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Fine Furs 7",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/f5a152c9-df2e-4baa-6b41-2ed92b4a0500/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Fine Furs 6",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/56b9aef2-fe38-4241-3bde-2a768e99f300/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Fine Furs 5",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/0aaa1547-b726-4583-376a-ea7358f29300/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Fine Furs 4",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/5c7cc20d-6f0c-440d-0023-af8665a5c400/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "Fine Furs 3",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/fabf1a57-47ec-45e6-977b-3c9589b72300/public",
+      objectPosition: objectPosition.top,
+    },
+  ],
 };
 
 interface Props {

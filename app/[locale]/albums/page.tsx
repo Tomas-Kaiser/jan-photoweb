@@ -5,7 +5,7 @@ import { objectPosition } from '../page';
 const albumsCategory = [
     {
         name: "Brands and campaign",
-        imgSrc: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/67c0f9bf-7f87-4f65-baee-9fdf6810f700/public",
+        imgSrc: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3eef17ee-9681-4644-5fcd-1460f61bf900/public",
         link: "/albums/brands-and-campaign",
         objectPosition: objectPosition.top30
     }, {
