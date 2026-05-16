@@ -525,6 +525,86 @@ const photos: Record<string, Photo[]> = {
       objectPosition: objectPosition.top,
     },
   ],
+  "czech-fashion-week-marianske-lazne": [
+    {
+      name: "CFW Marianske Lazne 1",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/526afc0b-6cb7-4ee6-132b-8b4125946200/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 52",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/e832306c-a74b-478d-b4f3-73fba860b200/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 75",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/bf5faa8d-5f16-49e6-7c92-b5478fcb2e00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 114",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/9e617bb5-62ed-4da2-11f1-330bb1d82b00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 117",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/b14ee2ad-2fba-4754-bbf3-72fd1dd94f00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 123",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/7242e299-6c20-40a9-967d-3432aae02300/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 163",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/d412a22c-c62e-42ef-1b6c-a113248cdb00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 180",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/644d0478-0c13-4a8c-9e07-bb2b53b8f900/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 199",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/badcde70-dc76-46a5-1a6b-c8b5d2aa4c00/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 201",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/dabac763-bd00-4a6d-eb40-42a3e5504500/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 205",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/dabac763-bd00-4a6d-eb40-42a3e5504500/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 208",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/166d51e1-11c4-4ed6-6c57-bd0b739bc000/public",
+      objectPosition: objectPosition.top,
+    },
+    {
+      name: "CFW Marianske Lazne 216",
+      imgSrc:
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/877043a8-5202-459a-e110-de567e91a100/public",
+      objectPosition: objectPosition.top,
+    },
+  ],
   "stillin-style": [
     {
       name: "Stillin 01",

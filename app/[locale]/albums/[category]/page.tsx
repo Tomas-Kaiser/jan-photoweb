@@ -171,9 +171,9 @@ const photoCoverAlbumsByCatogery: Record<string, PhotoAlbum[]> = {
     {
       name: "Czech Fashion Week Marianske lazne",
       imgSrc:
-        "https://img.freepik.com/free-vector/coming-soon-background-with-focus-light-effect-design_1017-27277.jpg?w=2000",
-      link: "/albums",
-      objectPosition: objectPosition.center,
+        "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/526afc0b-6cb7-4ee6-132b-8b4125946200/public",
+      link: "/albums/brands-and-campaign/czech-fashion-week-marianske-lazne",
+      objectPosition: objectPosition.top30,
     },
   ],
   portraits: [
