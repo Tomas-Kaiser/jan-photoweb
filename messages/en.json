@@ -22,6 +22,9 @@
       "heading": "Explore Our Signature Albums",
       "text": "Each collection captures a unique story, mood, and moment. Browse through to discover the artistry behind every frame.",
       "btn": "View All Albums"
+    },
+    "testimonials": {
+      "heading": "Client Testimonials"
     }
   },
   "albums": {
