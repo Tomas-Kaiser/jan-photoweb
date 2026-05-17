@@ -1,6 +1,8 @@
 import Link from "next/link";
-import HeroImage from "../components/HeroImage";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
+
+import HeroImage from "../components/HeroImage";
 import SwiperWrapper from "../components/SwiperWrapper";
 import GoogleReviews from "../components/GoogleReviews";
 
@@ -19,6 +21,7 @@ export const objectPosition: ObjectPosition = {
 } as const;
 
 export default function Home() {
+  const t = useTranslations("landingPage");
   const images = [
     {
       label: "Small screen",
@@ -48,12 +51,10 @@ export default function Home() {
           {/* Text Block */}
           <div className="w-full lg:w-1/2 text-gray-800 order-1 lg:order-2">
             <h2 className="text-center text-3xl font-bold mb-4">
-              Meet Your Photographer
+              {t('intro.heading')}
             </h2>
             <p className="text-lg text-gray-700 mb-6">
-              With a passion for capturing emotion and elegance, I specialize in
-              fashion, weddings, and editorial storytelling. Every shoot is a
-              collaboration — let’s create something timeless.
+              {t('intro.text')}
             </p>
 
             {/* Photo appears after intro on mobile, beside text on desktop */}
@@ -75,7 +76,7 @@ export default function Home() {
                 href="/contact"
                 className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition"
               >
-                Send a Query
+                {t('intro.btn')}
               </Link>
             </div>
           </div>
@@ -95,7 +96,7 @@ export default function Home() {
       </section>
       <section className="px-6 py-12 max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">
-          Portfolio Highlights
+          {t("portfolio.heading")}
         </h2>
         <div className="flex justify-center">
           <div className="w-full xl:w-[500px]">
@@ -105,21 +106,20 @@ export default function Home() {
       </section>
       <section className="text-center py-8 px-4 md:px-12 lg:px-24  bg-gray-50">
         <h2 className="text-3xl font-bold mb-4">
-          Explore Our Signature Albums
+          {t("albums.heading")}
         </h2>
         <p className="text-lg text-gray-600">
-          Each collection captures a unique story, mood, and moment. Browse
-          through to discover the artistry behind every frame.
+          {t("albums.text")}
         </p>
         <Link
           href="/albums"
           className="mt-4 inline-block bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition"
         >
-          View All Albums
+          {t("albums.btn")}
         </Link>
       </section>
       <section className="text-center py-8 px-4 md:px-12 lg:px-24">
-        <h2 className="text-3xl font-bold mb-4">Client Testimonials</h2>
+        <h2 className="text-3xl font-bold mb-4">{t("testimonials.heading")}</h2>
         <GoogleReviews />
       </section>
     </>

@@ -8,5 +8,52 @@
   },
   "hero": {
     "CTAbtn": "Prozkoumat alba"
+  },
+  "landingPage": {
+    "intro": {
+      "heading": "Poznejte svého fotografa",
+      "text": "S vášní pro zachycení emocí a elegance se specializuji na módu, svatby a editoriálovou tvorbu. Každé focení je pro mě spolupráce — pojďme společně vytvořit něco nadčasového.",
+      "btn": "Poslat dotaz"
+    },
+    "portfolio": {
+      "heading": "To nejlepší z portfolia"
+    },
+    "albums": {
+      "heading": "Prozkoumejte naše ikonické kolekce",
+      "text": "Každá kolekce zachycuje jedinečný příběh, náladu a okamžik. Prolistujte si je a objevte umění, které se skrývá za každým snímkem.",
+      "btn": "Zobrazit všechna alba"
+    },
+    "testimonials": {
+      "heading": "Reference klientů"
+    }
+  },
+  "albums": {
+    "heading": "Prozkoumejte naše ikonické kolekce",
+    "text": "Každá z níže uvedených kolekcí zachycuje jedinečný příběh, náladu a okamžik. Prolistujte si je a objevte umění, které se skrývá za každým snímkem."
+  },
+  "aboutMe": {
+    "heading": "O mně",
+    "text-1": "Dobrý den, jsem Jan Hájek — fotograf, kterého pohání hluboká vášeň pro zachycení krásy, emocí a jedinečnosti lidí prostřednictvím módní a portrétní fotografie.",
+    "text-2": "Od chvíle, kdy jsem poprvé vzal do ruky fotoaparát, jsem věděl, že fotografie pro mě bude víc než jen řemeslo — stane se mým způsobem vyprávění příběhů. Každá tvář, každý pohled i každý okamžik v sobě skrývají něco jedinečného a mým posláním je tuto podstatu odhalit skrze objektiv.",
+    "text-3": "Specializuji se na portrétní a módní fotografii, ve které propojuji kreativitu s autenticitou, abych vytvořil vizuální díla, která ve vás zanechají dojem. Fotografie pro mě není jen momentka — je to živé vyjádření toho, jak vidím svět.",
+    "text-4": "Pokud hledáte fotografie, které nejen zachytí vaši přítomnost, ale také oslaví vaši jedinečnost, jste na správném místě. Pojďme společně vytvořit něco nezapomenutelného.",
+    "text-5": "Srdcem,",
+    "text-6": "Jan Hájek"
+  },
+  "contact": {
+    "heading": "Spojme se",
+    "text": "Ať už máte zájem o spolupráci, chcete si rezervovat focení, nebo mě jen pozdravit — rád o vás uslyším.",
+    "form": {
+      "name": "Jméno",
+      "email": "E-mail",
+      "message": "Zpráva",
+      "btn": "Odeslat zprávu"
+    }
+  },
+  "footer": {
+    "heading": "Jste připraveni zachytit své nejlepší okamžiky?",
+    "text": "Ať už jde o portréty, akce nebo kreativní focení – jsem tu, abych se postaral o nezapomenutelný zážitek.",
+    "btn": "Rezervovat focení",
+    "copyright": "© {year} Jan Hajek | vytvořil Tomas Kaiser"
   }
 }

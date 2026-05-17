@@ -1,23 +1,24 @@
 import React from "react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInstagram, faFacebook } from "@fortawesome/free-brands-svg-icons";
-import Link from "next/link";
 
 const Footer = () => {
-  const year = new Date().getFullYear();
+  const t = useTranslations("footer");
+  const currentYear = new Date().getFullYear();
   return (
     <footer className="bg-base-200 py-4">
       <div className="bg-gradient-to-r py-10 px-6 text-center">
         <h2 className="text-3xl font-semibold mb-4">
-          Ready to capture your best moments?
+          {t("heading")}
         </h2>
         <p className="mb-6 text-lg">
-          Whether it&apos;s portraits, events, or creative shoots — I&apos;m
-          here to make it unforgettable.
+          {t("text")}
         </p>
         <Link href="/contact">
           <button className="inline-flex items-center justify-center h-10 px-6 bg-gradient-to-br from-purple-700 to-indigo-900 transition-all duration-300 hover:from-pink-600 hover:to-purple-800 hover:shadow-md cursor-pointer rounded text-white text-lg font-medium">
-            Book a Photoshoot
+            {t("btn")}
           </button>
         </Link>
       </div>
@@ -49,7 +50,7 @@ const Footer = () => {
           </a>
         </div>
         <div className="text-sm text-gray-600">
-          © {year} Jan Hajek | created by Tomas Kaiser
+          {t("copyright", { year: currentYear })}
         </div>
       </div>
     </footer>

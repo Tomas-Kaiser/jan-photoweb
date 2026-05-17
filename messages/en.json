@@ -8,5 +8,49 @@
   },
   "hero": {
     "CTAbtn": "Explore Albums"
+  },
+  "landingPage": {
+    "intro": {
+      "heading": "Meet Your Photographer",
+      "text": "With a passion for capturing emotion and elegance, I specialize in fashion, weddings, and editorial storytelling. Every shoot is a collaboration — let’s create something timeless.",
+      "btn": "Send a Query"
+    },
+    "portfolio": {
+      "heading": "Portfolio Highlights"
+    },
+    "albums": {
+      "heading": "Explore Our Signature Albums",
+      "text": "Each collection captures a unique story, mood, and moment. Browse through to discover the artistry behind every frame.",
+      "btn": "View All Albums"
+    }
+  },
+  "albums": {
+    "heading": "Explore Our Signature Albums",
+    "text": "Each collection below captures a unique story, mood, and moment. Browse through to discover the artistry behind every frame."
+  },
+  "aboutMe": {
+    "heading": "About Me",
+    "text-1": "Hello, I’m Jan Hajek — a photographer driven by a deep passion for capturing the beauty, emotion, and individuality of people through fashion and portraiture.",
+    "text-2": "From the moment I first held a camera, I knew photography would be more than a craft — it would be my way of telling stories. Every face, every glance, every moment holds something unique, and my mission is to reveal that essence through the lens.",
+    "text-3": "I specialize in portrait and fashion photography, blending creativity with authenticity to craft visuals that resonate. For me, a photo isn’t just a snapshot — it’s a living expression of how I see the world.",
+    "text-4": "If you’re looking for photographs that not only capture your presence but celebrate your uniqueness, you’re in the right place. Let’s create something unforgettable together.",
+    "text-5": "With heart,",
+    "text-6": "Jan Hajek"
+  },
+  "contact": {
+    "heading": "Let’s Connect",
+    "text": "Whether you’re looking to collaborate, book a shoot, or just say hello — I’d love to hear from you.",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "btn": "Send Message"
+    }
+  },
+  "footer": {
+    "heading": "Ready to capture your best moments?",
+    "text": "Whether it's portraits, events, or creative shoots — I'm here to make it unforgettable.",
+    "btn": "Book a Photoshoot",
+    "copyright": "© {year} Jan Hajek | created by Tomas Kaiser"
   }
 }
