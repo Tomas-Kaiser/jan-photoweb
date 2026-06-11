@@ -43,7 +43,6 @@ export default function Home() {
     "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/71072a4e-b905-49a1-d62f-3fa38fc5dc00/public",
     "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/f7e34341-4f11-45fb-9880-6ac082ede100/public",
     "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/f453d1db-ad5d-452b-ec0f-cd5733116b00/public",
-    "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/15bcda57-0bad-44bc-ee5e-461e8f2beb00/public",
     "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/2196e139-116f-4e3c-f855-ddc8589abc00/public",
     "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/36fc4214-609e-450f-2f83-d4f7f2124300/public",
     "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/70072f92-cfff-45b1-039e-dc26a1404400/public",
