@@ -12,6 +12,7 @@
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.0.1",
     "@fortawesome/react-fontawesome": "^3.0.2",
+    "drizzle-orm": "^0.45.2",
     "next": "15.5.7",
     "next-auth": "5.0.0-beta.30",
     "next-intl": "^4.8.2",
