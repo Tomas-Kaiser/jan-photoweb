@@ -1,40 +1,80 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
- 
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     Credentials({
-        credentials: {
-          email: {
-            type: "email",
-            label: "Email",
-            placeholder: "johndoe@gmail.com",
-          },
-          password: {
-            type: "password",
-            label: "Password",
-            placeholder: "*****",
-          },
+      credentials: {
+        email: {
+          type: "email",
+          label: "Email",
+          placeholder: "admin@example.com",
         },
+        password: {
+          type: "password",
+          label: "Password",
+          placeholder: "*****",
+        },
+      },
+      async authorize(credentials) {
+        const email = credentials?.email as string | undefined;
+        const password = credentials?.password as string | undefined;
 
-        // authorize: async (credentials) => {
-        //     let user = null
-     
-        //     // logic to salt and hash password
-        //     const pwHash = credentials.password // PLACEHOLDER - replace with real hashing
-     
-        //     // logic to verify if the user exists
-        //     user = false
-     
-        //     if (!user) {
-        //       // No user found, so this is their first attempt to login
-        //       // Optionally, this is also the place you could do a user registration
-        //       throw new Error("Invalid credentials.")
-        //     }
-     
-        //     // return user object with their profile data
-        //     return user
-        //   },
-      }),
+        if (
+          email === process.env.ADMIN_EMAIL &&
+          password === process.env.ADMIN_PASSWORD
+        ) {
+          return {
+            id: "admin",
+            name: "Admin",
+            email,
+            role: "admin",
+          };
+        }
+
+        return null;
+      },
+    }),
   ],
-})
+  callbacks: {
+    authorized({ auth, request }) {
+      const isLoggedIn = !!auth?.user;
+      const pathname = request.nextUrl.pathname;
+
+      const isAdminRoute =
+        pathname.startsWith("/admin") ||
+        pathname.includes("/admin");
+
+      const isLoginRoute =
+        pathname === "/admin/login" ||
+        pathname.endsWith("/admin/login");
+
+      if (isLoginRoute) {
+        return true;
+      }
+
+      if (isAdminRoute) {
+        return isLoggedIn;
+      }
+
+      return true;
+    },
+
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as { role?: string }).role;
+      }
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as { role?: string }).role = token.role as string;
+      }
+      return session;
+    },
+  },
+});
