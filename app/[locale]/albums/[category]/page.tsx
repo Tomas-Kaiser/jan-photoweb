@@ -1,16 +1,23 @@
 import React from "react";
 import AlbumsGrid from "../AlbumsGrid";
 import AlbumGrid from "../AlbumGrid";
+import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { albums, photos } from "@/app/db/schema";
 import { eq, asc } from "drizzle-orm";
+import AddPhotoForm from "./[...slug]/AddPhotoForm";
 
 interface Props {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }
 
 const AlbumCategory = async ({ params }: Props) => {
   const { category } = await params;
+
+  const session = await auth();
+  const isAdmin =
+    !!session?.user &&
+    (session.user as { role?: string }).role === "admin";
 
   const categoryAlbums = await db
     .select()
@@ -18,14 +25,11 @@ const AlbumCategory = async ({ params }: Props) => {
     .where(eq(albums.category, category))
     .orderBy(asc(albums.sortOrder));
 
-  // Categories with sub-albums (have a link) show AlbumsGrid
-  // Categories without sub-albums (weddings, portraits, visual-stories) show photos directly
   const hasSubAlbums = categoryAlbums.some((a) => a.link !== null);
 
   let content;
 
   if (hasSubAlbums) {
-    // Map albums to the shape AlbumsGrid expects
     const photoAlbums = categoryAlbums.map((album) => ({
       title: album.brand ?? undefined,
       name: album.name,
@@ -33,9 +37,9 @@ const AlbumCategory = async ({ params }: Props) => {
       link: album.link ?? undefined,
       objectPosition: album.objectPosition,
     }));
+
     content = <AlbumsGrid photoCoverAlbums={photoAlbums} />;
   } else {
-    // Fetch photos directly for this category's slug (e.g. "weddings", "portraits")
     const categoryPhotos = await db
       .select()
       .from(photos)
@@ -47,22 +51,39 @@ const AlbumCategory = async ({ params }: Props) => {
       imgSrc: photo.cloudflareUrl,
       objectPosition: photo.objectPosition,
     }));
-    content = <AlbumGrid photos={photoList} />;
+
+    content = (
+      <>
+        {isAdmin ? (
+          <div className="mx-auto mb-10 max-w-3xl px-4">
+            <AddPhotoForm albumSlug={category} />
+          </div>
+        ) : null}
+
+        <AlbumGrid photos={photoList} />
+      </>
+    );
   }
 
   return (
     <>
-      <div className="text-center py-8 px-4 md:px-12 lg:px-24">
-        <h2 className="text-3xl font-bold mb-4">
+      <div className="px-4 py-8 text-center md:px-12 lg:px-24">
+        <h2 className="mb-4 text-3xl font-bold">
           {category.replace(/-/g, " ").toUpperCase()}
         </h2>
-        {hasSubAlbums && (
+
+        {hasSubAlbums ? (
           <p className="text-lg text-gray-600">
             Each collection below captures a unique story, mood, and moment.
             Browse through to discover the artistry behind every frame.
           </p>
+        ) : (
+          <p className="text-lg text-gray-600">
+            A curated selection of images from this collection.
+          </p>
         )}
       </div>
+
       {content}
     </>
   );

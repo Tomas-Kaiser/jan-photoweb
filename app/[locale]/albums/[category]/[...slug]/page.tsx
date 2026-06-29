@@ -1,65 +1,85 @@
 import React from "react";
-import AlbumGrid from "../../AlbumGrid";
-import { db } from "@/app/db";
-import { photos, albums } from "@/app/db/schema";
-import { eq, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { asc, eq } from "drizzle-orm";
 
-interface Props {
-  params: { category: string; slug: string[] };
-}
+import { auth } from "@/auth";
+import { db } from "@/app/db";
+import { albums, photos } from "@/app/db/schema";
+import AlbumGrid from "../../AlbumGrid";
+import AddPhotoForm from "./AddPhotoForm";
 
-const Album = async ({ params }: Props) => {
-  const { category, slug: segments } = params;
+type Props = {
+  params: Promise<{
+    locale: string;
+    category: string;
+    slug: string[];
+  }>;
+};
 
-  // Always the last segment — works for both /fine-furs and /janine-made-by-love/vanguard-collection-2025
+const AlbumPage = async ({ params }: Props) => {
+  const { category, slug: segments } = await params;
   const albumSlug = segments[segments.length - 1];
 
-  // Fetch the album metadata (name, brand) for the header
-  const album = await db
+  const session = await auth();
+  const isAdmin =
+    !!session?.user &&
+    (session.user as { role?: string }).role === "admin";
+
+  const albumResult = await db
     .select()
     .from(albums)
     .where(eq(albums.slug, albumSlug))
     .limit(1);
 
-  if (!album.length) notFound();
+  if (!albumResult.length) {
+    notFound();
+  }
 
-  const albumData = album[0];
+  const album = albumResult[0];
 
-  // Fetch all photos for this album
   const albumPhotos = await db
     .select()
     .from(photos)
     .where(eq(photos.albumSlug, albumSlug))
     .orderBy(asc(photos.sortOrder));
 
-  if (!albumPhotos.length) notFound();
+  const photoList = albumPhotos
+    .filter((photo) => !!photo.cloudflareUrl)
+    .map((photo) => ({
+      name: photo.name,
+      imgSrc: photo.cloudflareUrl,
+      objectPosition: photo.objectPosition ?? "center",
+    }));
 
-  const photoList = albumPhotos.map((photo) => ({
-    name: photo.name,
-    imgSrc: photo.cloudflareUrl,
-    objectPosition: photo.objectPosition,
-  }));
-
-  // Use DB values for display — no more URL-derived labels
-  const title = albumData.brand ?? category.replaceAll("-", " ");
-  const subtitle = albumData.name;
+  const title = album.brand ?? category.replaceAll("-", " ");
+  const subtitle = album.name;
 
   return (
     <section className="pt-10 pb-10">
-      <div className="text-center">
-        <h2 className="text-4xl font-extrabold text-gray-900 mb-2 capitalize tracking-tight">
+      <div className="text-center px-4">
+        <h2 className="mb-2 text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
           {title}
         </h2>
-        <p className="text-lg text-gray-600 italic capitalize">
-          {subtitle}
-        </p>
+        <p className="text-lg italic text-gray-600 capitalize">{subtitle}</p>
       </div>
-      <div className="w-16 h-1 mx-auto my-6 bg-gray-300 rounded-full" />
 
-      <AlbumGrid photos={photoList} />
+      <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
+
+      {isAdmin ? (
+        <div className="mx-auto mb-10 max-w-2xl px-4">
+          <AddPhotoForm albumSlug={albumSlug} />
+        </div>
+      ) : null}
+
+      {photoList.length ? (
+        <AlbumGrid photos={photoList} />
+      ) : (
+        <div className="px-4 py-16 text-center text-gray-500">
+          No photos yet.
+        </div>
+      )}
     </section>
   );
 };
 
-export default Album;
+export default AlbumPage;
