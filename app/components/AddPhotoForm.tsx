@@ -3,10 +3,10 @@
 import { useRef, useState } from "react";
 
 type Props = {
-    albumSlug: string;
+    albumId: string;
 };
 
-export default function AddPhotoForm({ albumSlug }: Props) {
+export default function AddPhotoForm({ albumId }: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const [files, setFiles] = useState<File[]>([]);
@@ -74,7 +74,7 @@ export default function AddPhotoForm({ albumSlug }: Props) {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        albumSlug,
+                        albumId,
                         name: photoName,
                         cloudflareUrl,
                     }),
@@ -94,7 +94,7 @@ export default function AddPhotoForm({ albumSlug }: Props) {
             }
 
             window.location.reload();
-        } catch (error) {
+        } catch {
             setProgress("");
             setMessage("Upload failed. Please try again.");
         } finally {

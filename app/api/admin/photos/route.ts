@@ -2,7 +2,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { photos } from "@/app/db/schema";
+import { albums, photos } from "@/app/db/schema";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function POST(req: Request) {
@@ -17,14 +18,38 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
+    if (!body.albumId || !body.cloudflareUrl) {
+        return NextResponse.json(
+            { error: "Missing albumId or cloudflareUrl" },
+            { status: 400 }
+        );
+    }
+
+    const albumResult = await db
+        .select({
+            id: albums.id,
+            path: albums.path,
+        })
+        .from(albums)
+        .where(eq(albums.id, body.albumId))
+        .limit(1);
+
+    if (!albumResult.length) {
+        return NextResponse.json({ error: "Album not found" }, { status: 404 });
+    }
+
+    const album = albumResult[0];
+
     await db.insert(photos).values({
-        albumSlug: body.albumSlug,
-        name: body.name,
+        albumId: album.id,
+        name: body.name ?? null,
         cloudflareUrl: body.cloudflareUrl,
+        cloudflareId: body.cloudflareId ?? null,
         objectPosition: "center",
         sortOrder: -1,
     });
 
-    revalidatePath(`/albums/${body.albumSlug}`);
+    revalidatePath(`/albums/${album.path}`);
+
     return NextResponse.json({ success: true });
 }

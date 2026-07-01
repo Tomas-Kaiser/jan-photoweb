@@ -1,27 +1,83 @@
-import { pgTable, uuid, text, integer, timestamp } from 'drizzle-orm/pg-core'
+import {
+    pgTable,
+    uuid,
+    text,
+    integer,
+    timestamp,
+    uniqueIndex,
+    index,
+    foreignKey,
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
-// Cover image shown on the category listing page
-export const albums = pgTable('albums', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    brand: text('brand'),                // e.g. "Janine Made by Love" (optional)
-    name: text('name').notNull(),       // e.g. "Vanguard Collection 2025"
-    category: text('category').notNull(),   // e.g. "brands-and-campaign"
-    slug: text('slug').notNull().unique(),
-    coverUrl: text('cover_url').notNull(),
-    link: text('link'),
-    objectPosition: text('object_position').notNull().default('center'),
-    sortOrder: integer('sort_order').notNull().default(0),
-    createdAt: timestamp('created_at').defaultNow(),
-})
+export const albums = pgTable(
+    "albums",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        parentId: uuid("parent_id"),
+        name: text("name").notNull(),
+        slug: text("slug").notNull(),
+        path: text("path").notNull(),
+        coverUrl: text("cover_url").notNull(),
+        objectPosition: text("object_position").default("center").notNull(),
+        sortOrder: integer("sort_order").default(0).notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.parentId],
+            foreignColumns: [table.id],
+            name: "albums_parent_id_fkey",
+        }).onDelete("cascade"),
 
-// Individual photos inside an album
-export const photos = pgTable('photos', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    albumSlug: text('album_slug').notNull(),            // e.g. "vanguard-collection-2025"
-    name: text('name'),
-    cloudflareUrl: text('cloudflare_url').notNull(),
-    cloudflareId: text('cloudflare_id'),
-    objectPosition: text('object_position').notNull().default('center'),
-    sortOrder: integer('sort_order').notNull().default(0),
-    createdAt: timestamp('created_at').defaultNow(),
-})
+        uniqueIndex("albums_path_unique").on(table.path),
+
+        uniqueIndex("albums_parent_slug_unique").on(table.parentId, table.slug),
+
+        index("albums_parent_id_idx").on(table.parentId),
+        index("albums_sort_order_idx").on(table.sortOrder),
+    ]
+);
+
+export const photos = pgTable(
+    "photos",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        albumId: uuid("album_id").notNull(),
+        name: text("name"),
+        cloudflareUrl: text("cloudflare_url").notNull(),
+        cloudflareId: text("cloudflare_id"),
+        objectPosition: text("object_position").default("center").notNull(),
+        sortOrder: integer("sort_order").default(0).notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.albumId],
+            foreignColumns: [albums.id],
+            name: "photos_album_id_fkey",
+        }).onDelete("cascade"),
+
+        index("photos_album_id_idx").on(table.albumId),
+        index("photos_sort_order_idx").on(table.sortOrder),
+    ]
+);
+
+export const albumsRelations = relations(albums, ({ one, many }) => ({
+    parent: one(albums, {
+        fields: [albums.parentId],
+        references: [albums.id],
+        relationName: "album_children",
+    }),
+    children: many(albums, {
+        relationName: "album_children",
+    }),
+    photos: many(photos),
+}));
+
+export const photosRelations = relations(photos, ({ one }) => ({
+    album: one(albums, {
+        fields: [photos.albumId],
+        references: [albums.id],
+    }),
+}));
