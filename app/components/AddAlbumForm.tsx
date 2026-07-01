@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type AlbumOption = {
     id: string;
@@ -10,6 +10,11 @@ type AlbumOption = {
 };
 
 type AlbumPlacement = "root" | "child";
+
+interface Props {
+    defaultPlacement?: AlbumPlacement;
+    fixedParent?: AlbumOption | null;
+}
 
 function slugify(value: string) {
     return value
@@ -21,11 +26,6 @@ function slugify(value: string) {
         .replace(/^-+|-+$/g, "")
         .replace(/--+/g, "-");
 }
-
-interface Props {
-    defaultPlacement?: AlbumPlacement;
-    fixedParent?: AlbumOption | null;
-};
 
 export default function AddAlbumForm({
     defaultPlacement = "root",
@@ -47,12 +47,19 @@ export default function AddAlbumForm({
     const [message, setMessage] = useState("");
     const [progress, setProgress] = useState("");
 
+    useEffect(() => {
+        if (fixedParent) {
+            setPlacement("child");
+            setParentId(fixedParent.id);
+        }
+    }, [fixedParent]);
+
     const slug = useMemo(() => slugify(name), [name]);
 
-    const selectedParent = useMemo(
-        () => albums.find((album) => album.id === parentId) ?? null,
-        [albums, parentId]
-    );
+    const selectedParent = useMemo(() => {
+        if (fixedParent) return fixedParent;
+        return albums.find((album) => album.id === parentId) ?? null;
+    }, [albums, parentId, fixedParent]);
 
     const generatedPath = useMemo(() => {
         if (!slug) return "";
@@ -164,7 +171,7 @@ export default function AddAlbumForm({
             return;
         }
 
-        if (placement === "child" && !parentId) {
+        if (placement === "child" && !selectedParent?.id) {
             setMessage("Please choose a parent album.");
             return;
         }
@@ -186,7 +193,7 @@ export default function AddAlbumForm({
                 body: JSON.stringify({
                     name: name.trim(),
                     slug: finalSlug,
-                    parentId: placement === "child" ? parentId : null,
+                    parentId: placement === "child" ? selectedParent?.id ?? null : null,
                     coverUrl,
                     objectPosition,
                 }),
@@ -200,10 +207,10 @@ export default function AddAlbumForm({
             setMessage("Album created successfully.");
             setProgress("");
             setName("");
-            setParentId("");
             setObjectPosition("center");
             setCoverFile(null);
-            setPlacement("root");
+            setParentId(fixedParent?.id ?? "");
+            setPlacement(fixedParent ? "child" : defaultPlacement);
 
             if (inputRef.current) {
                 inputRef.current.value = "";
@@ -233,50 +240,52 @@ export default function AddAlbumForm({
                     </p>
                 </div>
 
-                <div className="mb-6">
-                    <label className="mb-3 block text-sm font-medium text-neutral-700">
-                        Album placement
-                    </label>
+                {!fixedParent ? (
+                    <div className="mb-6">
+                        <label className="mb-3 block text-sm font-medium text-neutral-700">
+                            Album placement
+                        </label>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setPlacement("root");
-                                setParentId("");
-                            }}
-                            className={`rounded-2xl border px-4 py-4 text-left transition ${placement === "root"
-                                ? "border-neutral-900 bg-neutral-900 text-white"
-                                : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
-                                }`}
-                        >
-                            <div className="text-sm font-semibold">Root album</div>
-                            <div
-                                className={`mt-1 text-sm ${placement === "root" ? "text-neutral-200" : "text-neutral-500"
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPlacement("root");
+                                    setParentId("");
+                                }}
+                                className={`rounded-2xl border px-4 py-4 text-left transition ${placement === "root"
+                                        ? "border-neutral-900 bg-neutral-900 text-white"
+                                        : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
                                     }`}
                             >
-                                /albums/your-album
-                            </div>
-                        </button>
+                                <div className="text-sm font-semibold">Root album</div>
+                                <div
+                                    className={`mt-1 text-sm ${placement === "root" ? "text-neutral-200" : "text-neutral-500"
+                                        }`}
+                                >
+                                    /albums/your-album
+                                </div>
+                            </button>
 
-                        <button
-                            type="button"
-                            onClick={() => setPlacement("child")}
-                            className={`rounded-2xl border px-4 py-4 text-left transition ${placement === "child"
-                                ? "border-neutral-900 bg-neutral-900 text-white"
-                                : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
-                                }`}
-                        >
-                            <div className="text-sm font-semibold">Child album</div>
-                            <div
-                                className={`mt-1 text-sm ${placement === "child" ? "text-neutral-200" : "text-neutral-500"
+                            <button
+                                type="button"
+                                onClick={() => setPlacement("child")}
+                                className={`rounded-2xl border px-4 py-4 text-left transition ${placement === "child"
+                                        ? "border-neutral-900 bg-neutral-900 text-white"
+                                        : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
                                     }`}
                             >
-                                /albums/parent/your-album
-                            </div>
-                        </button>
+                                <div className="text-sm font-semibold">Child album</div>
+                                <div
+                                    className={`mt-1 text-sm ${placement === "child" ? "text-neutral-200" : "text-neutral-500"
+                                        }`}
+                                >
+                                    /albums/parent/your-album
+                                </div>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                ) : null}
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
                     <div className="space-y-5">
@@ -295,27 +304,38 @@ export default function AddAlbumForm({
                         </div>
 
                         {placement === "child" ? (
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-neutral-700">
-                                    Parent album
-                                </label>
-                                <select
-                                    value={parentId}
-                                    onChange={(e) => setParentId(e.target.value)}
-                                    disabled={loadingAlbums || loading}
-                                    className="w-full rounded-2xl border border-neutral-300 bg-white px-5 py-4 text-neutral-900 outline-none transition focus:border-neutral-900 focus:ring-4 focus:ring-neutral-200"
-                                    required
-                                >
-                                    <option value="">
-                                        {loadingAlbums ? "Loading albums..." : "Select parent album"}
-                                    </option>
-                                    {albums.map((album) => (
-                                        <option key={album.id} value={album.id}>
-                                            {album.path}
+                            fixedParent ? (
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-neutral-700">
+                                        Parent album
+                                    </label>
+                                    <div className="w-full rounded-2xl border border-neutral-300 bg-neutral-50 px-5 py-4 text-neutral-900">
+                                        {fixedParent.path}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-neutral-700">
+                                        Parent album
+                                    </label>
+                                    <select
+                                        value={parentId}
+                                        onChange={(e) => setParentId(e.target.value)}
+                                        disabled={loadingAlbums || loading}
+                                        className="w-full rounded-2xl border border-neutral-300 bg-white px-5 py-4 text-neutral-900 outline-none transition focus:border-neutral-900 focus:ring-4 focus:ring-neutral-200"
+                                        required
+                                    >
+                                        <option value="">
+                                            {loadingAlbums ? "Loading albums..." : "Select parent album"}
                                         </option>
-                                    ))}
-                                </select>
-                            </div>
+                                        {albums.map((album) => (
+                                            <option key={album.id} value={album.id}>
+                                                {album.path}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )
                         ) : null}
 
                         <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
