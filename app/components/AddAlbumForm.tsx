@@ -22,12 +22,22 @@ function slugify(value: string) {
         .replace(/--+/g, "-");
 }
 
-export default function AddAlbumForm() {
+interface Props {
+    defaultPlacement?: AlbumPlacement;
+    fixedParent?: AlbumOption | null;
+};
+
+export default function AddAlbumForm({
+    defaultPlacement = "root",
+    fixedParent = null,
+}: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    const [placement, setPlacement] = useState<AlbumPlacement>("root");
+    const [placement, setPlacement] = useState<AlbumPlacement>(
+        fixedParent ? "child" : defaultPlacement
+    );
+    const [parentId, setParentId] = useState(fixedParent?.id ?? "");
     const [albums, setAlbums] = useState<AlbumOption[]>([]);
-    const [parentId, setParentId] = useState("");
     const [name, setName] = useState("");
     const [objectPosition, setObjectPosition] = useState("center");
     const [coverFile, setCoverFile] = useState<File | null>(null);
