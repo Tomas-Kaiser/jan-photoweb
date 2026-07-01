@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 
 type AlbumOption = {
     id: string;
@@ -235,8 +236,8 @@ export default function AddAlbumForm() {
                                 setParentId("");
                             }}
                             className={`rounded-2xl border px-4 py-4 text-left transition ${placement === "root"
-                                    ? "border-neutral-900 bg-neutral-900 text-white"
-                                    : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
+                                ? "border-neutral-900 bg-neutral-900 text-white"
+                                : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
                                 }`}
                         >
                             <div className="text-sm font-semibold">Root album</div>
@@ -252,8 +253,8 @@ export default function AddAlbumForm() {
                             type="button"
                             onClick={() => setPlacement("child")}
                             className={`rounded-2xl border px-4 py-4 text-left transition ${placement === "child"
-                                    ? "border-neutral-900 bg-neutral-900 text-white"
-                                    : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
+                                ? "border-neutral-900 bg-neutral-900 text-white"
+                                : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
                                 }`}
                         >
                             <div className="text-sm font-semibold">Child album</div>
@@ -395,12 +396,14 @@ export default function AddAlbumForm() {
                                 </p>
                             </div>
 
-                            <div className="flex aspect-[4/5] items-center justify-center bg-neutral-100">
+                            <div className="relative flex aspect-[4/5] items-center justify-center bg-neutral-100">
                                 {previewUrl ? (
-                                    <img
+                                    <Image
                                         src={previewUrl}
                                         alt="Cover preview"
-                                        className="h-full w-full object-cover"
+                                        fill
+                                        unoptimized
+                                        className="object-cover"
                                     />
                                 ) : (
                                     <div className="px-6 text-center text-sm text-neutral-400">

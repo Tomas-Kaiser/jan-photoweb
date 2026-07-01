@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type AlbumOption = {
     name: string;
@@ -29,7 +30,7 @@ export default function AddAlbumCard({ categories }: AddAlbumCardProps) {
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    const safeCategories = Array.isArray(categories) ? categories : [];
+    const safeCategories = useMemo(() => categories ?? [], [categories]);
     const hasParents = safeCategories.length > 0;
 
     const [open, setOpen] = useState(false);
@@ -269,15 +270,15 @@ export default function AddAlbumCard({ categories }: AddAlbumCardProps) {
                                                 type="button"
                                                 onClick={() => setMode("top-level")}
                                                 className={`rounded-2xl border px-4 py-4 text-left transition ${mode === "top-level"
-                                                        ? "border-neutral-900 bg-neutral-900 text-white"
-                                                        : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
+                                                    ? "border-neutral-900 bg-neutral-900 text-white"
+                                                    : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
                                                     }`}
                                             >
                                                 <div className="text-sm font-semibold">Top level</div>
                                                 <div
                                                     className={`mt-1 text-sm ${mode === "top-level"
-                                                            ? "text-neutral-200"
-                                                            : "text-neutral-500"
+                                                        ? "text-neutral-200"
+                                                        : "text-neutral-500"
                                                         }`}
                                                 >
                                                     Creates a new top-level album
@@ -289,15 +290,15 @@ export default function AddAlbumCard({ categories }: AddAlbumCardProps) {
                                                 onClick={() => setMode("nested")}
                                                 disabled={!hasParents}
                                                 className={`rounded-2xl border px-4 py-4 text-left transition ${mode === "nested"
-                                                        ? "border-neutral-900 bg-neutral-900 text-white"
-                                                        : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
+                                                    ? "border-neutral-900 bg-neutral-900 text-white"
+                                                    : "border-neutral-300 bg-white text-neutral-900 hover:border-neutral-500"
                                                     } ${!hasParents ? "cursor-not-allowed opacity-50 hover:border-neutral-300" : ""}`}
                                             >
                                                 <div className="text-sm font-semibold">Nested</div>
                                                 <div
                                                     className={`mt-1 text-sm ${mode === "nested"
-                                                            ? "text-neutral-200"
-                                                            : "text-neutral-500"
+                                                        ? "text-neutral-200"
+                                                        : "text-neutral-500"
                                                         }`}
                                                 >
                                                     {hasParents
@@ -413,12 +414,14 @@ export default function AddAlbumCard({ categories }: AddAlbumCardProps) {
                                             </p>
                                         </div>
 
-                                        <div className="flex h-64 items-center justify-center bg-neutral-100">
+                                        <div className="relative flex aspect-[4/5] items-center justify-center bg-neutral-100">
                                             {previewUrl ? (
-                                                <img
+                                                <Image
                                                     src={previewUrl}
                                                     alt="Cover preview"
-                                                    className="h-full w-full object-cover"
+                                                    fill
+                                                    unoptimized
+                                                    className="object-cover"
                                                 />
                                             ) : (
                                                 <div className="px-6 text-center text-sm text-neutral-400">
