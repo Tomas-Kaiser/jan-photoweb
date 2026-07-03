@@ -8,6 +8,7 @@ import { albums, photos } from "@/app/db/schema";
 import PhotoGrid from "../PhotoGrid";
 import AddPhotoForm from "@/app/components/AddPhotoForm";
 import AddAlbumForm from "@/app/components/AddAlbumForm";
+import EditAlbumNameButton from "@/app/components/EditAlbumNameButton";
 
 type Props = {
     params: Promise<{
@@ -120,6 +121,12 @@ const AlbumsPage = async ({ params }: Props) => {
                 <p className="text-lg italic text-gray-600 capitalize">
                     {album.path.replaceAll("/", " / ")}
                 </p>
+                <p>TEEEST</p>
+                {isAdmin ? (<><p>TEEEST</p>
+                    <EditAlbumNameButton
+                        albumId={album.id}
+                        initialName={album.name} initialSlug={album.slug} /></>
+                ) : null}
             </div>
 
             <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
