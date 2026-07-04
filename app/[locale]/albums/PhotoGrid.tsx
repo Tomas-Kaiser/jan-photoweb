@@ -3,11 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 type GridItem = {
+  id?: string;
   imgSrc: string;
   objectPosition: string;
   name?: string;
@@ -16,11 +18,15 @@ type GridItem = {
 
 interface Props {
   photos: GridItem[];
+  isAdmin?: boolean;
 }
 
-const PhotoGrid = ({ photos }: Props) => {
+const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
 
   const lightboxItems = useMemo(
     () => photos.filter((photo) => !photo.href),
@@ -57,10 +63,45 @@ const PhotoGrid = ({ photos }: Props) => {
     setIsOpen(true);
   };
 
+  const handleDeletePhoto = async (photoId: string, photoName?: string) => {
+    const confirmed = window.confirm(
+      `Delete this photo${photoName ? ` (${photoName})` : ""}?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingPhotoId(photoId);
+
+      const res = await fetch("/api/admin/photos", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ photoId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to delete photo");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Failed to delete photo");
+    } finally {
+      setDeletingPhotoId(null);
+    }
+  };
+
   return (
     <>
       <div className={`grid ${getGridColsClass(photos.length)} gap-0 p-0`}>
         {photos.map((photo, index) => {
+          const isDeleting = deletingPhotoId === photo.id;
+
           const image = (
             <Image
               src={photo.imgSrc}
@@ -74,7 +115,11 @@ const PhotoGrid = ({ photos }: Props) => {
 
           if (photo.href) {
             return (
-              <Link key={`${photo.href}-${index}`} href={photo.href} className="group block overflow-hidden">
+              <Link
+                key={`${photo.href}-${index}`}
+                href={photo.href}
+                className="group block overflow-hidden"
+              >
                 <div className="relative overflow-hidden">
                   {image}
                   {photo.name ? (
@@ -88,14 +133,35 @@ const PhotoGrid = ({ photos }: Props) => {
           }
 
           return (
-            <button
-              key={`${photo.imgSrc}-${index}`}
-              type="button"
-              onClick={() => openLightboxForGridIndex(index)}
-              className="cursor-pointer overflow-hidden text-left"
+            <div
+              key={`${photo.id ?? photo.imgSrc}-${index}`}
+              className="group relative overflow-hidden"
             >
-              {image}
-            </button>
+              <button
+                type="button"
+                onClick={() => openLightboxForGridIndex(index)}
+                className="block w-full cursor-pointer overflow-hidden text-left"
+              >
+                {image}
+              </button>
+
+              {isAdmin && photo.id ? (
+                <button
+                  type="button"
+                  onClick={() => handleDeletePhoto(photo.id!, photo.name)}
+                  disabled={isDeleting}
+                  className="absolute right-3 top-3 z-10 rounded bg-red-600/90 px-3 py-2 text-xs font-medium text-white shadow hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </button>
+              ) : null}
+
+              {photo.name ? (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+                  <p className="text-sm font-medium">{photo.name}</p>
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </div>

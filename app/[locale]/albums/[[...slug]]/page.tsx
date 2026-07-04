@@ -104,6 +104,7 @@ const AlbumsPage = async ({ params }: Props) => {
     const photoList = albumPhotos
         .filter((photo) => !!photo.cloudflareUrl)
         .map((photo) => ({
+            id: photo.id,
             name: photo.name ?? album.name,
             imgSrc: photo.cloudflareUrl,
             objectPosition: photo.objectPosition ?? "center",
@@ -121,62 +122,70 @@ const AlbumsPage = async ({ params }: Props) => {
                 <p className="text-lg italic text-gray-600 capitalize">
                     {album.path.replaceAll("/", " / ")}
                 </p>
-                <p>TEEEST</p>
-                {isAdmin ? (<><p>TEEEST</p>
+
+                {isAdmin ? (
                     <EditAlbumNameButton
                         albumId={album.id}
-                        initialName={album.name} initialSlug={album.slug} /></>
+                        initialName={album.name} initialSlug={album.slug} />
                 ) : null}
             </div>
 
             <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
 
 
-            {isAdmin ? (
-                <div className="mx-auto mb-10 space-y-6 px-4">
-                    <div className="mx-auto max-w-4xl">
-                        <AddAlbumForm
-                            defaultPlacement="child"
-                            fixedParent={{
-                                id: album.id,
-                                name: album.name,
-                                path: album.path,
-                            }}
-                        />
-                    </div>
-
-                    {!hasChildren ? (
-                        <div className="mx-auto max-w-2xl">
-                            <AddPhotoForm albumId={album.id} />
+            {
+                isAdmin ? (
+                    <div className="mx-auto mb-10 space-y-6 px-4">
+                        <div className="mx-auto max-w-4xl">
+                            <AddAlbumForm
+                                defaultPlacement="child"
+                                fixedParent={{
+                                    id: album.id,
+                                    name: album.name,
+                                    path: album.path,
+                                }}
+                            />
                         </div>
-                    ) : null}
-                </div>
-            ) : null}
 
-            {hasChildren ? (
-                <>
-                    <div className="mb-6 px-4 text-center">
-                        <h3 className="text-2xl font-bold text-gray-900">Subalbums</h3>
+                        {!hasChildren ? (
+                            <div className="mx-auto max-w-2xl">
+                                <AddPhotoForm albumId={album.id} />
+                            </div>
+                        ) : null}
                     </div>
-                    <PhotoGrid photos={childAlbumCards} />
-                </>
-            ) : null}
+                ) : null
+            }
 
-            {hasPhotos ? (
-                <>
-                    <div className="mb-6 mt-10 px-4 text-center">
-                        <h3 className="text-2xl font-bold text-gray-900">Photos</h3>
+            {
+                hasChildren ? (
+                    <>
+                        <div className="mb-6 px-4 text-center">
+                            <h3 className="text-2xl font-bold text-gray-900">Subalbums</h3>
+                        </div>
+                        <PhotoGrid photos={childAlbumCards} />
+                    </>
+                ) : null
+            }
+
+            {
+                hasPhotos ? (
+                    <>
+                        <div className="mb-6 mt-10 px-4 text-center">
+                            <h3 className="text-2xl font-bold text-gray-900">Photos</h3>
+                        </div>
+                        <PhotoGrid photos={photoList} isAdmin={isAdmin} />
+                    </>
+                ) : null
+            }
+
+            {
+                !hasChildren && !hasPhotos ? (
+                    <div className="px-4 py-16 text-center text-gray-500">
+                        No content yet.
                     </div>
-                    <PhotoGrid photos={photoList} />
-                </>
-            ) : null}
-
-            {!hasChildren && !hasPhotos ? (
-                <div className="px-4 py-16 text-center text-gray-500">
-                    No content yet.
-                </div>
-            ) : null}
-        </section>
+                ) : null
+            }
+        </section >
     );
 };
 

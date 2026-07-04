@@ -53,3 +53,91 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await auth();
+        const isAdmin =
+            !!session?.user &&
+            (session.user as { role?: string }).role === "admin";
+
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await req.json();
+
+        if (!body.photoId) {
+            return NextResponse.json(
+                { error: "Missing photoId" },
+                { status: 400 }
+            );
+        }
+
+        const photoResult = await db
+            .select({
+                id: photos.id,
+                albumId: photos.albumId,
+                cloudflareId: photos.cloudflareId,
+                cloudflareUrl: photos.cloudflareUrl,
+            })
+            .from(photos)
+            .where(eq(photos.id, body.photoId))
+            .limit(1);
+
+        if (!photoResult.length) {
+            return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+        }
+
+        const photo = photoResult[0];
+
+        const albumResult = await db
+            .select({
+                id: albums.id,
+                path: albums.path,
+            })
+            .from(albums)
+            .where(eq(albums.id, photo.albumId))
+            .limit(1);
+
+        if (!albumResult.length) {
+            return NextResponse.json({ error: "Album not found" }, { status: 404 });
+        }
+
+        const album = albumResult[0];
+
+        if (photo.cloudflareId) {
+            const cfRes = await fetch(
+                `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${encodeURIComponent(photo.cloudflareId)}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${process.env.CLOUDFLARE_IMAGES_API_TOKEN}`,
+                    },
+                }
+            );
+
+            if (!cfRes.ok) {
+                const cfText = await cfRes.text();
+                console.error("Cloudflare delete failed:", cfText);
+
+                return NextResponse.json(
+                    { error: "Failed to delete image from Cloudflare" },
+                    { status: 502 }
+                );
+            }
+        }
+
+        await db.delete(photos).where(eq(photos.id, body.photoId));
+
+        revalidatePath(`/albums/${album.path}`);
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Failed to delete photo:", error);
+        return NextResponse.json(
+            { error: "Failed to delete photo" },
+            { status: 500 }
+        );
+    }
+}
