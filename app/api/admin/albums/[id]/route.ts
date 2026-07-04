@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { albums } from "@/app/db/schema";
+import { albums, photos } from "@/app/db/schema";
 
 type Params = {
     params: Promise<{
@@ -166,6 +166,98 @@ export async function PATCH(req: Request, { params }: Params) {
         console.error("Failed to update album:", error);
         return NextResponse.json(
             { error: "Failed to update album" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(_req: Request, { params }: Params) {
+    try {
+        const session = await auth();
+        const isAdmin =
+            !!session?.user &&
+            (session.user as { role?: string }).role === "admin";
+
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { id } = await params;
+
+        const albumRows = await db
+            .select({
+                id: albums.id,
+                path: albums.path,
+                parentId: albums.parentId,
+            })
+            .from(albums)
+            .where(eq(albums.id, id))
+            .limit(1);
+
+        if (!albumRows.length) {
+            return NextResponse.json({ error: "Album not found" }, { status: 404 });
+        }
+
+        const album = albumRows[0];
+
+        const childRows = await db
+            .select({ id: albums.id })
+            .from(albums)
+            .where(eq(albums.parentId, album.id))
+            .limit(1);
+
+        if (childRows.length) {
+            return NextResponse.json(
+                { error: "Cannot delete an album that still has subalbums." },
+                { status: 409 }
+            );
+        }
+
+        const photoRows = await db
+            .select({
+                id: photos.id,
+                cloudflareId: photos.cloudflareId,
+            })
+            .from(photos)
+            .where(eq(photos.albumId, album.id));
+
+        for (const photo of photoRows) {
+            if (!photo.cloudflareId) continue;
+
+            const cfRes = await fetch(
+                `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${encodeURIComponent(photo.cloudflareId)}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${process.env.CLOUDFLARE_IMAGES_API_TOKEN}`,
+                    },
+                }
+            );
+
+            if (!cfRes.ok) {
+                const cfText = await cfRes.text();
+                console.error("Cloudflare delete failed:", cfText);
+
+                return NextResponse.json(
+                    { error: "Failed to delete one or more Cloudflare images." },
+                    { status: 502 }
+                );
+            }
+        }
+
+        await db.transaction(async (tx) => {
+            await tx.delete(photos).where(eq(photos.albumId, album.id));
+            await tx.delete(albums).where(eq(albums.id, album.id));
+        });
+
+        revalidatePath("/albums");
+        revalidatePath(`/albums/${album.path}`);
+
+        return NextResponse.json({ success: true }, { status: 200 });
+    } catch (error) {
+        console.error("Failed to delete album:", error);
+        return NextResponse.json(
+            { error: "Failed to delete album" },
             { status: 500 }
         );
     }

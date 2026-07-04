@@ -9,6 +9,7 @@ import PhotoGrid from "../PhotoGrid";
 import AddPhotoForm from "@/app/components/AddPhotoForm";
 import AddAlbumForm from "@/app/components/AddAlbumForm";
 import EditAlbumNameButton from "@/app/components/EditAlbumNameButton";
+import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
 
 type Props = {
     params: Promise<{
@@ -34,6 +35,7 @@ const AlbumsPage = async ({ params }: Props) => {
             .orderBy(asc(albums.sortOrder), asc(albums.createdAt));
 
         const rootAlbumPhotos = rootAlbums.map((album) => ({
+            id: album.id,
             name: album.name,
             imgSrc: album.coverUrl,
             objectPosition: album.objectPosition ?? "center",
@@ -95,6 +97,7 @@ const AlbumsPage = async ({ params }: Props) => {
         .orderBy(asc(photos.sortOrder), asc(photos.createdAt));
 
     const childAlbumCards = childAlbums.map((child) => ({
+        id: child.id,
         name: child.name,
         imgSrc: child.coverUrl,
         objectPosition: child.objectPosition ?? "center",
@@ -124,68 +127,68 @@ const AlbumsPage = async ({ params }: Props) => {
                 </p>
 
                 {isAdmin ? (
-                    <EditAlbumNameButton
-                        albumId={album.id}
-                        initialName={album.name} initialSlug={album.slug} />
+                    <div className="mt-4 flex items-center justify-center gap-3">
+                        <EditAlbumNameButton
+                            albumId={album.id}
+                            initialName={album.name}
+                            initialSlug={album.slug}
+                        />
+                        <DeleteAlbumButton
+                            albumId={album.id}
+                            albumName={album.name}
+                            redirectTo="/albums"
+                        />
+                    </div>
                 ) : null}
             </div>
 
             <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
 
-
-            {
-                isAdmin ? (
-                    <div className="mx-auto mb-10 space-y-6 px-4">
-                        <div className="mx-auto max-w-4xl">
-                            <AddAlbumForm
-                                defaultPlacement="child"
-                                fixedParent={{
-                                    id: album.id,
-                                    name: album.name,
-                                    path: album.path,
-                                }}
-                            />
-                        </div>
-
-                        {!hasChildren ? (
-                            <div className="mx-auto max-w-2xl">
-                                <AddPhotoForm albumId={album.id} />
-                            </div>
-                        ) : null}
+            {isAdmin ? (
+                <div className="mx-auto mb-10 space-y-6 px-4">
+                    <div className="mx-auto max-w-4xl">
+                        <AddAlbumForm
+                            defaultPlacement="child"
+                            fixedParent={{
+                                id: album.id,
+                                name: album.name,
+                                path: album.path,
+                            }}
+                        />
                     </div>
-                ) : null
-            }
 
-            {
-                hasChildren ? (
-                    <>
-                        <div className="mb-6 px-4 text-center">
-                            <h3 className="text-2xl font-bold text-gray-900">Subalbums</h3>
+                    {!hasChildren ? (
+                        <div className="mx-auto max-w-2xl">
+                            <AddPhotoForm albumId={album.id} />
                         </div>
-                        <PhotoGrid photos={childAlbumCards} />
-                    </>
-                ) : null
-            }
+                    ) : null}
+                </div>
+            ) : null}
 
-            {
-                hasPhotos ? (
-                    <>
-                        <div className="mb-6 mt-10 px-4 text-center">
-                            <h3 className="text-2xl font-bold text-gray-900">Photos</h3>
-                        </div>
-                        <PhotoGrid photos={photoList} isAdmin={isAdmin} />
-                    </>
-                ) : null
-            }
-
-            {
-                !hasChildren && !hasPhotos ? (
-                    <div className="px-4 py-16 text-center text-gray-500">
-                        No content yet.
+            {hasChildren ? (
+                <>
+                    <div className="mb-6 px-4 text-center">
+                        <h3 className="text-2xl font-bold text-gray-900">Subalbums</h3>
                     </div>
-                ) : null
-            }
-        </section >
+                    <PhotoGrid photos={childAlbumCards} />
+                </>
+            ) : null}
+
+            {hasPhotos ? (
+                <>
+                    <div className="mb-6 mt-10 px-4 text-center">
+                        <h3 className="text-2xl font-bold text-gray-900">Photos</h3>
+                    </div>
+                    <PhotoGrid photos={photoList} isAdmin={isAdmin} />
+                </>
+            ) : null}
+
+            {!hasChildren && !hasPhotos ? (
+                <div className="px-4 py-16 text-center text-gray-500">
+                    No content yet.
+                </div>
+            ) : null}
+        </section>
     );
 };
 
