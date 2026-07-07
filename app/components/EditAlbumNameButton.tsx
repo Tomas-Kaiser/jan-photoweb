@@ -5,11 +5,13 @@ import { useState } from "react";
 type Props = {
     albumId: string;
     initialName: string;
+    compact?: boolean;
 };
 
 export default function EditAlbumButton({
     albumId,
     initialName,
+    compact = false,
 }: Props) {
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(initialName);
@@ -56,7 +58,7 @@ export default function EditAlbumButton({
     }
 
     return (
-        <div className="mt-3 flex flex-col items-center gap-3">
+        <div className={compact ? "flex items-center" : "mt-3 flex flex-col items-center gap-3"}>
             {!isEditing ? (
                 <button
                     type="button"
@@ -64,10 +66,16 @@ export default function EditAlbumButton({
                         setIsEditing(true);
                         setMessage("");
                     }}
-                    className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
+                    aria-label="Edit album"
+                    title="Edit album"
+                    className={
+                        compact
+                            ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
+                            : "inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
+                    }
                 >
                     <span aria-hidden="true">✏️</span>
-                    Edit album
+                    {!compact ? <span>Edit album</span> : null}
                 </button>
             ) : (
                 <form

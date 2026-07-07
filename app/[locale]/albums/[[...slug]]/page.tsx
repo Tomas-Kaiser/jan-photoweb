@@ -8,9 +8,8 @@ import { albums, photos } from "@/app/db/schema";
 import PhotoGrid from "../PhotoGrid";
 import AddPhotoForm from "@/app/components/AddPhotoForm";
 import AddAlbumForm from "@/app/components/AddAlbumForm";
-import EditAlbumNameButton from "@/app/components/EditAlbumNameButton";
-import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
+import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
 
 type Props = {
     params: Promise<{
@@ -38,7 +37,7 @@ const AlbumsPage = async ({ params }: Props) => {
         const rootAlbumPhotos = rootAlbums.map((album) => ({
             id: album.id,
             name: album.name,
-            imgSrc: getCloudflareImageUrl(album.coverCloudflareId, 'card'),
+            imgSrc: getCloudflareImageUrl(album.coverCloudflareId, "card"),
             objectPosition: album.objectPosition ?? "center",
             href: `/albums/${album.path}`,
         }));
@@ -110,7 +109,7 @@ const AlbumsPage = async ({ params }: Props) => {
         .map((photo) => ({
             id: photo.id,
             name: photo.name ?? album.name,
-            imgSrc: getCloudflareImageUrl(photo.cloudflareId!, 'card'),
+            imgSrc: getCloudflareImageUrl(photo.cloudflareId!, "card"),
             objectPosition: photo.objectPosition ?? "center",
         }));
 
@@ -120,26 +119,12 @@ const AlbumsPage = async ({ params }: Props) => {
     return (
         <section className="pb-10 pt-10">
             <div className="px-4 text-center">
-                <h2 className="mb-2 text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
-                    {album.name}
-                </h2>
-                <p className="text-lg italic text-gray-600 capitalize">
-                    {album.path.replaceAll("/", " / ")}
-                </p>
-
-                {isAdmin ? (
-                    <div className="mt-4 flex items-center justify-center gap-3">
-                        <EditAlbumNameButton
-                            albumId={album.id}
-                            initialName={album.name}
-                        />
-                        <DeleteAlbumButton
-                            albumId={album.id}
-                            albumName={album.name}
-                            redirectTo="/albums"
-                        />
-                    </div>
-                ) : null}
+                <AlbumHeaderActions
+                    albumId={album.id}
+                    albumName={album.name}
+                    albumPath={album.path}
+                    isAdmin={isAdmin}
+                />
             </div>
 
             <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
