@@ -132,7 +132,6 @@ const AlbumsPage = async ({ params }: Props) => {
                         <EditAlbumNameButton
                             albumId={album.id}
                             initialName={album.name}
-                            initialSlug={album.slug}
                         />
                         <DeleteAlbumButton
                             albumId={album.id}
