@@ -10,6 +10,7 @@ import AddPhotoForm from "@/app/components/AddPhotoForm";
 import AddAlbumForm from "@/app/components/AddAlbumForm";
 import EditAlbumNameButton from "@/app/components/EditAlbumNameButton";
 import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
+import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 
 type Props = {
     params: Promise<{
@@ -37,7 +38,7 @@ const AlbumsPage = async ({ params }: Props) => {
         const rootAlbumPhotos = rootAlbums.map((album) => ({
             id: album.id,
             name: album.name,
-            imgSrc: album.coverUrl,
+            imgSrc: getCloudflareImageUrl(album.coverCloudflareId, 'card'),
             objectPosition: album.objectPosition ?? "center",
             href: `/albums/${album.path}`,
         }));
@@ -105,11 +106,11 @@ const AlbumsPage = async ({ params }: Props) => {
     }));
 
     const photoList = albumPhotos
-        .filter((photo) => !!photo.cloudflareUrl)
+        .filter((photo) => !!photo.cloudflareId)
         .map((photo) => ({
             id: photo.id,
             name: photo.name ?? album.name,
-            imgSrc: photo.cloudflareUrl,
+            imgSrc: getCloudflareImageUrl(photo.cloudflareId!, 'card'),
             objectPosition: photo.objectPosition ?? "center",
         }));
 

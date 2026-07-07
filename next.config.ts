@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "imagedelivery.net",
+        pathname: "/**",
       },
       {
         protocol: "https",

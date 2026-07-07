@@ -19,6 +19,7 @@ export const albums = pgTable(
         slug: text("slug").notNull(),
         path: text("path").notNull(),
         coverUrl: text("cover_url").notNull(),
+        coverCloudflareId: text("cover_cloudflare_id").notNull(),
         objectPosition: text("object_position").default("center").notNull(),
         sortOrder: integer("sort_order").default(0).notNull(),
         createdAt: timestamp("created_at").defaultNow().notNull(),
