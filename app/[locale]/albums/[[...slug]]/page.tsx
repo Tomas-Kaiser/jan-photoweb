@@ -99,7 +99,7 @@ const AlbumsPage = async ({ params }: Props) => {
     const childAlbumCards = childAlbums.map((child) => ({
         id: child.id,
         name: child.name,
-        imgSrc: child.coverUrl,
+        imgSrc: getCloudflareImageUrl(child.coverCloudflareId, "card"),
         objectPosition: child.objectPosition ?? "center",
         href: `/albums/${child.path}`,
     }));
