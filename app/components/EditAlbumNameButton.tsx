@@ -5,17 +5,14 @@ import { useState } from "react";
 type Props = {
     albumId: string;
     initialName: string;
-    initialSlug: string;
 };
 
 export default function EditAlbumButton({
     albumId,
     initialName,
-    initialSlug,
 }: Props) {
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(initialName);
-    const [slug, setSlug] = useState(initialSlug);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -24,11 +21,6 @@ export default function EditAlbumButton({
 
         if (!name.trim()) {
             setMessage("Album name is required.");
-            return;
-        }
-
-        if (!slug.trim()) {
-            setMessage("Slug is required.");
             return;
         }
 
@@ -43,7 +35,6 @@ export default function EditAlbumButton({
                 },
                 body: JSON.stringify({
                     name: name.trim(),
-                    slug: slug.trim(),
                 }),
             });
 
@@ -95,20 +86,8 @@ export default function EditAlbumButton({
                         required
                     />
 
-                    <label className="mb-2 mt-4 block text-left text-sm font-medium text-gray-700">
-                        Slug
-                    </label>
-                    <input
-                        type="text"
-                        value={slug}
-                        onChange={(e) => setSlug(e.target.value)}
-                        disabled={saving}
-                        className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none transition focus:border-gray-900 focus:ring-4 focus:ring-gray-200"
-                        required
-                    />
-
                     <p className="mt-3 text-left text-xs text-gray-500">
-                        Changing the slug updates this album URL and all subalbum paths.
+                        The album URL slug will be generated automatically from the name.
                     </p>
 
                     <div className="mt-4 flex items-center justify-end gap-3">
@@ -117,7 +96,6 @@ export default function EditAlbumButton({
                             onClick={() => {
                                 setIsEditing(false);
                                 setName(initialName);
-                                setSlug(initialSlug);
                                 setMessage("");
                             }}
                             disabled={saving}
