@@ -1,0 +1,1 @@
+ALTER TABLE "albums" ADD COLUMN "cover_cloudflare_id" text NOT NULL;
