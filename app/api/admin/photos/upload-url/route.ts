@@ -1,4 +1,3 @@
-// app/api/admin/photos/upload-url/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 

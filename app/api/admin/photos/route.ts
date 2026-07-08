@@ -1,4 +1,3 @@
-// app/api/admin/photos/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
@@ -7,51 +6,64 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function POST(req: Request) {
-    const session = await auth();
-    const isAdmin =
-        !!session?.user &&
-        (session.user as { role?: string }).role === "admin";
+    try {
+        const session = await auth();
+        const isAdmin =
+            !!session?.user &&
+            (session.user as { role?: string }).role === "admin";
 
-    if (!isAdmin) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+        if (!isAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
-    const body = await req.json();
+        const body = await req.json();
 
-    if (!body.albumId || !body.cloudflareUrl) {
+        const albumId = String(body?.albumId || "").trim();
+        const cloudflareId = String(body?.cloudflareId || "").trim();
+        const name = String(body?.name || "").trim();
+
+        if (!albumId || !cloudflareId) {
+            return NextResponse.json(
+                { error: "Missing albumId or cloudflareId" },
+                { status: 400 }
+            );
+        }
+
+        const albumResult = await db
+            .select({
+                id: albums.id,
+                path: albums.path,
+            })
+            .from(albums)
+            .where(eq(albums.id, albumId))
+            .limit(1);
+
+        if (!albumResult.length) {
+            return NextResponse.json({ error: "Album not found" }, { status: 404 });
+        }
+
+        const album = albumResult[0];
+
+        await db.insert(photos).values({
+            albumId: album.id,
+            name: name || null,
+            cloudflareId,
+            objectPosition: "center",
+            sortOrder: -1,
+        });
+
+        revalidatePath(`/albums/${album.path}`);
+        revalidatePath("/admin/albums");
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Failed to create photo:", error);
+
         return NextResponse.json(
-            { error: "Missing albumId or cloudflareUrl" },
-            { status: 400 }
+            { error: "Failed to create photo" },
+            { status: 500 }
         );
     }
-
-    const albumResult = await db
-        .select({
-            id: albums.id,
-            path: albums.path,
-        })
-        .from(albums)
-        .where(eq(albums.id, body.albumId))
-        .limit(1);
-
-    if (!albumResult.length) {
-        return NextResponse.json({ error: "Album not found" }, { status: 404 });
-    }
-
-    const album = albumResult[0];
-
-    await db.insert(photos).values({
-        albumId: album.id,
-        name: body.name ?? null,
-        cloudflareUrl: body.cloudflareUrl,
-        cloudflareId: body.cloudflareId ?? null,
-        objectPosition: "center",
-        sortOrder: -1,
-    });
-
-    revalidatePath(`/albums/${album.path}`);
-
-    return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: Request) {
@@ -79,7 +91,6 @@ export async function DELETE(req: Request) {
                 id: photos.id,
                 albumId: photos.albumId,
                 cloudflareId: photos.cloudflareId,
-                cloudflareUrl: photos.cloudflareUrl,
             })
             .from(photos)
             .where(eq(photos.id, body.photoId))
@@ -131,6 +142,7 @@ export async function DELETE(req: Request) {
         await db.delete(photos).where(eq(photos.id, body.photoId));
 
         revalidatePath(`/albums/${album.path}`);
+        revalidatePath("/admin/albums");
 
         return NextResponse.json({ success: true });
     } catch (error) {

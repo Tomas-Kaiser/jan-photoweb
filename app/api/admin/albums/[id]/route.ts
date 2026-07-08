@@ -189,6 +189,7 @@ export async function DELETE(_req: Request, { params }: Params) {
                 id: albums.id,
                 path: albums.path,
                 parentId: albums.parentId,
+                coverCloudflareId: albums.coverCloudflareId,
             })
             .from(albums)
             .where(eq(albums.id, id))
@@ -221,11 +222,16 @@ export async function DELETE(_req: Request, { params }: Params) {
             .from(photos)
             .where(eq(photos.albumId, album.id));
 
-        for (const photo of photoRows) {
-            if (!photo.cloudflareId) continue;
+        const imageIdsToDelete = Array.from(
+            new Set(
+                [album.coverCloudflareId, ...photoRows.map((photo) => photo.cloudflareId)]
+                    .filter((value): value is string => Boolean(value))
+            )
+        );
 
+        for (const imageId of imageIdsToDelete) {
             const cfRes = await fetch(
-                `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${encodeURIComponent(photo.cloudflareId)}`,
+                `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${encodeURIComponent(imageId)}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -234,12 +240,17 @@ export async function DELETE(_req: Request, { params }: Params) {
                 }
             );
 
-            if (!cfRes.ok) {
-                const cfText = await cfRes.text();
-                console.error("Cloudflare delete failed:", cfText);
+            const cfData = await cfRes.json().catch(() => null);
+
+            if (!cfRes.ok || cfData?.success === false) {
+                console.error("Cloudflare delete failed:", {
+                    imageId,
+                    status: cfRes.status,
+                    body: cfData,
+                });
 
                 return NextResponse.json(
-                    { error: "Failed to delete one or more Cloudflare images." },
+                    { error: `Failed to delete Cloudflare image ${imageId}.` },
                     { status: 502 }
                 );
             }
@@ -256,6 +267,7 @@ export async function DELETE(_req: Request, { params }: Params) {
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
         console.error("Failed to delete album:", error);
+
         return NextResponse.json(
             { error: "Failed to delete album" },
             { status: 500 }

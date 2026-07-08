@@ -6,8 +6,6 @@ import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { albums, photos } from "@/app/db/schema";
 import PhotoGrid from "../PhotoGrid";
-import AddPhotoForm from "@/app/components/AddPhotoForm";
-import AddAlbumForm from "@/app/components/AddAlbumForm";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
 
@@ -19,7 +17,7 @@ type Props = {
 };
 
 const AlbumsPage = async ({ params }: Props) => {
-    const { slug } = await params;
+    const { locale, slug } = await params;
     const path = slug?.join("/") ?? null;
 
     const session = await auth();
@@ -39,7 +37,7 @@ const AlbumsPage = async ({ params }: Props) => {
             name: album.name,
             imgSrc: getCloudflareImageUrl(album.coverCloudflareId, "card"),
             objectPosition: album.objectPosition ?? "center",
-            href: `/albums/${album.path}`,
+            href: `/${locale}/albums/${album.path}`,
         }));
 
         return (
@@ -54,12 +52,6 @@ const AlbumsPage = async ({ params }: Props) => {
                 </div>
 
                 <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
-
-                {isAdmin ? (
-                    <div className="mx-auto mb-10 max-w-4xl px-4">
-                        <AddAlbumForm />
-                    </div>
-                ) : null}
 
                 {rootAlbumPhotos.length ? (
                     <PhotoGrid photos={rootAlbumPhotos} />
@@ -101,7 +93,7 @@ const AlbumsPage = async ({ params }: Props) => {
         name: child.name,
         imgSrc: getCloudflareImageUrl(child.coverCloudflareId, "card"),
         objectPosition: child.objectPosition ?? "center",
-        href: `/albums/${child.path}`,
+        href: `/${locale}/albums/${child.path}`,
     }));
 
     const photoList = albumPhotos
@@ -116,6 +108,12 @@ const AlbumsPage = async ({ params }: Props) => {
     const hasChildren = childAlbumCards.length > 0;
     const hasPhotos = photoList.length > 0;
 
+    const albumOptions = childAlbums.map((child) => ({
+        id: child.id,
+        name: child.name,
+        path: child.path,
+    }));
+
     return (
         <section className="pb-10 pt-10">
             <div className="px-4 text-center">
@@ -124,31 +122,13 @@ const AlbumsPage = async ({ params }: Props) => {
                     albumName={album.name}
                     albumPath={album.path}
                     isAdmin={isAdmin}
+                    albums={albumOptions}
+                    hasSubalbums={hasChildren}
+                    locale={locale}
                 />
             </div>
 
             <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
-
-            {isAdmin ? (
-                <div className="mx-auto mb-10 space-y-6 px-4">
-                    <div className="mx-auto max-w-4xl">
-                        <AddAlbumForm
-                            defaultPlacement="child"
-                            fixedParent={{
-                                id: album.id,
-                                name: album.name,
-                                path: album.path,
-                            }}
-                        />
-                    </div>
-
-                    {!hasChildren ? (
-                        <div className="mx-auto max-w-2xl">
-                            <AddPhotoForm albumId={album.id} />
-                        </div>
-                    ) : null}
-                </div>
-            ) : null}
 
             {hasChildren ? (
                 <>

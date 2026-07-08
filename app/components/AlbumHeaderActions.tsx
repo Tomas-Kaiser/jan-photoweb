@@ -4,12 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
+import CreateAlbumButton from "./CreateAlbumButton";
+
+type AlbumOption = {
+    id: string;
+    name: string;
+    path: string;
+};
 
 type Props = {
     albumId: string;
     albumName: string;
     albumPath: string;
     isAdmin: boolean;
+    albums: AlbumOption[];
+    hasSubalbums: boolean;
+    locale: string;
 };
 
 export default function AlbumHeaderActions({
@@ -17,6 +27,9 @@ export default function AlbumHeaderActions({
     albumName,
     albumPath,
     isAdmin,
+    albums,
+    hasSubalbums,
+    locale,
 }: Props) {
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +75,7 @@ export default function AlbumHeaderActions({
             }
 
             setIsEditing(false);
-            router.push(`/albums/${data.path}`);
+            router.push(`/${locale}/albums/${data.path}`);
             router.refresh();
         } catch (error) {
             setMessage(
@@ -113,6 +126,17 @@ export default function AlbumHeaderActions({
 
                 {isAdmin ? (
                     <div className="flex items-center gap-2">
+                        <CreateAlbumButton
+                            albums={albums}
+                            fixedParent={{
+                                id: albumId,
+                                name: albumName,
+                                path: albumPath,
+                            }}
+                            canAddPhotosToCurrentAlbum={!hasSubalbums}
+                            locale={locale}
+                        />
+
                         {!isEditing ? (
                             <button
                                 type="button"
@@ -151,7 +175,7 @@ export default function AlbumHeaderActions({
                         <DeleteAlbumButton
                             albumId={albumId}
                             albumName={albumName}
-                            redirectTo="/albums"
+                            redirectTo={`/${locale}/albums`}
                             iconOnly
                         />
                     </div>
