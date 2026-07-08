@@ -1,3 +1,4 @@
+
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
@@ -17,51 +18,44 @@ if (!connectionString) {
 const pool = new Pool({ connectionString });
 const db = drizzle(pool);
 
-const BASE = "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg";
-const url = (id: string) => `${BASE}/${id}/public`;
-
 type AlbumSeed = {
   name: string;
   slug: string;
   path: string;
   parentPath: string | null;
-  coverUrl: string;
+  coverCloudflareId: string;
   objectPosition?: string;
   sortOrder?: number;
 };
 
 const albumsData: AlbumSeed[] = [
-  { name: "Brands and Campaign", slug: "brands-and-campaign", path: "brands-and-campaign", parentPath: null, coverUrl: url("3eef17ee-9681-4644-5fcd-1460f61bf900"), objectPosition: "top30", sortOrder: 0 },
-  { name: "Fashion Shows", slug: "fashion-shows", path: "fashion-shows", parentPath: null, coverUrl: url("2f2f9811-e3a0-4562-8ed7-efeb265b1500"), objectPosition: "center", sortOrder: 1 },
-  { name: "Portraits", slug: "portraits", path: "portraits", parentPath: null, coverUrl: url("71a2dd68-df7a-494e-eb73-dbbafb7e3800"), objectPosition: "top", sortOrder: 2 },
-  { name: "Visual Stories", slug: "visual-stories", path: "visual-stories", parentPath: null, coverUrl: url("92f6f6c1-e85f-498d-e175-a0c71c6efd00"), objectPosition: "center", sortOrder: 3 },
-  { name: "Weddings", slug: "weddings", path: "weddings", parentPath: null, coverUrl: url("1b3c4bc1-6bfe-4244-77b0-be81c4185f00"), objectPosition: "top30", sortOrder: 4 },
-  { name: "Couples", slug: "couples", path: "couples", parentPath: null, coverUrl: url("5fefadb3-5c3b-4379-ff48-f768cb600100"), objectPosition: "top", sortOrder: 5 },
-  { name: "Fashion and Editorials", slug: "fashion-and-editorials", path: "fashion-and-editorials", parentPath: null, coverUrl: url("6bd5f04a-5de2-4104-10da-daf20cee9300"), objectPosition: "center", sortOrder: 6 },
-
-  { name: "Fine Furs", slug: "fine-furs", path: "brands-and-campaign/fine-furs", parentPath: "brands-and-campaign", coverUrl: url("3eef17ee-9681-4644-5fcd-1460f61bf900"), objectPosition: "top", sortOrder: 0 },
-  { name: "Janine Made by Love", slug: "janine-made-by-love", path: "brands-and-campaign/janine-made-by-love", parentPath: "brands-and-campaign", coverUrl: url("67c0f9bf-7f87-4f65-baee-9fdf6810f700"), objectPosition: "top30", sortOrder: 1 },
-  { name: "Vanguard Collection 2025", slug: "vanguard-collection-2025", path: "brands-and-campaign/janine-made-by-love/vanguard-collection-2025", parentPath: "brands-and-campaign/janine-made-by-love", coverUrl: url("67c0f9bf-7f87-4f65-baee-9fdf6810f700"), objectPosition: "top30", sortOrder: 0 },
-  { name: "Spring Collection 2024", slug: "spring-collection-2024", path: "brands-and-campaign/janine-made-by-love/spring-collection-2024", parentPath: "brands-and-campaign/janine-made-by-love", coverUrl: url("14789a56-e5e8-4429-6df9-c78ec4ccf000"), objectPosition: "top15", sortOrder: 1 },
-  { name: "Autumn Collection 2024", slug: "autumn-collection-2024", path: "brands-and-campaign/janine-made-by-love/autumn-collection-2024", parentPath: "brands-and-campaign/janine-made-by-love", coverUrl: url("3d889cda-13a5-44f8-7300-225575d6ce00"), objectPosition: "top", sortOrder: 2 },
-  { name: "Infinimy", slug: "infinimy", path: "brands-and-campaign/infinimy", parentPath: "brands-and-campaign", coverUrl: url("bc482303-6466-4b8e-8062-801b2a7b7400"), objectPosition: "top", sortOrder: 2 },
-  { name: "Infinimy Collection 2024", slug: "infinimy-collection-2024", path: "brands-and-campaign/infinimy/infinimy-collection-2024", parentPath: "brands-and-campaign/infinimy", coverUrl: url("bc482303-6466-4b8e-8062-801b2a7b7400"), objectPosition: "top", sortOrder: 0 },
-  { name: "Hotel Pupp 2024", slug: "hotel-pupp-2024", path: "brands-and-campaign/hotel-pupp-2024", parentPath: "brands-and-campaign", coverUrl: url("a8865897-a6b4-4a87-53cf-f101a5ef8100"), objectPosition: "top", sortOrder: 3 },
-
-  { name: "Debbie Brown", slug: "debbie-brown", path: "fashion-shows/debbie-brown", parentPath: "fashion-shows", coverUrl: url("2f2f9811-e3a0-4562-8ed7-efeb265b1500"), objectPosition: "top", sortOrder: 0 },
-  { name: "Czech Fashion Week Marianske Lazne", slug: "czech-fashion-week-marianske-lazne", path: "fashion-shows/czech-fashion-week-marianske-lazne", parentPath: "fashion-shows", coverUrl: url("526afc0b-6cb7-4ee6-132b-8b4125946200"), objectPosition: "top30", sortOrder: 1 },
-
-  { name: "Mara a Market", slug: "mara-a-market", path: "couples/mara-a-market", parentPath: "couples", coverUrl: url("5fefadb3-5c3b-4379-ff48-f768cb600100"), objectPosition: "top", sortOrder: 0 },
-  { name: "Dasa a Filip", slug: "dasa-a-filip", path: "couples/dasa-a-filip", parentPath: "couples", coverUrl: url("302f0c15-eec3-4117-9d5b-34b80556fe00"), objectPosition: "top", sortOrder: 1 },
-
-  { name: "Wide Shooting", slug: "wide-shooting", path: "fashion-and-editorials/wide-shooting", parentPath: "fashion-and-editorials", coverUrl: url("72ceb85d-788a-416d-e52a-db5b22f17900"), objectPosition: "top", sortOrder: 0 },
-  { name: "Still in Style", slug: "still-in-style", path: "fashion-and-editorials/still-in-style", parentPath: "fashion-and-editorials", coverUrl: url("6bd5f04a-5de2-4104-10da-daf20cee9300"), objectPosition: "top", sortOrder: 1 },
+  { name: "Brands and Campaign", slug: "brands-and-campaign", path: "brands-and-campaign", parentPath: null, coverCloudflareId: "3eef17ee-9681-4644-5fcd-1460f61bf900", objectPosition: "top30", sortOrder: 0 },
+  { name: "Fashion Shows", slug: "fashion-shows", path: "fashion-shows", parentPath: null, coverCloudflareId: "2f2f9811-e3a0-4562-8ed7-efeb265b1500", objectPosition: "center", sortOrder: 1 },
+  { name: "Portraits", slug: "portraits", path: "portraits", parentPath: null, coverCloudflareId: "71a2dd68-df7a-494e-eb73-dbbafb7e3800", objectPosition: "top", sortOrder: 2 },
+  { name: "Visual Stories", slug: "visual-stories", path: "visual-stories", parentPath: null, coverCloudflareId: "92f6f6c1-e85f-498d-e175-a0c71c6efd00", objectPosition: "center", sortOrder: 3 },
+  { name: "Weddings", slug: "weddings", path: "weddings", parentPath: null, coverCloudflareId: "1b3c4bc1-6bfe-4244-77b0-be81c4185f00", objectPosition: "top30", sortOrder: 4 },
+  { name: "Couples", slug: "couples", path: "couples", parentPath: null, coverCloudflareId: "5fefadb3-5c3b-4379-ff48-f768cb600100", objectPosition: "top", sortOrder: 5 },
+  { name: "Fashion and Editorials", slug: "fashion-and-editorials", path: "fashion-and-editorials", parentPath: null, coverCloudflareId: "6bd5f04a-5de2-4104-10da-daf20cee9300", objectPosition: "center", sortOrder: 6 },
+  { name: "Fine Furs", slug: "fine-furs", path: "brands-and-campaign/fine-furs", parentPath: "brands-and-campaign", coverCloudflareId: "3eef17ee-9681-4644-5fcd-1460f61bf900", objectPosition: "top", sortOrder: 0 },
+  { name: "Janine Made by Love", slug: "janine-made-by-love", path: "brands-and-campaign/janine-made-by-love", parentPath: "brands-and-campaign", coverCloudflareId: "67c0f9bf-7f87-4f65-baee-9fdf6810f700", objectPosition: "top30", sortOrder: 1 },
+  { name: "Vanguard Collection 2025", slug: "vanguard-collection-2025", path: "brands-and-campaign/janine-made-by-love/vanguard-collection-2025", parentPath: "brands-and-campaign/janine-made-by-love", coverCloudflareId: "67c0f9bf-7f87-4f65-baee-9fdf6810f700", objectPosition: "top30", sortOrder: 0 },
+  { name: "Spring Collection 2024", slug: "spring-collection-2024", path: "brands-and-campaign/janine-made-by-love/spring-collection-2024", parentPath: "brands-and-campaign/janine-made-by-love", coverCloudflareId: "14789a56-e5e8-4429-6df9-c78ec4ccf000", objectPosition: "top15", sortOrder: 1 },
+  { name: "Autumn Collection 2024", slug: "autumn-collection-2024", path: "brands-and-campaign/janine-made-by-love/autumn-collection-2024", parentPath: "brands-and-campaign/janine-made-by-love", coverCloudflareId: "3d889cda-13a5-44f8-7300-225575d6ce00", objectPosition: "top", sortOrder: 2 },
+  { name: "Infinimy", slug: "infinimy", path: "brands-and-campaign/infinimy", parentPath: "brands-and-campaign", coverCloudflareId: "bc482303-6466-4b8e-8062-801b2a7b7400", objectPosition: "top", sortOrder: 2 },
+  { name: "Infinimy Collection 2024", slug: "infinimy-collection-2024", path: "brands-and-campaign/infinimy/infinimy-collection-2024", parentPath: "brands-and-campaign/infinimy", coverCloudflareId: "bc482303-6466-4b8e-8062-801b2a7b7400", objectPosition: "top", sortOrder: 0 },
+  { name: "Hotel Pupp 2024", slug: "hotel-pupp-2024", path: "brands-and-campaign/hotel-pupp-2024", parentPath: "brands-and-campaign", coverCloudflareId: "a8865897-a6b4-4a87-53cf-f101a5ef8100", objectPosition: "top", sortOrder: 3 },
+  { name: "Debbie Brown", slug: "debbie-brown", path: "fashion-shows/debbie-brown", parentPath: "fashion-shows", coverCloudflareId: "2f2f9811-e3a0-4562-8ed7-efeb265b1500", objectPosition: "top", sortOrder: 0 },
+  { name: "Czech Fashion Week Marianske Lazne", slug: "czech-fashion-week-marianske-lazne", path: "fashion-shows/czech-fashion-week-marianske-lazne", parentPath: "fashion-shows", coverCloudflareId: "526afc0b-6cb7-4ee6-132b-8b4125946200", objectPosition: "top30", sortOrder: 1 },
+  { name: "Mara a Market", slug: "mara-a-market", path: "couples/mara-a-market", parentPath: "couples", coverCloudflareId: "5fefadb3-5c3b-4379-ff48-f768cb600100", objectPosition: "top", sortOrder: 0 },
+  { name: "Dasa a Filip", slug: "dasa-a-filip", path: "couples/dasa-a-filip", parentPath: "couples", coverCloudflareId: "302f0c15-eec3-4117-9d5b-34b80556fe00", objectPosition: "top", sortOrder: 1 },
+  { name: "Wide Shooting", slug: "wide-shooting", path: "fashion-and-editorials/wide-shooting", parentPath: "fashion-and-editorials", coverCloudflareId: "72ceb85d-788a-416d-e52a-db5b22f17900", objectPosition: "top", sortOrder: 0 },
+  { name: "Still in Style", slug: "still-in-style", path: "fashion-and-editorials/still-in-style", parentPath: "fashion-and-editorials", coverCloudflareId: "6bd5f04a-5de2-4104-10da-daf20cee9300", objectPosition: "top", sortOrder: 1 },
 ];
 
 type PhotoSeed = {
   albumPath: string;
   name: string;
-  cloudflareUrl: string;
+  cloudflareId: string;
   objectPosition?: string;
   sortOrder?: number;
 };
@@ -75,7 +69,7 @@ const p = (
 ): PhotoSeed => ({
   albumPath,
   name,
-  cloudflareUrl: url(id),
+  cloudflareId: id,
   objectPosition: pos,
   sortOrder: i,
 });
@@ -101,7 +95,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     "6a65c9f7-e8db-413f-0cd2-2ddb092f0900", "82c57836-cb03-4800-915d-1ce0126ae800", "9b68f3f3-9796-4810-8a38-46aeeed81a00",
     "f6a6c79d-77d1-4b8e-7e9b-3573d5382a00", "65a13da5-cd19-4d66-3902-9c88079a9900", "65c9897b-4771-40a4-7f39-29bcab158000",
@@ -117,7 +110,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     "3d889cda-13a5-44f8-7300-225575d6ce00", "5fde9906-6ca0-4696-093a-8d4f1d89cf00", "fa3f0458-6fb1-47eb-6bf2-17f6caef6800",
     "e2498a0d-0e02-4732-bffb-04400a55ef00", "bb512ba2-dfcc-485d-65dc-c02e111ea200", "f2ddf53a-fe11-4232-61db-66fd83a89000",
@@ -131,7 +123,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     "bc482303-6466-4b8e-8062-801b2a7b7400", "266fd571-4c8c-4a93-a10f-ab9d30949000", "7dca3a6a-9333-422c-035a-b520f7e43300",
     "7ed113cb-8425-49b5-6ed8-1b286462ad00", "8c30fa17-1ef0-4fa6-e2d2-05a8a1d57b00", "9f1fc37e-1e2c-4d06-f390-2ea4b9a83d00",
@@ -147,7 +138,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     "a8865897-a6b4-4a87-53cf-f101a5ef8100", "e84233ed-0ab1-4e61-e658-e3a8e8b44900", "9e4596f3-f27a-4d33-4e0a-794bfadf3600",
     "eafa4e3f-4ef0-4b19-0e4a-f5a23ed7f300", "14f9a7eb-1540-4a09-ef14-80fa77f15c00", "7566b550-4838-4d07-77ad-859ced8d1200",
@@ -162,7 +152,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     ["c136bb4c-b1f7-4a50-e8da-38b80910fc00", "25"], ["2f2f9811-e3a0-4562-8ed7-efeb265b1500", "23"],
     ["67e1379f-c257-475f-1a78-253a11a93a00", "22"], ["0191312e-5fa6-4851-05c1-4892abb97e00", "21"],
@@ -177,7 +166,6 @@ const photosData: PhotoSeed[] = [
   ].map(([id, num], i) =>
     p("fashion-shows/debbie-brown", `DEBBIE BROWN ${num}`, id, "top", i)
   ),
-
   ...[
     ["526afc0b-6cb7-4ee6-132b-8b4125946200", "1"], ["e832306c-a74b-478d-b4f3-73fba860b200", "52"],
     ["bf5faa8d-5f16-49e6-7c92-b5478fcb2e00", "75"], ["9e617bb5-62ed-4da2-11f1-330bb1d82b00", "114"],
@@ -195,7 +183,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     "6bd5f04a-5de2-4104-10da-daf20cee9300", "3aea453e-90bd-479a-46a0-e2c916035300", "7b66d645-5332-41db-afea-c0fd24b22b00",
     "60680062-1cd1-4c05-1ef9-853475de1100", "ab564a41-78d8-4df4-a1ae-4ad12d3c7800", "ea92fd31-61ea-4207-d2a1-910ff0c94f00",
@@ -209,7 +196,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     "72ceb85d-788a-416d-e52a-db5b22f17900", "0ed6883a-3978-46be-0773-97b50a45e800", "35c66228-6470-4221-cef9-bcb644e5a500",
     "87d11b5e-b6fb-4679-c739-452c99e42c00", "ad8a9ba4-6fe0-4262-3c37-31ee69fba400", "72cb6b04-4082-4ff6-8af5-2f51e51a4d00",
@@ -226,7 +212,6 @@ const photosData: PhotoSeed[] = [
       i
     )
   ),
-
   ...[
     "bf132444-3436-41c1-b11f-0b35e98b2500", "6e4feacc-0181-4ab2-72b6-b559be1f2c00", "1f7cd461-2d50-4684-9500-b438ac2a4200",
     "41486dd8-25d2-43b4-cac1-b0e4c8c07d00", "68cdb2a4-72eb-479b-f89a-1a4980f0ed00", "5fefadb3-5c3b-4379-ff48-f768cb600100",
@@ -235,7 +220,6 @@ const photosData: PhotoSeed[] = [
   ].map((id, i) =>
     p("couples/mara-a-market", `Mara a Market ${String(i + 1).padStart(2, "0")}`, id, "top", i)
   ),
-
   ...[
     "0e326f64-ae5d-486f-5bd1-4a703196b400", "c1beb1f2-bee6-433d-b064-72ad31762d00", "73658a6f-2dae-44d8-fc59-3011e3f1be00",
     "b0c89a90-2f5c-47e2-6b7b-eb2ec7f6be00", "24fd4078-288b-4461-c3f1-3086762dc700", "f4c76a25-05f2-4114-6f5c-b3e171d5ef00",
@@ -245,7 +229,6 @@ const photosData: PhotoSeed[] = [
   ].map((id, i) =>
     p("couples/dasa-a-filip", `Dasa a Filip ${String(i + 1).padStart(2, "0")}`, id, "top", i)
   ),
-
   ...[
     ["3eef17ee-9681-4644-5fcd-1460f61bf900", "1"], ["3bab1222-816e-443d-536c-473f98263600", "2"],
     ["f5a152c9-df2e-4baa-6b41-2ed92b4a0500", "7"], ["56b9aef2-fe38-4241-3bde-2a768e99f300", "6"],
@@ -254,7 +237,6 @@ const photosData: PhotoSeed[] = [
   ].map(([id, num], i) =>
     p("brands-and-campaign/fine-furs", `Fine Furs ${num}`, id, "top", i)
   ),
-
   ...[
     "1b3c4bc1-6bfe-4244-77b0-be81c4185f00", "ef67c70d-38c8-477a-1e1a-e5bf26744e00", "62880405-5ff1-4d6e-a86d-8570c1863b00",
     "8c3e9e05-12ad-48ab-c3a0-e0efb3787c00", "159ff4bd-6b50-401f-5196-dca6f92dcc00", "398d7efc-e98b-49bb-b08b-2cda207b0100",
@@ -266,7 +248,6 @@ const photosData: PhotoSeed[] = [
   ].map((id, i) =>
     p("weddings", `Wedding ${i + 1}`, id, i === 0 ? "top30" : i === 1 ? "top15" : "top", i)
   ),
-
   ...[
     ["71a2dd68-df7a-494e-eb73-dbbafb7e3800", "New Portait 09"], ["770617be-5d4b-4fa0-2dbe-72a5da91c400", "New Portait 08"],
     ["8274b47b-1722-4bb7-95ec-32d23861d200", "New Portait 06"], ["d70a9f6b-cc76-44ab-ddc6-49eae892ca00", "New Portait 05"],
@@ -283,7 +264,6 @@ const photosData: PhotoSeed[] = [
     ["31758c63-c86c-4cdb-a857-1ab37a0e3d00", "Portrait 7"], ["79882449-209d-4651-f384-cf67b0ffb100", "Portrait 8"],
     ["9682c2cf-bda1-4f8f-a30b-1765f7e9e700", "Portrait 9"], ["da6a911f-e6cf-421d-995f-23f0ca73ea00", "Portrait 10"],
   ].map(([id, name], i) => p("portraits", name, id, "top", i)),
-
   ...[
     "92f6f6c1-e85f-498d-e175-a0c71c6efd00", "98248836-86f0-4fbe-a9f1-84ce4e35df00", "cf5f8dc4-ed66-4970-fdf1-4ab686a96c00",
     "1e53840f-942c-4779-a7c7-d944ef8e6600", "b9456802-bc45-454e-76d1-bfa9068aa400", "41fc3e38-c116-4411-b231-a5fe01fd0000",
@@ -311,7 +291,7 @@ async function insertAlbumsTree() {
       slug: album.slug,
       path: album.path,
       parentId: album.parentPath ? insertedByPath.get(album.parentPath)! : null,
-      coverUrl: album.coverUrl,
+      coverCloudflareId: album.coverCloudflareId,
       objectPosition: album.objectPosition ?? "center",
       sortOrder: album.sortOrder ?? 0,
     }));
@@ -344,15 +324,13 @@ async function seed() {
     await db.insert(photos).values(
       photosData.map((photo) => {
         const albumId = albumIdByPath.get(photo.albumPath);
-
         if (!albumId) {
           throw new Error(`Album not found for photo: ${photo.albumPath}`);
         }
-
         return {
           albumId,
           name: photo.name,
-          cloudflareUrl: photo.cloudflareUrl,
+          cloudflareId: photo.cloudflareId,
           objectPosition: photo.objectPosition ?? "center",
           sortOrder: photo.sortOrder ?? 0,
         };
