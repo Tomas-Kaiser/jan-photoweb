@@ -36,14 +36,12 @@ export default async function LocaleLayout(props: {
         (session.user as { role?: string }).role === "admin";
 
     return (
-        <html lang={locale}>
-            <body className={`${geistSans.variable} ${geistMono.variable}`}>
-                <NextIntlClientProvider locale={locale} messages={messages}>
-                    <NavBar isAdmin={isAdmin} />
-                    {props.children}
-                    <Footer />
-                </NextIntlClientProvider>
-            </body>
-        </html>
+        <div className={`${geistSans.variable} ${geistMono.variable}`}>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+                <NavBar isAdmin={isAdmin} />
+                {props.children}
+                <Footer />
+            </NextIntlClientProvider>
+        </div>
     );
 }
