@@ -98,7 +98,7 @@ export default function AddPhotosForm({ album }: Props) {
             }
 
             router.refresh();
-            router.push("/admin/albums");
+            router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong.");
         } finally {

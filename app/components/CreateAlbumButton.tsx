@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AddAlbumForm from "./AddAlbumForm";
+import AddPhotosForm from "./AddPhotosForm";
 
 type AlbumOption = {
     id: string;
@@ -23,14 +24,30 @@ type Props = {
     locale: string;
 };
 
+type Mode = "album" | "photos";
+
 export default function CreateAlbumButton({
     albums = [],
     fixedParent,
+    canAddPhotosToCurrentAlbum = false,
     iconOnly = true,
     locale,
 }: Props) {
     const [open, setOpen] = useState(false);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+    const defaultMode: Mode = useMemo(() => {
+        if (fixedParent && canAddPhotosToCurrentAlbum) return "photos";
+        return "album";
+    }, [fixedParent, canAddPhotosToCurrentAlbum]);
+
+    const [mode, setMode] = useState<Mode>(defaultMode);
+
+    useEffect(() => {
+        if (!open) {
+            setMode(defaultMode);
+        }
+    }, [open, defaultMode]);
 
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
@@ -49,13 +66,15 @@ export default function CreateAlbumButton({
         };
     }, [open]);
 
+    const canShowPhotoMode = !!fixedParent && canAddPhotosToCurrentAlbum;
+
     return (
         <>
             <button
                 type="button"
                 onClick={() => setOpen(true)}
-                aria-label="Create album"
-                title="Create album"
+                aria-label="Create album or add photos"
+                title="Create album or add photos"
                 className={
                     iconOnly
                         ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
@@ -63,7 +82,7 @@ export default function CreateAlbumButton({
                 }
             >
                 <span aria-hidden="true">＋</span>
-                {!iconOnly ? <span>Create</span> : null}
+                {!iconOnly ? <span>Add</span> : null}
             </button>
 
             {open ? (
@@ -85,11 +104,13 @@ export default function CreateAlbumButton({
                                         id="create-modal-title"
                                         className="text-xl font-bold text-gray-900"
                                     >
-                                        Create album
+                                        {mode === "album" ? "Create album" : "Add photos"}
                                     </h3>
 
                                     <p className="mt-1 text-sm text-gray-600">
-                                        Add a new album to your collection.
+                                        {mode === "album"
+                                            ? "Create a new album and optionally upload photos into it."
+                                            : "Upload photos directly into this album."}
                                     </p>
                                 </div>
 
@@ -105,11 +126,69 @@ export default function CreateAlbumButton({
                             </div>
 
                             <div className="min-h-0 overflow-y-auto px-6 py-5">
-                                <AddAlbumForm
-                                    albums={albums}
-                                    fixedParent={fixedParent}
-                                    locale={locale}
-                                />
+                                {canShowPhotoMode ? (
+                                    <fieldset className="mb-6">
+                                        <legend className="mb-3 text-sm font-medium text-gray-900">
+                                            Choose action
+                                        </legend>
+
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 p-4 transition hover:border-gray-400">
+                                                <input
+                                                    type="radio"
+                                                    name="create-mode"
+                                                    value="album"
+                                                    checked={mode === "album"}
+                                                    onChange={() => setMode("album")}
+                                                    className="mt-1"
+                                                />
+                                                <span>
+                                                    <span className="block text-sm font-semibold text-gray-900">
+                                                        Create new album
+                                                    </span>
+                                                    <span className="mt-1 block text-sm text-gray-600">
+                                                        Add a child album under this album, with a cover and optional photos.
+                                                    </span>
+                                                </span>
+                                            </label>
+
+                                            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 p-4 transition hover:border-gray-400">
+                                                <input
+                                                    type="radio"
+                                                    name="create-mode"
+                                                    value="photos"
+                                                    checked={mode === "photos"}
+                                                    onChange={() => setMode("photos")}
+                                                    className="mt-1"
+                                                />
+                                                <span>
+                                                    <span className="block text-sm font-semibold text-gray-900">
+                                                        Add photos only
+                                                    </span>
+                                                    <span className="mt-1 block text-sm text-gray-600">
+                                                        Upload photos directly into the current album without creating a new one.
+                                                    </span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </fieldset>
+                                ) : null}
+
+                                {mode === "album" ? (
+                                    <AddAlbumForm
+                                        albums={albums}
+                                        fixedParent={fixedParent}
+                                        locale={locale}
+                                    />
+                                ) : fixedParent ? (
+                                    <AddPhotosForm
+                                        album={{
+                                            id: fixedParent.id,
+                                            name: fixedParent.name,
+                                            path: fixedParent.path,
+                                        }}
+                                    />
+                                ) : null}
                             </div>
                         </div>
                     </div>
