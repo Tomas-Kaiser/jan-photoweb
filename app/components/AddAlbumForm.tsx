@@ -52,17 +52,17 @@ export default function AddAlbumForm({
 
     const effectiveParentId = fixedParent?.id ?? parentId;
 
+    const generatedSlug = useMemo(() => slugify(name), [name]);
+
+    const selectedParent = useMemo(() => {
+        if (fixedParent) return fixedParent;
+        return albums.find((album) => album.id === effectiveParentId);
+    }, [albums, effectiveParentId, fixedParent]);
+
     const generatedPath = useMemo(() => {
-        const generatedSlug = slugify(name);
         if (!generatedSlug) return "";
-
-        if (fixedParent) {
-            return `${fixedParent.path}/${generatedSlug}`;
-        }
-
-        const parent = albums.find((album) => album.id === parentId);
-        return parent ? `${parent.path}/${generatedSlug}` : generatedSlug;
-    }, [albums, fixedParent, name, parentId]);
+        return selectedParent ? `${selectedParent.path}/${generatedSlug}` : generatedSlug;
+    }, [generatedSlug, selectedParent]);
 
     async function requestUploadUrl(): Promise<DirectUploadResponse> {
         const res = await fetch("/api/admin/photos/upload-url", {
@@ -185,7 +185,10 @@ export default function AddAlbumForm({
                     id="name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                        setName(e.target.value);
+                        if (error) setError(null);
+                    }}
                     disabled={saving}
                     className="w-full rounded-xl border border-gray-300 px-3 py-2.5"
                     placeholder="Summer wedding"
@@ -215,12 +218,23 @@ export default function AddAlbumForm({
                 </div>
             ) : null}
 
-            <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Path preview
-                </label>
-                <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
-                    {generatedPath || "Path will be generated from the album name"}
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                <p className="mb-2 text-sm font-medium text-gray-700">Live preview</p>
+
+                <div className="space-y-2 text-sm">
+                    <div>
+                        <span className="font-medium text-gray-600">Slug:</span>{" "}
+                        <span className="text-gray-900">
+                            {generatedSlug || "Will be generated while you type"}
+                        </span>
+                    </div>
+
+                    <div>
+                        <span className="font-medium text-gray-600">Path:</span>{" "}
+                        <span className="break-all text-gray-900">
+                            {generatedPath || "Path preview will appear while you type the album name"}
+                        </span>
+                    </div>
                 </div>
             </div>
 

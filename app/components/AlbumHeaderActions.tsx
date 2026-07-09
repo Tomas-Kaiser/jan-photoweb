@@ -126,41 +126,40 @@ export default function AlbumHeaderActions({
 
                 {isAdmin ? (
                     <div className="flex items-center gap-2">
-                        <CreateAlbumButton
-                            albums={albums}
-                            fixedParent={{
-                                id: albumId,
-                                name: albumName,
-                                path: albumPath,
-                            }}
-                            canAddPhotosToCurrentAlbum={!hasSubalbums}
-                            locale={locale}
-                        />
-
                         {!isEditing ? (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsEditing(true);
-                                    setMessage("");
-                                }}
-                                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
-                                aria-label="Edit album name"
-                                title="Edit album name"
-                            >
-                                <span aria-hidden="true">✏️</span>
-                            </button>
-                        ) : (
                             <>
                                 <button
                                     type="button"
-                                    onClick={handleCancel}
-                                    disabled={saving}
-                                    className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500 disabled:opacity-50"
+                                    onClick={() => {
+                                        setIsEditing(true);
+                                        setMessage("");
+                                    }}
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
+                                    aria-label="Edit album name"
+                                    title="Edit album name"
                                 >
-                                    Cancel
+                                    <span aria-hidden="true">✏️</span>
                                 </button>
+                                <CreateAlbumButton
+                                    albums={albums}
+                                    fixedParent={{
+                                        id: albumId,
+                                        name: albumName,
+                                        path: albumPath,
+                                    }}
+                                    canAddPhotosToCurrentAlbum={!hasSubalbums}
+                                    locale={locale}
+                                />
 
+                                <DeleteAlbumButton
+                                    albumId={albumId}
+                                    albumName={albumName}
+                                    redirectTo={`/${locale}/albums`}
+                                    iconOnly
+                                />
+                            </>
+                        ) : (
+                            <>
                                 <button
                                     type="button"
                                     onClick={handleSave}
@@ -169,15 +168,16 @@ export default function AlbumHeaderActions({
                                 >
                                     {saving ? "Saving..." : "Save"}
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={handleCancel}
+                                    disabled={saving}
+                                    className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500 disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
                             </>
                         )}
-
-                        <DeleteAlbumButton
-                            albumId={albumId}
-                            albumName={albumName}
-                            redirectTo={`/${locale}/albums`}
-                            iconOnly
-                        />
                     </div>
                 ) : null}
             </div>
