@@ -8,6 +8,7 @@ import { albums, photos } from "@/app/db/schema";
 import PhotoGrid from "../PhotoGrid";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
+import CreateAlbumButton from "@/app/components/CreateAlbumButton";
 
 type Props = {
     params: Promise<{
@@ -24,6 +25,15 @@ const AlbumsPage = async ({ params }: Props) => {
     const isAdmin =
         !!session?.user &&
         (session.user as { role?: string }).role === "admin";
+
+    const allAlbums = await db
+        .select({
+            id: albums.id,
+            name: albums.name,
+            path: albums.path,
+        })
+        .from(albums)
+        .orderBy(asc(albums.path));
 
     if (!path) {
         const rootAlbums = await db
@@ -43,9 +53,20 @@ const AlbumsPage = async ({ params }: Props) => {
         return (
             <section className="pb-10 pt-10">
                 <div className="px-4 text-center">
-                    <h2 className="mb-2 text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
-                        Albums
-                    </h2>
+                    <div className="flex items-center justify-center gap-3">
+                        <h2 className="mb-2 text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
+                            Albums
+                        </h2>
+
+                        {isAdmin ? (
+                            <CreateAlbumButton
+                                albums={allAlbums}
+                                locale={locale}
+                                iconOnly
+                            />
+                        ) : null}
+                    </div>
+
                     <p className="text-lg italic text-gray-600">
                         Browse all album collections
                     </p>
@@ -108,12 +129,6 @@ const AlbumsPage = async ({ params }: Props) => {
     const hasChildren = childAlbumCards.length > 0;
     const hasPhotos = photoList.length > 0;
 
-    const albumOptions = childAlbums.map((child) => ({
-        id: child.id,
-        name: child.name,
-        path: child.path,
-    }));
-
     return (
         <section className="pb-10 pt-10">
             <div className="px-4 text-center">
@@ -122,7 +137,7 @@ const AlbumsPage = async ({ params }: Props) => {
                     albumName={album.name}
                     albumPath={album.path}
                     isAdmin={isAdmin}
-                    albums={albumOptions}
+                    albums={allAlbums}
                     hasSubalbums={hasChildren}
                     locale={locale}
                 />
