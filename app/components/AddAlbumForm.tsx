@@ -216,7 +216,13 @@ export default function AddAlbumForm({
                         ))}
                     </select>
                 </div>
-            ) : null}
+            ) : (
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                    <p className="text-sm font-medium text-gray-700">Parent album</p>
+                    <p className="mt-1 text-sm text-gray-900">{fixedParent.name}</p>
+                    <p className="mt-1 break-all text-sm text-gray-500">{fixedParent.path}</p>
+                </div>
+            )}
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                 <p className="mb-2 text-sm font-medium text-gray-700">Live preview</p>
@@ -242,28 +248,109 @@ export default function AddAlbumForm({
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                     Cover image
                 </label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    disabled={saving}
-                    onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
-                    className="block w-full text-sm text-gray-700"
-                    required
-                />
+
+                <label
+                    htmlFor="coverFile"
+                    className="group block cursor-pointer rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5 transition hover:border-gray-500 hover:bg-gray-100 focus-within:border-gray-900 focus-within:ring-4 focus-within:ring-gray-200"
+                >
+                    <input
+                        id="coverFile"
+                        type="file"
+                        accept="image/*"
+                        disabled={saving}
+                        onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+                        className="sr-only"
+                        required
+                    />
+
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-lg text-gray-700">
+                            🖼️
+                        </div>
+
+                        <div className="min-w-0 text-center">
+                            <div className="text-sm font-semibold text-gray-900">
+                                {coverFile ? "Change cover image" : "Choose cover image"}
+                            </div>
+
+                            <div className="mt-1 text-sm text-gray-600">
+                                Click to browse and select the album cover.
+                            </div>
+
+                            <div className="mt-2 text-sm text-gray-500">
+                                {coverFile ? (
+                                    <span className="break-all font-medium text-gray-800">
+                                        {coverFile.name}
+                                    </span>
+                                ) : (
+                                    "PNG, JPG, WEBP and other image formats supported."
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </label>
             </div>
 
             <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                     Additional photos
                 </label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    disabled={saving}
-                    onChange={(e) => setPhotoFiles(Array.from(e.target.files ?? []))}
-                    className="block w-full text-sm text-gray-700"
-                />
+
+                <label
+                    htmlFor="photoFiles"
+                    className="group block cursor-pointer rounded-2xl border border-dashed border-gray-300 bg-white p-5 transition hover:border-gray-500 hover:bg-gray-50 focus-within:border-gray-900 focus-within:ring-4 focus-within:ring-gray-200"
+                >
+                    <input
+                        id="photoFiles"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={saving}
+                        onChange={(e) => setPhotoFiles(Array.from(e.target.files ?? []))}
+                        className="sr-only"
+                    />
+
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-gray-50 text-lg text-gray-700">
+                            ⬆️
+                        </div>
+
+                        <div className="min-w-0 text-center">
+                            <div className="text-sm font-semibold text-gray-900">
+                                {photoFiles.length > 0 ? "Change selected photos" : "Choose additional photos"}
+                            </div>
+
+                            <div className="mt-1 text-sm text-gray-600">
+                                Select one or many photos to upload into this album.
+                            </div>
+
+                            <div className="mt-2 text-sm text-gray-500">
+                                {photoFiles.length > 0 ? (
+                                    <span className="font-medium text-gray-800">
+                                        {photoFiles.length} file{photoFiles.length > 1 ? "s" : ""} selected
+                                    </span>
+                                ) : (
+                                    "You can select multiple image files at once."
+                                )}
+                            </div>
+
+                            {photoFiles.length > 0 ? (
+                                <ul className="mt-3 space-y-1 text-center text-sm text-gray-600">
+                                    {photoFiles.slice(0, 5).map((file) => (
+                                        <li key={`${file.name}-${file.size}`} className="truncate">
+                                            {file.name}
+                                        </li>
+                                    ))}
+                                    {photoFiles.length > 5 ? (
+                                        <li className="text-gray-500">
+                                            + {photoFiles.length - 5} more
+                                        </li>
+                                    ) : null}
+                                </ul>
+                            ) : null}
+                        </div>
+                    </div>
+                </label>
             </div>
 
             {error ? (
