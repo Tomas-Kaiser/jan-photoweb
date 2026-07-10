@@ -15,6 +15,13 @@
       "when": 1783461381960,
       "tag": "0001_high_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783712764286,
+      "tag": "0002_wealthy_nebula",
+      "breakpoints": true
     }
   ]
 }
