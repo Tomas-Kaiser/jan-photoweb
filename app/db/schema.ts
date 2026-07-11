@@ -1,5 +1,6 @@
 import {
     pgTable,
+    pgEnum,
     uuid,
     text,
     integer,
@@ -9,6 +10,11 @@ import {
     foreignKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+export const photoVisibilityEnum = pgEnum("photo_visibility", [
+    "public",
+    "highlights_only",
+]);
 
 export const albums = pgTable(
     "albums",
@@ -31,9 +37,7 @@ export const albums = pgTable(
         }).onDelete("cascade"),
 
         uniqueIndex("albums_path_unique").on(table.path),
-
         uniqueIndex("albums_parent_slug_unique").on(table.parentId, table.slug),
-
         index("albums_parent_id_idx").on(table.parentId),
         index("albums_sort_order_idx").on(table.sortOrder),
     ]
@@ -47,6 +51,7 @@ export const photos = pgTable(
         name: text("name"),
         cloudflareId: text("cloudflare_id").notNull(),
         objectPosition: text("object_position").default("center").notNull(),
+        visibility: photoVisibilityEnum("visibility").default("public").notNull(),
         sortOrder: integer("sort_order").default(0).notNull(),
         createdAt: timestamp("created_at").defaultNow().notNull(),
     },
@@ -59,6 +64,27 @@ export const photos = pgTable(
 
         index("photos_album_id_idx").on(table.albumId),
         index("photos_sort_order_idx").on(table.sortOrder),
+        index("photos_visibility_idx").on(table.visibility),
+    ]
+);
+
+export const portfolioHighlights = pgTable(
+    "portfolio_highlights",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        photoId: uuid("photo_id").notNull(),
+        sortOrder: integer("sort_order").default(0).notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.photoId],
+            foreignColumns: [photos.id],
+            name: "portfolio_highlights_photo_id_fkey",
+        }).onDelete("cascade"),
+
+        uniqueIndex("portfolio_highlights_photo_id_unique").on(table.photoId),
+        index("portfolio_highlights_sort_order_idx").on(table.sortOrder),
     ]
 );
 
@@ -74,9 +100,17 @@ export const albumsRelations = relations(albums, ({ one, many }) => ({
     photos: many(photos),
 }));
 
-export const photosRelations = relations(photos, ({ one }) => ({
+export const photosRelations = relations(photos, ({ one, many }) => ({
     album: one(albums, {
         fields: [photos.albumId],
         references: [albums.id],
+    }),
+    portfolioHighlights: many(portfolioHighlights),
+}));
+
+export const portfolioHighlightsRelations = relations(portfolioHighlights, ({ one }) => ({
+    photo: one(photos, {
+        fields: [portfolioHighlights.photoId],
+        references: [photos.id],
     }),
 }));

@@ -6,7 +6,7 @@ dotenv.config({ path: ".env" });
 
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { albums, photos } from "./schema";
+import { albums, photos, portfolioHighlights } from "./schema";
 
 const connectionString =
   process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -52,12 +52,15 @@ const albumsData: AlbumSeed[] = [
   { name: "Still in Style", slug: "still-in-style", path: "fashion-and-editorials/still-in-style", parentPath: "fashion-and-editorials", coverCloudflareId: "6bd5f04a-5de2-4104-10da-daf20cee9300", objectPosition: "top", sortOrder: 1 },
 ];
 
+type PhotoVisibility = "public" | "highlights_only";
+
 type PhotoSeed = {
   albumPath: string;
   name: string;
   cloudflareId: string;
   objectPosition?: string;
   sortOrder?: number;
+  visibility?: PhotoVisibility;
 };
 
 const p = (
@@ -65,14 +68,17 @@ const p = (
   name: string,
   id: string,
   pos = "top",
-  i = 0
+  i = 0,
+  visibility: PhotoVisibility = "public"
 ): PhotoSeed => ({
   albumPath,
   name,
   cloudflareId: id,
   objectPosition: pos,
   sortOrder: i,
+  visibility,
 });
+
 
 const photosData: PhotoSeed[] = [
   ...([
@@ -314,25 +320,60 @@ async function insertAlbumsTree() {
   return insertedByPath;
 }
 
+const portfolioHighlightsData = [
+  { cloudflareId: "c8f6475c-9150-4838-32c6-3ebeb7515400", sortOrder: 0 },
+  { cloudflareId: "9682c2cf-bda1-4f8f-a30b-1765f7e9e700", sortOrder: 1 },
+  { cloudflareId: "24fd4078-288b-4461-c3f1-3086762dc700", sortOrder: 2 },
+];
+
 async function seed() {
   try {
+    await db.delete(portfolioHighlights);
     await db.delete(photos);
     await db.delete(albums);
 
     const albumIdByPath = await insertAlbumsTree();
 
-    await db.insert(photos).values(
-      photosData.map((photo) => {
-        const albumId = albumIdByPath.get(photo.albumPath);
-        if (!albumId) {
-          throw new Error(`Album not found for photo: ${photo.albumPath}`);
+    const insertedPhotos = await db
+      .insert(photos)
+      .values(
+        photosData.map((photo) => {
+          const albumId = albumIdByPath.get(photo.albumPath);
+          if (!albumId) {
+            throw new Error(`Album not found for photo: ${photo.albumPath}`);
+          }
+          return {
+            albumId,
+            name: photo.name,
+            cloudflareId: photo.cloudflareId,
+            objectPosition: photo.objectPosition ?? "center",
+            visibility: photo.visibility ?? "public",
+            sortOrder: photo.sortOrder ?? 0,
+          };
+        })
+      )
+      .returning({
+        id: photos.id,
+        cloudflareId: photos.cloudflareId,
+      });
+
+    const photoIdByCloudflareId = new Map(
+      insertedPhotos.map((photo) => [photo.cloudflareId, photo.id])
+    );
+
+    await db.insert(portfolioHighlights).values(
+      portfolioHighlightsData.map(({ cloudflareId, sortOrder }) => {
+        const photoId = photoIdByCloudflareId.get(cloudflareId);
+
+        if (!photoId) {
+          throw new Error(
+            `Portfolio highlight photo not found: ${cloudflareId}`
+          );
         }
+
         return {
-          albumId,
-          name: photo.name,
-          cloudflareId: photo.cloudflareId,
-          objectPosition: photo.objectPosition ?? "center",
-          sortOrder: photo.sortOrder ?? 0,
+          photoId,
+          sortOrder,
         };
       })
     );
