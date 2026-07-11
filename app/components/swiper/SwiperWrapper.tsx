@@ -9,17 +9,26 @@ import {
   Pagination,
   Navigation,
 } from "swiper/modules";
-import styles from "./SwiperWrapper.module.css"
+import styles from "./SwiperWrapper.module.css";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
+interface PortfolioHighlightPhoto {
+  id: string;
+  cardSrc: string;
+  fullSrc: string;
+  alt: string;
+  objectPosition?: string;
+}
+
 interface Props {
-  photos: string[];
+  photos: PortfolioHighlightPhoto[];
 }
 
 const SwiperWrapper = ({ photos }: Props) => {
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] =
+    useState<PortfolioHighlightPhoto | null>(null);
 
   return (
     <>
@@ -44,22 +53,23 @@ const SwiperWrapper = ({ photos }: Props) => {
         modules={[EffectCoverflow, Autoplay, Navigation, Pagination]}
         className={`${styles.photoSwiper} mx-auto w-full max-w-6xl`}
       >
-        {photos.map((src, index) => (
+        {photos.map((photo, index) => (
           <SwiperSlide
-            key={index}
+            key={photo.id}
             className="!w-[220px] sm:!w-[280px] lg:!w-[320px]"
           >
             <button
               type="button"
-              onClick={() => setSelectedPhoto(src)}
+              onClick={() => setSelectedPhoto(photo)}
               className="block w-full cursor-pointer overflow-hidden rounded-xl"
             >
-              <div className="relative h-[280px] sm:h-[340px] lg:h-[420px] w-full overflow-hidden rounded-xl">
+              <div className="relative h-[280px] w-full overflow-hidden rounded-xl sm:h-[340px] lg:h-[420px]">
                 <Image
-                  src={src}
-                  alt={`Photo ${index + 1}`}
+                  src={photo.cardSrc}
+                  alt={photo.alt || `Photo ${index + 1}`}
                   fill
                   className="object-cover"
+                  style={{ objectPosition: photo.objectPosition ?? "center" }}
                   sizes="(max-width: 640px) 220px, (max-width: 1024px) 280px, 320px"
                 />
               </div>
@@ -85,8 +95,8 @@ const SwiperWrapper = ({ photos }: Props) => {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={selectedPhoto}
-              alt="Enlarged"
+              src={selectedPhoto.fullSrc}
+              alt={selectedPhoto.alt}
               fill
               className="rounded-lg object-contain"
               sizes="90vw"
