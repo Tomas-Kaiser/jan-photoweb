@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 import HeroImage from "../components/HeroImage";
-import SwiperWrapper from "../components/SwiperWrapper";
+import SwiperWrapper from "../components/swiper/SwiperWrapper";
 import GoogleReviews from "../components/GoogleReviews";
 
 type ObjectPosition = {
@@ -78,7 +78,7 @@ export default function Home() {
             <div className="flex justify-center ">
               <div className="block md:w-1/2 lg:hidden mb-6">
                 <Image
-                  src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
+                  src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
                   alt="Jan Hajek"
                   width={600}
                   height={800}
@@ -101,7 +101,7 @@ export default function Home() {
           {/* Photo for desktop view */}
           <div className="w-full lg:w-1/2 hidden lg:block order-2 lg:order-1">
             <Image
-              src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
+              src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
               alt="Jan Hajek"
               width={600}
               height={800}

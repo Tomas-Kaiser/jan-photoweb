@@ -1,0 +1,42 @@
+.photoSwiper {
+    --swiper-navigation-color: #fff;
+    --swiper-pagination-color: #fff;
+}
+
+.photoSwiper :global(.swiper-button-prev),
+.photoSwiper :global(.swiper-button-next) {
+    color: #fff !important;
+}
+
+.photoSwiper :global(.swiper-button-prev::after),
+.photoSwiper :global(.swiper-button-next::after) {
+    color: #fff !important;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.photoSwiper :global(.swiper-pagination) {
+    width: fit-content !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 6px 10px;
+    border-radius: 9999px;
+    background: rgba(207, 189, 189, 0.28);
+    backdrop-filter: blur(6px);
+}
+
+.photoSwiper :global(.swiper-pagination-bullet-active) {
+    background: #fff !important;
+}
+
+@media (max-width: 499px) {
+    .photoSwiper :global(.swiper-pagination) {
+        display: none !important;
+    }
+}
