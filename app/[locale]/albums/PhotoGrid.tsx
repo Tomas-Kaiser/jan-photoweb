@@ -28,13 +28,18 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
 
+  const toFullVariant = (src: string) => {
+    const cleanSrc = src.split("?")[0];
+    return cleanSrc.replace(/\/[^/]+$/, "/full");
+  };
+
   const lightboxItems = useMemo(
     () => photos.filter((photo) => !photo.href),
     [photos]
   );
 
   const slides = lightboxItems.map((photo) => ({
-    src: photo.imgSrc,
+    src: toFullVariant(photo.imgSrc),
   }));
 
   const getGridColsClass = (count: number) => {
