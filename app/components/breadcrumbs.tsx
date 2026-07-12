@@ -1,15 +1,18 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 export type BreadcrumbItem = {
     label: string;
     href?: string;
+    translate?: boolean;
 };
 
 type Props = {
     items?: BreadcrumbItem[] | null;
 };
 
-export default function Breadcrumbs(props: Props) {
+export default async function Breadcrumbs(props: Props) {
+    const t = await getTranslations("common");
     const items = Array.isArray(props?.items) ? props.items : [];
 
     if (items.length === 0) return null;
@@ -19,13 +22,14 @@ export default function Breadcrumbs(props: Props) {
             <ul>
                 {items.map((item, index) => {
                     const isLast = index === items.length - 1;
+                    const label = item.translate ? t(item.label) : item.label;
 
                     return (
                         <li key={`${item.label}-${item.href ?? index}`}>
                             {item.href && !isLast ? (
-                                <Link href={item.href}>{item.label}</Link>
+                                <Link href={item.href}>{label}</Link>
                             ) : (
-                                <span>{item.label}</span>
+                                <span>{label}</span>
                             )}
                         </li>
                     );

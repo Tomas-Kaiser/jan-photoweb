@@ -1,6 +1,7 @@
 {
   "welcome": "Welcome to my app",
   "common": {
+    "home": "Home",
     "albums": "Albums",
     "about": "About",
     "contact": "Contact",
@@ -29,7 +30,9 @@
   },
   "albums": {
     "heading": "Explore Our Signature Albums",
-    "text": "Each collection below captures a unique story, mood, and moment. Browse through to discover the artistry behind every frame."
+    "text": "Each collection below captures a unique story, mood, and moment. Browse through to discover the artistry behind every frame.",
+    "subalbums": "Subalbums",
+    "noContent": "No content yet."
   },
   "aboutMe": {
     "heading": "About Me",

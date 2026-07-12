@@ -10,6 +10,7 @@ import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
 import CreateAlbumButton from "@/app/components/CreateAlbumButton";
 import Breadcrumbs, { BreadcrumbItem } from "@/app/components/breadcrumbs";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
     params: Promise<{
@@ -19,6 +20,7 @@ type Props = {
 };
 
 const AlbumsPage = async ({ params }: Props) => {
+    const t = await getTranslations("albums");
     const { locale, slug } = await params;
     const path = slug?.join("/") ?? null;
 
@@ -52,8 +54,8 @@ const AlbumsPage = async ({ params }: Props) => {
         }));
 
         const breadcrumbItems: BreadcrumbItem[] = [
-            { label: "Home", href: `/${locale}` },
-            { label: "Albums" },
+            { label: "home", href: `/${locale}`, translate: true },
+            { label: "albums", translate: true },
         ];
 
         return (
@@ -65,7 +67,7 @@ const AlbumsPage = async ({ params }: Props) => {
 
                     <div className="flex items-center justify-center gap-3">
                         <h2 className="mb-2 text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
-                            Albums
+                            {t('heading')}
                         </h2>
 
                         {isAdmin ? (
@@ -78,7 +80,7 @@ const AlbumsPage = async ({ params }: Props) => {
                     </div>
 
                     <p className="text-lg italic text-gray-600">
-                        Browse all album collections
+                        {t('text')}
                     </p>
                 </div>
 
@@ -139,12 +141,18 @@ const AlbumsPage = async ({ params }: Props) => {
     const hasChildren = childAlbumCards.length > 0;
     const hasPhotos = photoList.length > 0;
 
+    const formatSlugLabel = (value: string) =>
+        value
+            .split("-")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" ");
+
     const slugParts = slug ?? [];
     const breadcrumbItems: BreadcrumbItem[] = [
-        { label: "Home", href: `/${locale}` },
-        { label: "Albums", href: `/${locale}/albums` },
+        { label: "home", href: `/${locale}`, translate: true },
+        { label: "albums", href: `/${locale}/albums`, translate: true },
         ...slugParts.map((segment, index) => ({
-            label: index === slugParts.length - 1 ? album.name : segment,
+            label: index === slugParts.length - 1 ? album.name : formatSlugLabel(segment),
             href:
                 index === slugParts.length - 1
                     ? undefined
@@ -175,19 +183,14 @@ const AlbumsPage = async ({ params }: Props) => {
             {hasChildren ? (
                 <>
                     <div className="mb-6 px-4 text-center">
-                        <h3 className="text-2xl font-bold text-gray-900">Subalbums</h3>
+                        <h3 className="text-2xl font-bold text-gray-900">{t('subalbums')}</h3>
                     </div>
                     <PhotoGrid photos={childAlbumCards} />
                 </>
             ) : null}
 
             {hasPhotos ? (
-                <>
-                    <div className="mb-6 mt-10 px-4 text-center">
-                        <h3 className="text-2xl font-bold text-gray-900">Photos</h3>
-                    </div>
-                    <PhotoGrid photos={photoList} isAdmin={isAdmin} />
-                </>
+                <PhotoGrid photos={photoList} isAdmin={isAdmin} />
             ) : null}
 
             {!hasChildren && !hasPhotos ? (
