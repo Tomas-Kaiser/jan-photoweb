@@ -9,6 +9,7 @@ import PhotoGrid from "../PhotoGrid";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
 import CreateAlbumButton from "@/app/components/CreateAlbumButton";
+import Breadcrumbs, { BreadcrumbItem } from "@/app/components/breadcrumbs";
 
 type Props = {
     params: Promise<{
@@ -50,9 +51,18 @@ const AlbumsPage = async ({ params }: Props) => {
             href: `/${locale}/albums/${album.path}`,
         }));
 
+        const breadcrumbItems: BreadcrumbItem[] = [
+            { label: "Home", href: `/${locale}` },
+            { label: "Albums" },
+        ];
+
         return (
             <section className="pb-10 pt-10">
                 <div className="px-4 text-center">
+                    <div className="mx-auto mb-4 flex max-w-5xl">
+                        <Breadcrumbs items={breadcrumbItems} />
+                    </div>
+
                     <div className="flex items-center justify-center gap-3">
                         <h2 className="mb-2 text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
                             Albums
@@ -129,9 +139,26 @@ const AlbumsPage = async ({ params }: Props) => {
     const hasChildren = childAlbumCards.length > 0;
     const hasPhotos = photoList.length > 0;
 
+    const slugParts = slug ?? [];
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Home", href: `/${locale}` },
+        { label: "Albums", href: `/${locale}/albums` },
+        ...slugParts.map((segment, index) => ({
+            label: index === slugParts.length - 1 ? album.name : segment,
+            href:
+                index === slugParts.length - 1
+                    ? undefined
+                    : `/${locale}/albums/${slugParts.slice(0, index + 1).join("/")}`,
+        })),
+    ];
+
     return (
         <section className="pb-10 pt-10">
             <div className="px-4 text-center">
+                <div className="mx-auto mb-4 flex max-w-5xl text-left">
+                    <Breadcrumbs items={breadcrumbItems} />
+                </div>
+
                 <AlbumHeaderActions
                     albumId={album.id}
                     albumName={album.name}
