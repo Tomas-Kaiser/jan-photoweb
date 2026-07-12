@@ -50,6 +50,30 @@ const NavBar = ({ isAdmin }: Props) => {
             className="text-black"
           />
         </a>
+
+        <ul className="flex items-center gap-2">
+          {isAdmin ? (
+            <>
+              <li>
+                <Link
+                  href="/admin"
+                  className="block rounded-lg bg-green-100 px-3 py-2 cursor-pointer"
+                >
+                  Admin
+                </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-lg bg-green-100 px-3 py-2 cursor-pointer"
+                  onClick={() => signOut({ callbackUrl: `/${locale}` })}
+                >
+                  Logout
+                </button>
+              </li>
+            </>
+          ) : null}
+        </ul>
       </div>
 
       <div className="navbar-center lg:flex">
@@ -69,17 +93,6 @@ const NavBar = ({ isAdmin }: Props) => {
           <li>
             <Link href="/contact">{t("contact")}</Link>
           </li>
-
-          {isAdmin ? (
-            <li>
-              <button
-                type="button"
-                onClick={() => signOut({ callbackUrl: `/${locale}` })}
-              >
-                Logout
-              </button>
-            </li>
-          ) : null}
         </ul>
 
         <div className="hidden lg:flex">
