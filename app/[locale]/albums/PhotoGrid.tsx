@@ -108,14 +108,16 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
           const isDeleting = deletingPhotoId === photo.id;
 
           const image = (
-            <Image
-              src={photo.imgSrc}
-              alt={photo.name ?? `Photo ${index + 1}`}
-              width={400}
-              height={300}
-              style={{ objectPosition: photo.objectPosition }}
-              className="h-[28rem] w-full object-cover transition-transform duration-300 hover:scale-105"
-            />
+            <div className="relative aspect-[3/4] w-full overflow-hidden bg-black">
+              <Image
+                src={photo.imgSrc}
+                alt={photo.name ?? `Photo ${index + 1}`}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
+                style={{ objectPosition: photo.objectPosition || "50% 35%" }}
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
           );
 
           if (photo.href) {
@@ -128,7 +130,7 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
                 <div className="relative overflow-hidden">
                   {image}
                   {photo.name ? (
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
                       <p className="text-sm font-medium">{photo.name}</p>
                     </div>
                   ) : null}
