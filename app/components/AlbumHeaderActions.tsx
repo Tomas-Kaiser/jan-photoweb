@@ -182,10 +182,6 @@ export default function AlbumHeaderActions({
                 ) : null}
             </div>
 
-            <p className="mt-2 text-lg italic text-gray-600 capitalize">
-                {albumPath.replaceAll("/", " / ")}
-            </p>
-
             {isEditing ? (
                 <p className="mt-2 text-xs text-gray-500">
                     Press Enter to save or Escape to cancel.
