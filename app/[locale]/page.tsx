@@ -56,7 +56,7 @@ export default async function Home() {
   const photos = highlightRows.map((row) => ({
     id: row.highlightId,
     cardSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/card`,
-    fullSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/public`,
+    fullSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/full`,
     alt: row.name ?? "Portfolio highlight",
     objectPosition: row.photoObjectPosition ?? "center",
   }));

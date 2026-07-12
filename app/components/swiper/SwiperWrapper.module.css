@@ -1,6 +1,19 @@
 .photoSwiper {
     --swiper-navigation-color: #fff;
     --swiper-pagination-color: #fff;
+    --swiper-pagination-bottom: 0px;
+
+    padding-bottom: 24px;
+}
+
+.photoSwiper :global(.swiper-wrapper) {
+    align-items: flex-start;
+}
+
+.photoSwiper :global(.swiper-slide) {
+    height: auto !important;
+    padding-bottom: 88px;
+    box-sizing: border-box;
 }
 
 .photoSwiper :global(.swiper-button-prev),
@@ -19,6 +32,7 @@
     width: fit-content !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
+    bottom: 0 !important;
 
     display: inline-flex !important;
     align-items: center;
@@ -36,6 +50,14 @@
 }
 
 @media (max-width: 499px) {
+    .photoSwiper {
+        padding-bottom: 12px;
+    }
+
+    .photoSwiper :global(.swiper-slide) {
+        padding-bottom: 20px;
+    }
+
     .photoSwiper :global(.swiper-pagination) {
         display: none !important;
     }

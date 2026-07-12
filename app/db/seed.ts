@@ -324,6 +324,9 @@ const portfolioHighlightsData = [
   { cloudflareId: "c8f6475c-9150-4838-32c6-3ebeb7515400", sortOrder: 0 },
   { cloudflareId: "9682c2cf-bda1-4f8f-a30b-1765f7e9e700", sortOrder: 1 },
   { cloudflareId: "24fd4078-288b-4461-c3f1-3086762dc700", sortOrder: 2 },
+  { cloudflareId: "3eef17ee-9681-4644-5fcd-1460f61bf900", sortOrder: 3 },
+  { cloudflareId: "02040a24-6d16-4911-01fb-69023ed59600", sortOrder: 4 },
+  { cloudflareId: "9b2e25e6-c475-4fee-d092-5a25d941a400", sortOrder: 5 },
 ];
 
 async function seed() {

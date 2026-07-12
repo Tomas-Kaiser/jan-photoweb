@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
@@ -14,7 +14,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-interface PortfolioHighlightPhoto {
+export interface PortfolioHighlightPhoto {
   id: string;
   cardSrc: string;
   fullSrc: string;
@@ -24,11 +24,46 @@ interface PortfolioHighlightPhoto {
 
 interface Props {
   photos: PortfolioHighlightPhoto[];
+  isAdmin?: boolean;
+  onDelete?: (highlightId: string) => Promise<void>;
+  onMoveLeft?: (highlightId: string) => Promise<void>;
+  onMoveRight?: (highlightId: string) => Promise<void>;
 }
 
-const SwiperWrapper = ({ photos }: Props) => {
+const SwiperWrapper = ({
+  photos,
+  isAdmin = false,
+  onDelete,
+  onMoveLeft,
+  onMoveRight,
+}: Props) => {
   const [selectedPhoto, setSelectedPhoto] =
     useState<PortfolioHighlightPhoto | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = (highlightId: string) => {
+    if (!onDelete) return;
+
+    startTransition(async () => {
+      await onDelete(highlightId);
+    });
+  };
+
+  const handleMoveLeft = (highlightId: string) => {
+    if (!onMoveLeft) return;
+
+    startTransition(async () => {
+      await onMoveLeft(highlightId);
+    });
+  };
+
+  const handleMoveRight = (highlightId: string) => {
+    if (!onMoveRight) return;
+
+    startTransition(async () => {
+      await onMoveRight(highlightId);
+    });
+  };
 
   return (
     <>
@@ -58,22 +93,57 @@ const SwiperWrapper = ({ photos }: Props) => {
             key={photo.id}
             className="!w-[220px] sm:!w-[280px] lg:!w-[320px]"
           >
-            <button
-              type="button"
-              onClick={() => setSelectedPhoto(photo)}
-              className="block w-full cursor-pointer overflow-hidden rounded-xl"
-            >
-              <div className="relative h-[280px] w-full overflow-hidden rounded-xl sm:h-[340px] lg:h-[420px]">
-                <Image
-                  src={photo.cardSrc}
-                  alt={photo.alt || `Photo ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  style={{ objectPosition: photo.objectPosition ?? "center" }}
-                  sizes="(max-width: 640px) 220px, (max-width: 1024px) 280px, 320px"
-                />
+            {({ isActive }) => (
+              <div className="overflow-hidden rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPhoto(photo)}
+                  className="block w-full cursor-pointer overflow-hidden rounded-xl"
+                >
+                  <div className="relative h-[280px] w-full overflow-hidden rounded-xl sm:h-[340px] lg:h-[420px]">
+                    <Image
+                      src={photo.cardSrc}
+                      alt={photo.alt || `Photo ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      style={{ objectPosition: photo.objectPosition ?? "center" }}
+                      sizes="(max-width: 640px) 220px, (max-width: 1024px) 280px, 320px"
+                    />
+                  </div>
+                </button>
+
+                {isAdmin && isActive && (
+                  <div className="mt-3 flex flex-wrap justify-center gap-2 px-2 pb-2">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveLeft(photo.id)}
+                      disabled={isPending}
+                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {isPending ? "Working..." : "Move left"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleMoveRight(photo.id)}
+                      disabled={isPending}
+                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {isPending ? "Working..." : "Move right"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(photo.id)}
+                      disabled={isPending}
+                      className="rounded-lg bg-red-600 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {isPending ? "Working..." : "Remove"}
+                    </button>
+                  </div>
+                )}
               </div>
-            </button>
+            )}
           </SwiperSlide>
         ))}
       </Swiper>
@@ -84,6 +154,7 @@ const SwiperWrapper = ({ photos }: Props) => {
           onClick={() => setSelectedPhoto(null)}
         >
           <button
+            type="button"
             onClick={() => setSelectedPhoto(null)}
             className="absolute right-4 top-4 text-3xl font-bold text-white hover:cursor-pointer"
           >

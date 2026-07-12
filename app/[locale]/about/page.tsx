@@ -18,7 +18,7 @@ const AboutPage = () => {
                     {/* Photo appears after intro on mobile, beside text on desktop */}
                     <div className="block lg:hidden mb-6">
                         <Image
-                            src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
+                            src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/full"
                             alt="Jan Hajek"
                             width={600}
                             height={800}
@@ -42,7 +42,7 @@ const AboutPage = () => {
                 {/* Photo for desktop view */}
                 <div className="w-full lg:w-1/2 hidden lg:block order-2 lg:order-1">
                     <Image
-                        src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/public"
+                        src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/full"
                         alt="Jan Hajek"
                         width={600}
                         height={800}
