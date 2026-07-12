@@ -18,6 +18,9 @@ type Props = {
   isAdmin: boolean;
 };
 
+const adminButtonClass =
+  "rounded-lg bg-green-800 px-3 py-2 text-white transition hover:bg-green-900";
+
 const NavBar = ({ isAdmin }: Props) => {
   const t = useTranslations("common");
   const locale = useLocale();
@@ -51,29 +54,27 @@ const NavBar = ({ isAdmin }: Props) => {
           />
         </a>
 
-        <ul className="flex items-center gap-2">
-          {isAdmin ? (
-            <>
-              <li>
-                <Link
-                  href="/admin"
-                  className="block rounded-lg bg-green-100 px-3 py-2 cursor-pointer"
-                >
-                  Admin
-                </Link>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  className="inline-flex items-center rounded-lg bg-green-100 px-3 py-2 cursor-pointer"
-                  onClick={() => signOut({ callbackUrl: `/${locale}` })}
-                >
-                  Logout
-                </button>
-              </li>
-            </>
-          ) : null}
-        </ul>
+        {isAdmin ? (
+          <ul className="ml-2 hidden items-center gap-2 lg:flex">
+            <li>
+              <Link
+                href="/admin"
+                className={`block cursor-pointer ${adminButtonClass}`}
+              >
+                Admin Dashboard
+              </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={`inline-flex cursor-pointer items-center ${adminButtonClass}`}
+                onClick={() => signOut({ callbackUrl: `/${locale}` })}
+              >
+                Logout
+              </button>
+            </li>
+          </ul>
+        ) : null}
       </div>
 
       <div className="navbar-center lg:flex">
@@ -99,8 +100,8 @@ const NavBar = ({ isAdmin }: Props) => {
           <LanguageSwitcher />
         </div>
 
-        <div className="dropdown lg:hidden">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+        <div className="dropdown dropdown-end lg:hidden">
+          <div tabIndex={0} role="button" className="btn btn-ghost">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -119,7 +120,7 @@ const NavBar = ({ isAdmin }: Props) => {
 
           <ul
             tabIndex={0}
-            className="menu dropdown-content absolute right-0 z-50 mt-3 w-52 rounded-box bg-base-100 p-2 shadow"
+            className="menu dropdown-content z-50 mt-3 w-56 rounded-box bg-base-100 p-2 shadow"
           >
             <li>
               <Link href="/albums" onClick={blur}>
@@ -138,20 +139,39 @@ const NavBar = ({ isAdmin }: Props) => {
             </li>
 
             {isAdmin ? (
-              <li>
-                <button
-                  type="button"
-                  onClick={() => {
-                    blur();
-                    signOut({ callbackUrl: `/${locale}` });
-                  }}
-                >
-                  Logout
-                </button>
-              </li>
+              <>
+                <li className="menu-title text-center">
+                  <span>Admin Panel</span>
+                </li>
+                <li className="mt-1">
+                  <Link
+                    href="/admin"
+                    onClick={blur}
+                    className={adminButtonClass}
+                  >
+                    Admin Dashboard
+                  </Link>
+                </li>
+                <li className="mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      blur();
+                      signOut({ callbackUrl: `/${locale}` });
+                    }}
+                    className={adminButtonClass}
+                  >
+                    Logout
+                  </button>
+                </li>
+              </>
             ) : null}
 
-            <LanguageSwitcher />
+            <li className="mt-1">
+              <div className="px-2 py-1">
+                <LanguageSwitcher />
+              </div>
+            </li>
           </ul>
         </div>
       </div>
