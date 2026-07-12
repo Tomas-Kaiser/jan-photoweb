@@ -1,18 +1,29 @@
 .photoSwiper {
     --swiper-navigation-color: #fff;
     --swiper-pagination-color: #fff;
-    --swiper-pagination-bottom: 0px;
+}
 
+.photoSwiperPublic {
     padding-bottom: 24px;
+}
+
+.photoSwiperAdmin {
+    padding-bottom: 88px;
 }
 
 .photoSwiper :global(.swiper-wrapper) {
     align-items: flex-start;
 }
 
-.photoSwiper :global(.swiper-slide) {
+.photoSwiperPublic :global(.swiper-slide) {
     height: auto !important;
-    padding-bottom: 88px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.photoSwiperAdmin :global(.swiper-slide) {
+    height: auto !important;
+    padding-bottom: 48px;
     box-sizing: border-box;
 }
 
@@ -28,7 +39,24 @@
     font-weight: 700;
 }
 
-.photoSwiper :global(.swiper-pagination) {
+.photoSwiperPublic :global(.swiper-pagination) {
+    width: fit-content !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 20px !important;
+
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 6px 10px;
+    border-radius: 9999px;
+    background: rgba(207, 189, 189, 0.28);
+    backdrop-filter: blur(6px);
+}
+
+.photoSwiperAdmin :global(.swiper-pagination) {
     width: fit-content !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
@@ -50,11 +78,16 @@
 }
 
 @media (max-width: 499px) {
-    .photoSwiper {
+    .photoSwiperPublic {
         padding-bottom: 12px;
     }
 
-    .photoSwiper :global(.swiper-slide) {
+    .photoSwiperAdmin {
+        padding-bottom: 20px;
+    }
+
+    .photoSwiperPublic :global(.swiper-slide),
+    .photoSwiperAdmin :global(.swiper-slide) {
         padding-bottom: 20px;
     }
 

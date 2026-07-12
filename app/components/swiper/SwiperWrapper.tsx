@@ -86,7 +86,7 @@ const SwiperWrapper = ({
           scale: 0.94,
         }}
         modules={[EffectCoverflow, Autoplay, Navigation, Pagination]}
-        className={`${styles.photoSwiper} mx-auto w-full max-w-6xl`}
+        className={`${styles.photoSwiper} ${isAdmin ? styles.photoSwiperAdmin : styles.photoSwiperPublic} mx-auto w-full max-w-6xl`}
       >
         {photos.map((photo, index) => (
           <SwiperSlide
