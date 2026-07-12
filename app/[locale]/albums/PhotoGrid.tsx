@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
 
 type GridItem = {
   id?: string;
@@ -114,7 +115,7 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
                 alt={photo.name ?? `Photo ${index + 1}`}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
-                style={{ objectPosition: photo.objectPosition || "50% 35%" }}
+                style={{ objectPosition: normalizePhotoPosition(photo.objectPosition) }}
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>

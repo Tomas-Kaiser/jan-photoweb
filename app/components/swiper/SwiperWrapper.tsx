@@ -13,6 +13,7 @@ import styles from "./SwiperWrapper.module.css";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
 
 export interface PortfolioHighlightPhoto {
   id: string;
@@ -106,7 +107,7 @@ const SwiperWrapper = ({
                       alt={photo.alt || `Photo ${index + 1}`}
                       fill
                       className="object-cover"
-                      style={{ objectPosition: photo.objectPosition ?? "center" }}
+                      style={{ objectPosition: normalizePhotoPosition(photo.objectPosition) }}
                       sizes="(max-width: 640px) 220px, (max-width: 1024px) 280px, 320px"
                     />
                   </div>
