@@ -15,6 +15,19 @@ function slugify(value: string) {
         .replace(/^-|-$/g, "");
 }
 
+type DbLikeError = {
+    code?: string;
+    constraint?: string;
+    cause?: {
+        code?: string;
+        constraint?: string;
+    };
+};
+
+function isDbLikeError(error: unknown): error is DbLikeError {
+    return typeof error === "object" && error !== null;
+}
+
 export async function POST(req: Request) {
     try {
         const session = await auth();
@@ -93,11 +106,16 @@ export async function POST(req: Request) {
             { success: true, album: inserted[0] },
             { status: 201 }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("POST /api/admin/albums failed:", error);
 
-        const code = error?.code ?? error?.cause?.code;
-        const constraint = error?.constraint ?? error?.cause?.constraint;
+        const code = isDbLikeError(error)
+            ? error.code ?? error.cause?.code
+            : undefined;
+
+        const constraint = isDbLikeError(error)
+            ? error.constraint ?? error.cause?.constraint
+            : undefined;
 
         if (code === "23505" && constraint === "albums_path_unique") {
             return NextResponse.json(

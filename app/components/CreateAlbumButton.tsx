@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AddAlbumForm from "./AddAlbumForm";
 import AddPhotosForm from "./AddPhotosForm";
 
@@ -43,15 +43,19 @@ export default function CreateAlbumButton({
 
     const [mode, setMode] = useState<Mode>(defaultMode);
 
-    useEffect(() => {
-        if (!open) {
-            setMode(defaultMode);
-        }
-    }, [open, defaultMode]);
+    const handleOpen = useCallback(() => {
+        setMode(defaultMode);
+        setOpen(true);
+    }, [defaultMode]);
+
+    const handleClose = useCallback(() => {
+        setOpen(false);
+        setMode(defaultMode);
+    }, [defaultMode]);
 
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
-            if (e.key === "Escape") setOpen(false);
+            if (e.key === "Escape") handleClose();
         }
 
         if (open) {
@@ -64,7 +68,7 @@ export default function CreateAlbumButton({
             document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = "";
         };
-    }, [open]);
+    }, [open, handleClose]);
 
     const canShowPhotoMode = !!fixedParent && canAddPhotosToCurrentAlbum;
 
@@ -72,7 +76,7 @@ export default function CreateAlbumButton({
         <>
             <button
                 type="button"
-                onClick={() => setOpen(true)}
+                onClick={handleOpen}
                 aria-label="Create album or add photos"
                 title="Create album or add photos"
                 className={
@@ -88,7 +92,7 @@ export default function CreateAlbumButton({
             {open ? (
                 <div
                     className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4"
-                    onClick={() => setOpen(false)}
+                    onClick={handleClose}
                 >
                     <div className="flex min-h-full items-center justify-center">
                         <div
@@ -117,7 +121,7 @@ export default function CreateAlbumButton({
                                 <button
                                     ref={closeButtonRef}
                                     type="button"
-                                    onClick={() => setOpen(false)}
+                                    onClick={handleClose}
                                     aria-label="Close modal"
                                     className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
                                 >
