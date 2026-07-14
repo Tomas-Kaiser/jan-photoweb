@@ -268,7 +268,7 @@ const PhotoGrid = ({
             ) : null;
 
           const caption =
-            (isAdmin || photo.name) && photo.name ? (
+            (isAdmin && photo.name) && photo.name ? (
               <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
                 <p className="text-sm font-medium">
                   {photo.name}
