@@ -51,6 +51,7 @@ const AlbumsPage = async ({ params }: Props) => {
             imgSrc: getCloudflareImageUrl(album.coverCloudflareId, "card"),
             objectPosition: album.objectPosition ?? "center",
             href: `/${locale}/albums/${album.path}`,
+            sortOrder: album.sortOrder,
         }));
 
         const breadcrumbItems: BreadcrumbItem[] = [
@@ -67,27 +68,27 @@ const AlbumsPage = async ({ params }: Props) => {
 
                     <div className="flex items-center justify-center gap-3">
                         <h2 className="mb-2 text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
-                            {t('heading')}
+                            {t("heading")}
                         </h2>
 
                         {isAdmin ? (
-                            <CreateAlbumButton
-                                albums={allAlbums}
-                                locale={locale}
-                                iconOnly
-                            />
+                            <CreateAlbumButton albums={allAlbums} locale={locale} iconOnly />
                         ) : null}
                     </div>
 
-                    <p className="text-lg italic text-gray-600">
-                        {t('text')}
-                    </p>
+                    <p className="text-lg italic text-gray-600">{t("text")}</p>
                 </div>
 
                 <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
 
                 {rootAlbumPhotos.length ? (
-                    <PhotoGrid photos={rootAlbumPhotos} />
+                    <PhotoGrid
+                        photos={rootAlbumPhotos}
+                        isAdmin={isAdmin}
+                        reorderType="albums"
+                        reorderParentId={null}
+                        revalidatePaths={[`/${locale}/albums`]}
+                    />
                 ) : (
                     <div className="px-4 py-16 text-center text-gray-500">
                         No albums yet.
@@ -127,15 +128,18 @@ const AlbumsPage = async ({ params }: Props) => {
         imgSrc: getCloudflareImageUrl(child.coverCloudflareId, "card"),
         objectPosition: child.objectPosition ?? "center",
         href: `/${locale}/albums/${child.path}`,
+        sortOrder: child.sortOrder,
     }));
 
     const photoList = albumPhotos
         .filter((photo) => !!photo.cloudflareId)
         .map((photo) => ({
             id: photo.id,
+            albumId: photo.albumId,
             name: photo.name ?? album.name,
             imgSrc: getCloudflareImageUrl(photo.cloudflareId!, "card"),
             objectPosition: photo.objectPosition ?? "center",
+            sortOrder: photo.sortOrder,
         }));
 
     const hasChildren = childAlbumCards.length > 0;
@@ -152,13 +156,16 @@ const AlbumsPage = async ({ params }: Props) => {
         { label: "home", href: `/${locale}`, translate: true },
         { label: "albums", href: `/${locale}/albums`, translate: true },
         ...slugParts.map((segment, index) => ({
-            label: index === slugParts.length - 1 ? album.name : formatSlugLabel(segment),
+            label:
+                index === slugParts.length - 1 ? album.name : formatSlugLabel(segment),
             href:
                 index === slugParts.length - 1
                     ? undefined
                     : `/${locale}/albums/${slugParts.slice(0, index + 1).join("/")}`,
         })),
     ];
+
+    const currentAlbumPath = `/${locale}/albums/${album.path}`;
 
     return (
         <section className="pb-10 pt-10">
@@ -183,14 +190,29 @@ const AlbumsPage = async ({ params }: Props) => {
             {hasChildren ? (
                 <>
                     <div className="mb-6 px-4 text-center">
-                        <h3 className="text-2xl font-bold text-gray-900">{t('subalbums')}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900">
+                            {t("subalbums")}
+                        </h3>
                     </div>
-                    <PhotoGrid photos={childAlbumCards} />
+
+                    <PhotoGrid
+                        photos={childAlbumCards}
+                        isAdmin={isAdmin}
+                        reorderType="albums"
+                        reorderParentId={album.id}
+                        revalidatePaths={[`/${locale}/albums`, currentAlbumPath]}
+                    />
                 </>
             ) : null}
 
             {hasPhotos ? (
-                <PhotoGrid photos={photoList} isAdmin={isAdmin} />
+                <PhotoGrid
+                    photos={photoList}
+                    isAdmin={isAdmin}
+                    reorderType="photos"
+                    reorderAlbumId={album.id}
+                    revalidatePaths={[currentAlbumPath, `/${locale}/albums`]}
+                />
             ) : null}
 
             {!hasChildren && !hasPhotos ? (

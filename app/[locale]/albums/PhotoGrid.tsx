@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -11,8 +11,10 @@ import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
 
 type GridItem = {
   id?: string;
+  albumId?: string;
   imgSrc: string;
   objectPosition: string;
+  sortOrder?: number;
   name?: string;
   href?: string;
 };
@@ -20,23 +22,43 @@ type GridItem = {
 interface Props {
   photos: GridItem[];
   isAdmin?: boolean;
+  reorderType?: "photos" | "albums";
+  reorderAlbumId?: string;
+  reorderParentId?: string | null;
+  revalidatePaths?: string[];
 }
 
-const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
+const PhotoGrid = ({
+  photos,
+  isAdmin = false,
+  reorderType,
+  reorderAlbumId,
+  reorderParentId,
+  revalidatePaths = [],
+}: Props) => {
   const router = useRouter();
 
+  const [items, setItems] = useState<GridItem[]>(photos);
   const [isOpen, setIsOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
+  const [savingOrder, setSavingOrder] = useState(false);
+
+  useEffect(() => {
+    setItems(photos);
+  }, [photos]);
 
   const toFullVariant = (src: string) => {
     const cleanSrc = src.split("?")[0];
     return cleanSrc.replace(/\/[^/]+$/, "/full");
   };
 
+  const isPhotoMode = reorderType === "photos";
+  const isAlbumMode = reorderType === "albums";
+
   const lightboxItems = useMemo(
-    () => photos.filter((photo) => !photo.href),
-    [photos]
+    () => items.filter((item) => !item.href),
+    [items]
   );
 
   const slides = lightboxItems.map((photo) => ({
@@ -56,7 +78,9 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
   };
 
   const openLightboxForGridIndex = (index: number) => {
-    const item = photos[index];
+    if (!isPhotoMode) return;
+
+    const item = items[index];
     if (item.href) return;
 
     const lightboxIndex = lightboxItems.findIndex(
@@ -67,6 +91,76 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
 
     setPhotoIndex(lightboxIndex);
     setIsOpen(true);
+  };
+
+  const persistOrder = async (nextItems: GridItem[]) => {
+    if (!reorderType) return;
+
+    const reorderable = nextItems.filter(
+      (item): item is GridItem & { id: string } => Boolean(item.id)
+    );
+
+    setSavingOrder(true);
+
+    try {
+      const endpoint =
+        reorderType === "albums"
+          ? "/api/admin/albums/reorder"
+          : "/api/admin/photos/reorder";
+
+      const payload =
+        reorderType === "albums"
+          ? {
+            parentId: reorderParentId ?? null,
+            items: reorderable.map((item, index) => ({
+              id: item.id,
+              sortOrder: index,
+            })),
+            revalidatePaths,
+          }
+          : {
+            albumId: reorderAlbumId,
+            items: reorderable.map((item, index) => ({
+              id: item.id,
+              sortOrder: index,
+            })),
+            revalidatePaths,
+          };
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to save order");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Failed to save order");
+      setItems(photos);
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
+  const moveItem = async (from: number, to: number) => {
+    if (savingOrder) return;
+    if (to < 0 || to >= items.length) return;
+
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    setItems(next);
+    await persistOrder(next);
   };
 
   const handleDeletePhoto = async (photoId: string, photoName?: string) => {
@@ -104,8 +198,8 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
 
   return (
     <>
-      <div className={`grid ${getGridColsClass(photos.length)} gap-0 p-0`}>
-        {photos.map((photo, index) => {
+      <div className={`grid ${getGridColsClass(items.length)} gap-0 p-0`}>
+        {items.map((photo, index) => {
           const isDeleting = deletingPhotoId === photo.id;
 
           const image = (
@@ -115,26 +209,85 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
                 alt={photo.name ?? `Photo ${index + 1}`}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
-                style={{ objectPosition: normalizePhotoPosition(photo.objectPosition) }}
+                style={{
+                  objectPosition: normalizePhotoPosition(photo.objectPosition),
+                }}
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
           );
 
+          const adminMoveControls =
+            isAdmin && reorderType && photo.id ? (
+              <div className="absolute left-3 top-3 z-10 flex gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    void moveItem(index, index - 1);
+                  }}
+                  disabled={index === 0 || savingOrder}
+                  className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Move earlier"
+                  title="Move earlier"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    void moveItem(index, index + 1);
+                  }}
+                  disabled={index === items.length - 1 || savingOrder}
+                  className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Move later"
+                  title="Move later"
+                >
+                  →
+                </button>
+              </div>
+            ) : null;
+
+          const adminDeleteButton =
+            isAdmin && isPhotoMode && photo.id ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  void handleDeletePhoto(photo.id!, photo.name);
+                }}
+                disabled={isDeleting}
+                className="absolute right-3 top-3 z-10 rounded bg-red-600/90 px-3 py-2 text-xs font-medium text-white shadow hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            ) : null;
+
+          const caption =
+            (isAdmin || photo.name) && photo.name ? (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+                <p className="text-sm font-medium">
+                  {photo.name}
+                  {savingOrder ? " · Saving order..." : ""}
+                </p>
+              </div>
+            ) : null;
+
           if (photo.href) {
             return (
               <Link
-                key={`${photo.href}-${index}`}
+                key={`${photo.id ?? photo.href}-${index}`}
                 href={photo.href}
                 className="group block overflow-hidden"
               >
                 <div className="relative overflow-hidden">
                   {image}
-                  {photo.name ? (
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-                      <p className="text-sm font-medium">{photo.name}</p>
-                    </div>
-                  ) : null}
+                  {adminMoveControls}
+                  {caption}
                 </div>
               </Link>
             );
@@ -153,41 +306,30 @@ const PhotoGrid = ({ photos, isAdmin = false }: Props) => {
                 {image}
               </button>
 
-              {isAdmin && photo.id ? (
-                <button
-                  type="button"
-                  onClick={() => handleDeletePhoto(photo.id!, photo.name)}
-                  disabled={isDeleting}
-                  className="absolute right-3 top-3 z-10 rounded bg-red-600/90 px-3 py-2 text-xs font-medium text-white shadow hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isDeleting ? "Deleting..." : "Delete"}
-                </button>
-              ) : null}
-
-              {isAdmin && photo.name ? (
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-                  <p className="text-sm font-medium">{photo.name}</p>
-                </div>
-              ) : null}
+              {adminMoveControls}
+              {adminDeleteButton}
+              {caption}
             </div>
           );
         })}
       </div>
 
-      <Lightbox
-        open={isOpen}
-        close={() => setIsOpen(false)}
-        slides={slides}
-        index={photoIndex}
-        plugins={[Zoom]}
-        zoom={{
-          maxZoomPixelRatio: 3,
-          zoomInMultiplier: 1.2,
-          doubleTapDelay: 300,
-          doubleClickDelay: 300,
-          keyboardMoveDistance: 50,
-        }}
-      />
+      {isPhotoMode ? (
+        <Lightbox
+          open={isOpen}
+          close={() => setIsOpen(false)}
+          slides={slides}
+          index={photoIndex}
+          plugins={[Zoom]}
+          zoom={{
+            maxZoomPixelRatio: 3,
+            zoomInMultiplier: 1.2,
+            doubleTapDelay: 300,
+            doubleClickDelay: 300,
+            keyboardMoveDistance: 50,
+          }}
+        />
+      ) : null}
     </>
   );
 };

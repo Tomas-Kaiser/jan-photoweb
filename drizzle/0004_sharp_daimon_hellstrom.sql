@@ -1,0 +1,2 @@
+CREATE INDEX "albums_parent_sort_order_idx" ON "albums" USING btree ("parent_id","sort_order");--> statement-breakpoint
+CREATE INDEX "photos_album_sort_order_idx" ON "photos" USING btree ("album_id","sort_order");

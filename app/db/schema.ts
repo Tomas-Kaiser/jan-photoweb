@@ -40,6 +40,7 @@ export const albums = pgTable(
         uniqueIndex("albums_parent_slug_unique").on(table.parentId, table.slug),
         index("albums_parent_id_idx").on(table.parentId),
         index("albums_sort_order_idx").on(table.sortOrder),
+        index("albums_parent_sort_order_idx").on(table.parentId, table.sortOrder),
     ]
 );
 
@@ -65,6 +66,7 @@ export const photos = pgTable(
         index("photos_album_id_idx").on(table.albumId),
         index("photos_sort_order_idx").on(table.sortOrder),
         index("photos_visibility_idx").on(table.visibility),
+        index("photos_album_sort_order_idx").on(table.albumId, table.sortOrder),
     ]
 );
 
@@ -108,9 +110,12 @@ export const photosRelations = relations(photos, ({ one, many }) => ({
     portfolioHighlights: many(portfolioHighlights),
 }));
 
-export const portfolioHighlightsRelations = relations(portfolioHighlights, ({ one }) => ({
-    photo: one(photos, {
-        fields: [portfolioHighlights.photoId],
-        references: [photos.id],
-    }),
-}));
+export const portfolioHighlightsRelations = relations(
+    portfolioHighlights,
+    ({ one }) => ({
+        photo: one(photos, {
+            fields: [portfolioHighlights.photoId],
+            references: [photos.id],
+        }),
+    })
+);
