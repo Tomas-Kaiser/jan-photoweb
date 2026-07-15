@@ -57,7 +57,7 @@ const Footer = () => {
         </div>
 
         <div className="text-sm text-gray-600">
-          {t("copyright", { year: currentYear })}
+          {t("copyrightPrefix")} {currentYear} {t("copyrightText")}
         </div>
 
         <button

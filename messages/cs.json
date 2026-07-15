@@ -57,7 +57,8 @@
     "heading": "Jste připraveni zachytit své nejlepší okamžiky?",
     "text": "Ať už jde o portréty, akce nebo kreativní focení – jsem tu, abych se postaral o nezapomenutelný zážitek.",
     "btn": "Rezervovat focení",
-    "copyright": "© {year} Jan Hájek | vytvořil Tomas Kaiser",
+    "copyrightPrefix": "©",
+    "copyrightText": "Jan Hajek | created by Tomas Kaiser",
     "cookieSettings": "Nastavení cookies"
   },
   "cookieConsent": {
