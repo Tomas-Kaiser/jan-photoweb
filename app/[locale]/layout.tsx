@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { auth } from "@/auth";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
+import CookieConsentBanner from "../components/consent/CookieConsentBanner";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default async function LocaleLayout(props: {
                 <NavBar isAdmin={isAdmin} />
                 {props.children}
                 <Footer />
+                <CookieConsentBanner />
             </NextIntlClientProvider>
         </div>
     );

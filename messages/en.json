@@ -57,6 +57,14 @@
     "heading": "Ready to capture your best moments?",
     "text": "Whether it's portraits, events, or creative shoots — I'm here to make it unforgettable.",
     "btn": "Book a Photoshoot",
-    "copyright": "© {year} Jan Hajek | created by Tomas Kaiser"
+    "copyright": "© {year} Jan Hajek | created by Tomas Kaiser",
+    "cookieSettings": "Cookie settings"
+  },
+  "cookieConsent": {
+    "line1": "We use essential cookies for the website to work and optional external content for Google Reviews.",
+    "line2": "You can accept or reject loading the reviews widget.",
+    "close": "Close",
+    "rejectOptional": "Reject optional",
+    "acceptOptional": "Accept optional"
   }
 }

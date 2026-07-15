@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -7,21 +9,23 @@ import { faInstagram, faFacebook } from "@fortawesome/free-brands-svg-icons";
 const Footer = () => {
   const t = useTranslations("footer");
   const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-base-200 py-4">
-      <div className="bg-gradient-to-r py-10 px-6 text-center">
-        <h2 className="text-3xl font-semibold mb-4">
+      <div className="bg-gradient-to-r px-6 py-10 text-center">
+        <h2 className="mb-4 text-3xl font-semibold">
           {t("heading")}
         </h2>
         <p className="mb-6 text-lg">
           {t("text")}
         </p>
         <Link href="/contact">
-          <button className="inline-flex items-center justify-center h-10 px-6 bg-gradient-to-br from-purple-700 to-indigo-900 transition-all duration-300 hover:from-pink-600 hover:to-purple-800 hover:shadow-md cursor-pointer rounded text-white text-lg font-medium">
+          <button className="inline-flex h-10 cursor-pointer items-center justify-center rounded bg-gradient-to-br from-purple-700 to-indigo-900 px-6 text-lg font-medium text-white transition-all duration-300 hover:from-pink-600 hover:to-purple-800 hover:shadow-md">
             {t("btn")}
           </button>
         </Link>
       </div>
+
       <div className="flex flex-col items-center justify-center space-y-2">
         <div className="flex items-center space-x-2">
           <a
@@ -36,6 +40,7 @@ const Footer = () => {
               className="text-black"
             />
           </a>
+
           <a
             href="https://www.instagram.com/yenhighjack/?igsh=Yzl0eW1wMGkxN3po&utm_source=qr"
             target="_blank"
@@ -49,9 +54,18 @@ const Footer = () => {
             />
           </a>
         </div>
+
         <div className="text-sm text-gray-600">
           {t("copyright", { year: currentYear })}
         </div>
+
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("open-cookie-consent"))}
+          className="text-sm cursor-pointer text-gray-600 underline underline-offset-4 transition hover:text-black"
+        >
+          {t("cookieSettings")}
+        </button>
       </div>
     </footer>
   );

@@ -57,6 +57,14 @@
     "heading": "Jste připraveni zachytit své nejlepší okamžiky?",
     "text": "Ať už jde o portréty, akce nebo kreativní focení – jsem tu, abych se postaral o nezapomenutelný zážitek.",
     "btn": "Rezervovat focení",
-    "copyright": "© {year} Jan Hájek | vytvořil Tomas Kaiser"
+    "copyright": "© {year} Jan Hájek | vytvořil Tomas Kaiser",
+    "cookieSettings": "Nastavení cookies"
+  },
+  "cookieConsent": {
+    "line1": "Používáme nezbytné cookies, aby web správně fungoval, a volitelný externí obsah pro Google recenze.",
+    "line2": "Načítání widgetu s recenzemi můžete přijmout nebo odmítnout.",
+    "close": "Zavřít",
+    "rejectOptional": "Odmítnout volitelné",
+    "acceptOptional": "Přijmout volitelné"
   }
 }

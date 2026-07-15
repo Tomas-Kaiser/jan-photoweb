@@ -5,10 +5,12 @@ import { asc, eq } from "drizzle-orm";
 
 import HeroImage from "../components/HeroImage";
 import SwiperWrapper from "../components/swiper/SwiperWrapper";
-import GoogleReviews from "../components/GoogleReviews";
+
 
 import { portfolioHighlights, photos as photosTable } from "../db/schema";
 import { db } from "../db";
+import ConsentGate from "../components/consent/ConsentGate";
+import CookieConsentBanner from "../components/consent/CookieConsentBanner";
 
 type ObjectPosition = {
   top: string;
@@ -143,7 +145,7 @@ export default async function Home() {
         <h2 className="mb-4 text-3xl font-bold">
           {t("testimonials.heading")}
         </h2>
-        <GoogleReviews />
+        <ConsentGate />
       </section>
     </>
   );
