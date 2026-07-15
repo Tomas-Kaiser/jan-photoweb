@@ -9,32 +9,36 @@ const COOKIE_NAME = "site_consent_external";
 
 function getCookie(name: string) {
     if (typeof document === "undefined") return null;
+
     const match = document.cookie
         .split("; ")
         .find((row) => row.startsWith(`${name}=`));
+
     return match ? decodeURIComponent(match.split("=")[1]) : null;
 }
 
+function readConsentCookie(): ConsentValue {
+    const saved = getCookie(COOKIE_NAME);
+    return saved === "accepted" || saved === "rejected" ? saved : null;
+}
+
 function setCookie(name: string, value: string, days = 180) {
-    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+    const expires = new Date(
+        Date.now() + days * 24 * 60 * 60 * 1000
+    ).toUTCString();
+
     document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
 }
 
 export default function CookieConsentBanner() {
     const t = useTranslations("cookieConsent");
-    const [mounted, setMounted] = useState(false);
-    const [consent, setConsent] = useState<ConsentValue>(null);
-    const [isOpen, setIsOpen] = useState(false);
+    const [consent, setConsent] = useState<ConsentValue>(() => readConsentCookie());
     const [isReopened, setIsReopened] = useState(false);
 
     useEffect(() => {
-        const saved = getCookie(COOKIE_NAME) as ConsentValue;
-        setConsent(saved === "accepted" || saved === "rejected" ? saved : null);
-        setMounted(true);
-
         const openBanner = () => {
             setIsReopened(true);
-            setIsOpen(true);
+            setConsent(readConsentCookie());
         };
 
         window.addEventListener("open-cookie-consent", openBanner);
@@ -44,26 +48,20 @@ export default function CookieConsentBanner() {
         };
     }, []);
 
-    useEffect(() => {
-        if (mounted && consent === null) {
-            setIsReopened(false);
-            setIsOpen(true);
-        }
-    }, [mounted, consent]);
+    const isOpen = consent === null || isReopened;
 
-    if (!mounted || !isOpen) return null;
+    if (!isOpen) return null;
 
     const handleChoice = (value: Exclude<ConsentValue, null>) => {
         setCookie(COOKIE_NAME, value);
         setConsent(value);
-        setIsOpen(false);
         setIsReopened(false);
         window.dispatchEvent(new Event("consent-updated"));
     };
 
     const handleClose = () => {
-        setIsOpen(false);
         setIsReopened(false);
+        setConsent(readConsentCookie());
     };
 
     return (
