@@ -8,7 +8,7 @@ import { faInstagram, faFacebook } from "@fortawesome/free-brands-svg-icons";
 
 const Footer = () => {
   const t = useTranslations("footer");
-  const currentYear = new Date().getFullYear();
+  const currentYear = String(new Date().getFullYear());
 
   return (
     <footer className="bg-base-200 py-4">
@@ -19,10 +19,11 @@ const Footer = () => {
         <p className="mb-6 text-lg">
           {t("text")}
         </p>
-        <Link href="/contact">
-          <button className="inline-flex h-10 cursor-pointer items-center justify-center rounded bg-gradient-to-br from-purple-700 to-indigo-900 px-6 text-lg font-medium text-white transition-all duration-300 hover:from-pink-600 hover:to-purple-800 hover:shadow-md">
-            {t("btn")}
-          </button>
+        <Link
+          href="/contact"
+          className="inline-flex h-10 cursor-pointer items-center justify-center rounded bg-gradient-to-br from-purple-700 to-indigo-900 px-6 text-lg font-medium text-white transition-all duration-300 hover:from-pink-600 hover:to-purple-800 hover:shadow-md"
+        >
+          {t("btn")}
         </Link>
       </div>
 
