@@ -27,19 +27,24 @@ function setCookie(name: string, value: string, days = 180) {
         Date.now() + days * 24 * 60 * 60 * 1000
     ).toUTCString();
 
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
+    const secure =
+        typeof window !== "undefined" && window.location.protocol === "https:"
+            ? "; Secure"
+            : "";
+
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secure}`;
 }
 
-export default function CookieConsentBanner() {
+type Props = {
+    initialConsent: ConsentValue;
+};
+
+export default function CookieConsentBanner({ initialConsent }: Props) {
     const t = useTranslations("cookieConsent");
-    const [mounted, setMounted] = useState(false);
-    const [consent, setConsent] = useState<ConsentValue>(null);
+    const [consent, setConsent] = useState<ConsentValue>(initialConsent);
     const [isReopened, setIsReopened] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-        setConsent(readConsentCookie());
-
         const openBanner = () => {
             setIsReopened(true);
             setConsent(readConsentCookie());
@@ -51,8 +56,6 @@ export default function CookieConsentBanner() {
             window.removeEventListener("open-cookie-consent", openBanner);
         };
     }, []);
-
-    if (!mounted) return null;
 
     const isOpen = consent === null || isReopened;
 
