@@ -32,10 +32,14 @@ function setCookie(name: string, value: string, days = 180) {
 
 export default function CookieConsentBanner() {
     const t = useTranslations("cookieConsent");
-    const [consent, setConsent] = useState<ConsentValue>(() => readConsentCookie());
+    const [mounted, setMounted] = useState(false);
+    const [consent, setConsent] = useState<ConsentValue>(null);
     const [isReopened, setIsReopened] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
+        setConsent(readConsentCookie());
+
         const openBanner = () => {
             setIsReopened(true);
             setConsent(readConsentCookie());
@@ -47,6 +51,8 @@ export default function CookieConsentBanner() {
             window.removeEventListener("open-cookie-consent", openBanner);
         };
     }, []);
+
+    if (!mounted) return null;
 
     const isOpen = consent === null || isReopened;
 
