@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+    MAX_UPLOAD_BYTES,
+    optimizeImageForUpload,
+} from "../utils/optimize-image-for-upload";
 
 type Album = {
     id: string;
@@ -18,12 +22,18 @@ type DirectUploadResponse = {
     uploadURL: string;
 };
 
+type UploadStage = "idle" | "optimizing" | "uploading" | "saving";
+
 export default function AddPhotosForm({ album }: Props) {
     const router = useRouter();
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const [files, setFiles] = useState<File[]>([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [stage, setStage] = useState<UploadStage>("idle");
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [currentFileName, setCurrentFileName] = useState<string>("");
 
     async function requestUploadUrl(): Promise<DirectUploadResponse> {
         const res = await fetch("/api/admin/photos/upload-url", {
@@ -39,6 +49,33 @@ export default function AddPhotosForm({ album }: Props) {
         return data;
     }
 
+    function resetFileInput() {
+        if (inputRef.current) {
+            inputRef.current.value = "";
+        }
+    }
+
+    function getStatusText() {
+        if (!saving) return null;
+
+        const total = files.length;
+        const position = Math.min(currentIndex + 1, total);
+
+        if (stage === "optimizing") {
+            return `Optimizing ${position} of ${total}: ${currentFileName}`;
+        }
+
+        if (stage === "uploading") {
+            return `Uploading ${position} of ${total}: ${currentFileName}`;
+        }
+
+        if (stage === "saving") {
+            return `Saving ${position} of ${total}: ${currentFileName}`;
+        }
+
+        return "Processing photos...";
+    }
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
@@ -50,12 +87,28 @@ export default function AddPhotosForm({ album }: Props) {
         try {
             setSaving(true);
             setError(null);
+            setStage("idle");
+            setCurrentIndex(0);
+            setCurrentFileName("");
 
-            for (const file of files) {
+            for (const [index, file] of files.entries()) {
+                setCurrentIndex(index);
+                setCurrentFileName(file.name);
+
+                setStage("optimizing");
+                const optimizedFile = await optimizeImageForUpload(file);
+
+                if (optimizedFile.size > MAX_UPLOAD_BYTES) {
+                    throw new Error(
+                        `Image is still too large after optimization: ${file.name}`
+                    );
+                }
+
+                setStage("uploading");
                 const { id, uploadURL } = await requestUploadUrl();
 
                 const formData = new FormData();
-                formData.append("file", file);
+                formData.append("file", optimizedFile, optimizedFile.name);
 
                 const uploadRes = await fetch(uploadURL, {
                     method: "POST",
@@ -68,6 +121,7 @@ export default function AddPhotosForm({ album }: Props) {
                     throw new Error(`Failed to upload image: ${file.name}`);
                 }
 
+                setStage("saving");
                 const photoRes = await fetch("/api/admin/photos", {
                     method: "POST",
                     headers: {
@@ -83,11 +137,17 @@ export default function AddPhotosForm({ album }: Props) {
                 const photoData = await photoRes.json().catch(() => null);
 
                 if (!photoRes.ok) {
-                    throw new Error(photoData?.error || `Failed to save photo: ${file.name}`);
+                    throw new Error(
+                        photoData?.error || `Failed to save photo: ${file.name}`
+                    );
                 }
             }
 
             setFiles([]);
+            resetFileInput();
+            setStage("idle");
+            setCurrentIndex(0);
+            setCurrentFileName("");
             router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -95,6 +155,8 @@ export default function AddPhotosForm({ album }: Props) {
             setSaving(false);
         }
     }
+
+    const statusText = getStatusText();
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -108,6 +170,7 @@ export default function AddPhotosForm({ album }: Props) {
                     className="group block cursor-pointer rounded-2xl border border-dashed border-gray-300 bg-white p-5 transition hover:border-gray-500 hover:bg-gray-50 focus-within:border-gray-900 focus-within:ring-4 focus-within:ring-gray-200"
                 >
                     <input
+                        ref={inputRef}
                         id="albumPhotos"
                         type="file"
                         accept="image/*"
@@ -162,6 +225,12 @@ export default function AddPhotosForm({ album }: Props) {
                     </div>
                 </label>
             </div>
+
+            {statusText ? (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-700">
+                    {statusText}
+                </div>
+            ) : null}
 
             {error ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
