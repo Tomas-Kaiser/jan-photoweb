@@ -1,7 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+    MAX_UPLOAD_BYTES,
+    optimizeImageForUpload,
+} from "../utils/optimize-image-for-upload";
 
 type AlbumOption = {
     id: string;
@@ -26,6 +30,15 @@ type DirectUploadResponse = {
     uploadURL: string;
 };
 
+type UploadStage =
+    | "idle"
+    | "optimizing-cover"
+    | "uploading-cover"
+    | "creating-album"
+    | "optimizing-photo"
+    | "uploading-photo"
+    | "saving-photo";
+
 function slugify(value: string) {
     return value
         .trim()
@@ -43,12 +56,19 @@ export default function AddAlbumForm({
 }: Props) {
     const router = useRouter();
 
+    const coverInputRef = useRef<HTMLInputElement | null>(null);
+    const photosInputRef = useRef<HTMLInputElement | null>(null);
+
     const [name, setName] = useState("");
     const [parentId, setParentId] = useState("");
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [photoFiles, setPhotoFiles] = useState<File[]>([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [stage, setStage] = useState<UploadStage>("idle");
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [currentFileName, setCurrentFileName] = useState("");
 
     const effectiveParentId = fixedParent?.id ?? parentId;
 
@@ -85,7 +105,7 @@ export default function AddAlbumForm({
         const { id, uploadURL } = await requestUploadUrl();
 
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", file, file.name);
 
         const uploadRes = await fetch(uploadURL, {
             method: "POST",
@@ -104,6 +124,49 @@ export default function AddAlbumForm({
         };
     }
 
+    function resetInputs() {
+        if (coverInputRef.current) {
+            coverInputRef.current.value = "";
+        }
+
+        if (photosInputRef.current) {
+            photosInputRef.current.value = "";
+        }
+    }
+
+    function getStatusText() {
+        if (!saving) return null;
+
+        if (stage === "optimizing-cover") {
+            return `Optimizing cover image: ${currentFileName}`;
+        }
+
+        if (stage === "uploading-cover") {
+            return `Uploading cover image: ${currentFileName}`;
+        }
+
+        if (stage === "creating-album") {
+            return "Creating album...";
+        }
+
+        const totalPhotos = photoFiles.length;
+        const position = Math.min(currentPhotoIndex + 1, totalPhotos);
+
+        if (stage === "optimizing-photo") {
+            return `Optimizing photo ${position} of ${totalPhotos}: ${currentFileName}`;
+        }
+
+        if (stage === "uploading-photo") {
+            return `Uploading photo ${position} of ${totalPhotos}: ${currentFileName}`;
+        }
+
+        if (stage === "saving-photo") {
+            return `Saving photo ${position} of ${totalPhotos}: ${currentFileName}`;
+        }
+
+        return "Processing...";
+    }
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
@@ -120,9 +183,22 @@ export default function AddAlbumForm({
         try {
             setSaving(true);
             setError(null);
+            setStage("idle");
+            setCurrentPhotoIndex(0);
+            setCurrentFileName("");
 
-            const coverUpload = await uploadToCloudflare(coverFile);
+            setCurrentFileName(coverFile.name);
+            setStage("optimizing-cover");
+            const optimizedCover = await optimizeImageForUpload(coverFile);
 
+            if (optimizedCover.size > MAX_UPLOAD_BYTES) {
+                throw new Error(`Cover image is still too large after optimization: ${coverFile.name}`);
+            }
+
+            setStage("uploading-cover");
+            const coverUpload = await uploadToCloudflare(optimizedCover);
+
+            setStage("creating-album");
             const albumRes = await fetch("/api/admin/albums", {
                 method: "POST",
                 headers: {
@@ -144,9 +220,21 @@ export default function AddAlbumForm({
             const albumId = albumData.album.id as string;
             const albumPath = albumData.album.path as string;
 
-            for (const file of photoFiles) {
-                const uploaded = await uploadToCloudflare(file);
+            for (const [index, file] of photoFiles.entries()) {
+                setCurrentPhotoIndex(index);
+                setCurrentFileName(file.name);
 
+                setStage("optimizing-photo");
+                const optimizedPhoto = await optimizeImageForUpload(file);
+
+                if (optimizedPhoto.size > MAX_UPLOAD_BYTES) {
+                    throw new Error(`Image is still too large after optimization: ${file.name}`);
+                }
+
+                setStage("uploading-photo");
+                const uploaded = await uploadToCloudflare(optimizedPhoto);
+
+                setStage("saving-photo");
                 const photoRes = await fetch("/api/admin/photos", {
                     method: "POST",
                     headers: {
@@ -166,6 +254,15 @@ export default function AddAlbumForm({
                 }
             }
 
+            setName("");
+            setParentId("");
+            setCoverFile(null);
+            setPhotoFiles([]);
+            setStage("idle");
+            setCurrentPhotoIndex(0);
+            setCurrentFileName("");
+            resetInputs();
+
             router.refresh();
             router.push(`/${locale}/albums/${albumPath}`);
         } catch (err) {
@@ -174,6 +271,8 @@ export default function AddAlbumForm({
             setSaving(false);
         }
     }
+
+    const statusText = getStatusText();
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -254,11 +353,15 @@ export default function AddAlbumForm({
                     className="group block cursor-pointer rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5 transition hover:border-gray-500 hover:bg-gray-100 focus-within:border-gray-900 focus-within:ring-4 focus-within:ring-gray-200"
                 >
                     <input
+                        ref={coverInputRef}
                         id="coverFile"
                         type="file"
                         accept="image/*"
                         disabled={saving}
-                        onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+                        onChange={(e) => {
+                            setCoverFile(e.target.files?.[0] ?? null);
+                            if (error) setError(null);
+                        }}
                         className="sr-only"
                         required
                     />
@@ -301,12 +404,16 @@ export default function AddAlbumForm({
                     className="group block cursor-pointer rounded-2xl border border-dashed border-gray-300 bg-white p-5 transition hover:border-gray-500 hover:bg-gray-50 focus-within:border-gray-900 focus-within:ring-4 focus-within:ring-gray-200"
                 >
                     <input
+                        ref={photosInputRef}
                         id="photoFiles"
                         type="file"
                         accept="image/*"
                         multiple
                         disabled={saving}
-                        onChange={(e) => setPhotoFiles(Array.from(e.target.files ?? []))}
+                        onChange={(e) => {
+                            setPhotoFiles(Array.from(e.target.files ?? []));
+                            if (error) setError(null);
+                        }}
                         className="sr-only"
                     />
 
@@ -352,6 +459,12 @@ export default function AddAlbumForm({
                     </div>
                 </label>
             </div>
+
+            {statusText ? (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-700">
+                    {statusText}
+                </div>
+            ) : null}
 
             {error ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
