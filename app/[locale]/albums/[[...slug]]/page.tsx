@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { asc, eq, isNull } from "drizzle-orm";
+import { asc, eq, isNull, exists, notExists, and } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import { auth } from "@/auth";
 import { db } from "@/app/db";
@@ -17,6 +18,12 @@ type Props = {
         locale: string;
         slug?: string[];
     }>;
+};
+
+type MoveAlbumOption = {
+    id: string;
+    name: string;
+    path: string;
 };
 
 const AlbumsPage = async ({ params }: Props) => {
@@ -167,6 +174,41 @@ const AlbumsPage = async ({ params }: Props) => {
 
     const currentAlbumPath = `/${locale}/albums/${album.path}`;
 
+    const childAlbumsAlias = alias(albums, "child_albums");
+
+    const movableLeafAlbums: MoveAlbumOption[] = await db
+        .select({
+            id: albums.id,
+            name: albums.name,
+            path: albums.path,
+        })
+        .from(albums)
+        .where(
+            and(
+                exists(
+                    db
+                        .select({ id: photos.id })
+                        .from(photos)
+                        .where(eq(photos.albumId, albums.id))
+                ),
+                notExists(
+                    db
+                        .select({ id: childAlbumsAlias.id })
+                        .from(childAlbumsAlias)
+                        .where(eq(childAlbumsAlias.parentId, albums.id))
+                )
+            )
+        )
+        .orderBy(asc(albums.path));
+
+    const moveAlbums: MoveAlbumOption[] = movableLeafAlbums
+        .filter((candidate: MoveAlbumOption) => candidate.id !== album.id)
+        .map((candidate: MoveAlbumOption) => ({
+            id: candidate.id,
+            name: candidate.name,
+            path: candidate.path,
+        }));
+
     return (
         <section className="pb-10 pt-10">
             <div className="px-4 text-center">
@@ -212,6 +254,7 @@ const AlbumsPage = async ({ params }: Props) => {
                     reorderType="photos"
                     reorderAlbumId={album.id}
                     revalidatePaths={[currentAlbumPath, `/${locale}/albums`]}
+                    moveAlbums={moveAlbums}
                 />
             ) : null}
 
