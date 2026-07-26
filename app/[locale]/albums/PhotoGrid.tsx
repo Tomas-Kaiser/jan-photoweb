@@ -70,10 +70,7 @@ const PhotoGrid = ({
   const isPhotoMode = reorderType === "photos";
   const canBulkMove = isAdmin && isPhotoMode && Boolean(reorderAlbumId);
 
-  const lightboxItems = useMemo(
-    () => items.filter((item) => !item.href),
-    [items]
-  );
+  const lightboxItems = useMemo(() => items.filter((item) => !item.href), [items]);
 
   const slides = lightboxItems.map((photo) => ({
     src: toFullVariant(photo.imgSrc),
@@ -325,7 +322,10 @@ const PhotoGrid = ({
         </div>
       ) : null}
 
-      <div className={`grid ${getGridColsClass(items.length)} gap-0 p-0`}>
+      <div
+        className={`grid ${getGridColsClass(items.length)} gap-0 p-0 ${items.length <= 2 ? "justify-items-center" : ""
+          }`}
+      >
         {items.map((photo, index) => {
           const isDeleting = deletingPhotoId === photo.id;
           const isSelected = photo.id ? selectedPhotoIds.has(photo.id) : false;
@@ -349,6 +349,13 @@ const PhotoGrid = ({
               ) : null}
             </div>
           );
+
+          const cardWidthClass =
+            items.length === 1
+              ? "max-w-sm"
+              : items.length === 2
+                ? "max-w-md"
+                : "";
 
           const adminMoveControls =
             isAdmin && reorderType && photo.id ? (
@@ -429,7 +436,9 @@ const PhotoGrid = ({
               </button>
             ) : null;
 
-          const showCaption = Boolean(photo.name) && (Boolean(photo.href) || isAdmin);
+          const showCaption =
+            Boolean(photo.name) && (Boolean(photo.href) || isAdmin);
+
           const caption = showCaption ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
               <p className="text-sm font-medium">
@@ -443,12 +452,9 @@ const PhotoGrid = ({
             return (
               <div
                 key={`${photo.id ?? photo.href}-${index}`}
-                className="group relative overflow-hidden"
+                className={`group relative overflow-hidden w-full ${cardWidthClass}`}
               >
-                <Link
-                  href={photo.href}
-                  className="block overflow-hidden"
-                >
+                <Link href={photo.href} className="block overflow-hidden">
                   {image}
                 </Link>
 
@@ -462,7 +468,7 @@ const PhotoGrid = ({
           return (
             <div
               key={`${photo.id ?? photo.imgSrc}-${index}`}
-              className="group relative overflow-hidden"
+              className={`group relative overflow-hidden w-full ${cardWidthClass}`}
             >
               <button
                 type="button"
