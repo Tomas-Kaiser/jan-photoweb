@@ -55,7 +55,7 @@ const AlbumsPage = async ({ params }: Props) => {
         const rootAlbumPhotos = rootAlbums.map((album) => ({
             id: album.id,
             name: album.name,
-            imgSrc: getCloudflareImageUrl(album.coverCloudflareId, "card"),
+            imgSrc: getCloudflareImageUrl(album.coverCloudflareId, "detail"),
             objectPosition: album.objectPosition ?? "center",
             href: `/${locale}/albums/${album.path}`,
             sortOrder: album.sortOrder,
@@ -132,7 +132,7 @@ const AlbumsPage = async ({ params }: Props) => {
     const childAlbumCards = childAlbums.map((child) => ({
         id: child.id,
         name: child.name,
-        imgSrc: getCloudflareImageUrl(child.coverCloudflareId, "card"),
+        imgSrc: getCloudflareImageUrl(child.coverCloudflareId, "detail"),
         objectPosition: child.objectPosition ?? "center",
         href: `/${locale}/albums/${child.path}`,
         sortOrder: child.sortOrder,
