@@ -138,7 +138,7 @@ export default function AddAlbumCard({ categories }: AddAlbumCardProps) {
         }
 
         const DELIVERY_BASE = "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg";
-        return `${DELIVERY_BASE}/${id}/card`;
+        return `${DELIVERY_BASE}/${id}/detail`;
     }
 
     async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
