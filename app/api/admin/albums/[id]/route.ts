@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { albums, photos } from "@/app/db/schema";
+import { albums } from "@/app/db/schema";
 
 type Params = {
     params: Promise<{
@@ -33,12 +33,69 @@ function slugify(value: string) {
         .replace(/-{2,}/g, "-");
 }
 
+async function requireAdmin() {
+    const session = await auth();
+    const isAdmin =
+        !!session?.user &&
+        (session.user as { role?: string }).role === "admin";
+
+    return isAdmin;
+}
+
+async function deleteCloudflareImage(imageId: string) {
+    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+    const apiToken = process.env.CLOUDFLARE_IMAGES_API_TOKEN;
+
+    if (!accountId || !apiToken) {
+        return {
+            ok: false as const,
+            missing: false as const,
+            status: 500,
+            data: { error: "Missing Cloudflare configuration" },
+        };
+    }
+
+    const res = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1/${encodeURIComponent(imageId)}`,
+        {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${apiToken}`,
+            },
+        }
+    );
+
+    const data = await res.json().catch(() => null);
+
+    if (res.status === 404) {
+        return {
+            ok: true as const,
+            missing: true as const,
+            status: res.status,
+            data,
+        };
+    }
+
+    if (!res.ok || data?.success === false) {
+        return {
+            ok: false as const,
+            missing: false as const,
+            status: res.status,
+            data,
+        };
+    }
+
+    return {
+        ok: true as const,
+        missing: false as const,
+        status: res.status,
+        data,
+    };
+}
+
 export async function PATCH(req: Request, { params }: Params) {
     try {
-        const session = await auth();
-        const isAdmin =
-            !!session?.user &&
-            (session.user as { role?: string }).role === "admin";
+        const isAdmin = await requireAdmin();
 
         if (!isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -173,10 +230,7 @@ export async function PATCH(req: Request, { params }: Params) {
 
 export async function DELETE(_req: Request, { params }: Params) {
     try {
-        const session = await auth();
-        const isAdmin =
-            !!session?.user &&
-            (session.user as { role?: string }).role === "admin";
+        const isAdmin = await requireAdmin();
 
         if (!isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -214,39 +268,27 @@ export async function DELETE(_req: Request, { params }: Params) {
             );
         }
 
-        const photoRows = await db
-            .select({
-                id: photos.id,
-                cloudflareId: photos.cloudflareId,
-            })
-            .from(photos)
-            .where(eq(photos.albumId, album.id));
-
         const imageIdsToDelete = Array.from(
-            new Set(
-                [album.coverCloudflareId, ...photoRows.map((photo) => photo.cloudflareId)]
-                    .filter((value): value is string => Boolean(value))
-            )
-        );
+            new Set([album.coverCloudflareId].filter(Boolean))
+        ) as string[];
 
         for (const imageId of imageIdsToDelete) {
-            const cfRes = await fetch(
-                `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${encodeURIComponent(imageId)}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${process.env.CLOUDFLARE_IMAGES_API_TOKEN}`,
-                    },
-                }
-            );
+            const result = await deleteCloudflareImage(imageId);
 
-            const cfData = await cfRes.json().catch(() => null);
+            if (result.missing) {
+                console.warn("Cloudflare image already missing, continuing delete:", {
+                    imageId,
+                    status: result.status,
+                    body: result.data,
+                });
+                continue;
+            }
 
-            if (!cfRes.ok || cfData?.success === false) {
+            if (!result.ok) {
                 console.error("Cloudflare delete failed:", {
                     imageId,
-                    status: cfRes.status,
-                    body: cfData,
+                    status: result.status,
+                    body: result.data,
                 });
 
                 return NextResponse.json(
@@ -257,7 +299,6 @@ export async function DELETE(_req: Request, { params }: Params) {
         }
 
         await db.transaction(async (tx) => {
-            await tx.delete(photos).where(eq(photos.albumId, album.id));
             await tx.delete(albums).where(eq(albums.id, album.id));
         });
 
