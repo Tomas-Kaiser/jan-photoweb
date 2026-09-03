@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { asc, eq, isNull, exists, notExists, and } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -12,6 +13,11 @@ import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
 import CreateAlbumButton from "@/app/components/CreateAlbumButton";
 import Breadcrumbs, { BreadcrumbItem } from "@/app/components/breadcrumbs";
 import { getTranslations } from "next-intl/server";
+
+export const metadata: Metadata = {
+    title: "Photo Albums | Jan Hájek",
+    description: "Explore photography albums by Jan Hájek.",
+};
 
 type Props = {
     params: Promise<{

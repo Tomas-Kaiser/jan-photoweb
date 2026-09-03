@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { asc, eq } from "drizzle-orm";
 
@@ -11,6 +12,12 @@ import { portfolioHighlights, photos as photosTable } from "../db/schema";
 import { db } from "../db";
 import ConsentGate from "../components/consent/ConsentGate";
 import CookieConsentBanner from "../components/consent/CookieConsentBanner";
+
+export const metadata: Metadata = {
+  title: "Jan Hájek | Photography Portfolio & Workshops",
+  description:
+    "Photography that holds on to real moments. Explore the portfolio and workshops of Jan Hájek.",
+};
 
 type ObjectPosition = {
   top: string;

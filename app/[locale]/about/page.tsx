@@ -1,6 +1,12 @@
 import React from 'react'
 import Image from 'next/image'
+import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
+
+export const metadata: Metadata = {
+    title: "About Jan Hájek | Photographer",
+    description: "Learn more about photographer Jan Hájek and his work.",
+};
 
 const AboutPage = () => {
     const t = useTranslations("aboutMe");
