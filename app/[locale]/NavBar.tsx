@@ -79,7 +79,7 @@ const NavBar = ({ isAdmin }: Props) => {
 
       <div className="navbar-center lg:flex">
         <Link href="/" className="mr-1 text-xl font-semibold">
-          Jan Hajek
+          Jan Hájek
         </Link>
       </div>
 

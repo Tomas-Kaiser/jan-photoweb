@@ -83,7 +83,7 @@ export default async function Home() {
               <div className="mb-6 block md:w-1/2 lg:hidden">
                 <Image
                   src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
-                  alt="Jan Hajek"
+                  alt="Jan Hájek"
                   width={600}
                   height={800}
                   className="h-auto w-full rounded-lg object-cover shadow-lg"
@@ -105,7 +105,7 @@ export default async function Home() {
           <div className="order-2 hidden w-full lg:order-1 lg:block lg:w-1/2">
             <Image
               src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
-              alt="Jan Hajek"
+              alt="Jan Hájek"
               width={600}
               height={800}
               className="h-auto w-full rounded-lg object-cover shadow-lg"
