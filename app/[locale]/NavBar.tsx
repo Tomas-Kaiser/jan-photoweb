@@ -84,7 +84,7 @@ const NavBar = ({ isAdmin }: Props) => {
       </div>
 
       <div className="navbar-end">
-        <ul className="menu menu-horizontal hidden px-1 font-semibold lg:flex">
+        <ul className="menu menu-horizontal hidden px-1 text-base font-semibold lg:flex">
           <li>
             <Link href="/albums">{t("albums")}</Link>
           </li>
