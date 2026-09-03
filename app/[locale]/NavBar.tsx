@@ -26,7 +26,7 @@ const NavBar = ({ isAdmin }: Props) => {
   const locale = useLocale();
 
   return (
-    <div className="navbar bg-base-100 shadow-sm">
+    <div className="sticky top-0 z-40 navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
         <a
           href="https://www.facebook.com/share/jpVp8s9n6sw2aGfd"
