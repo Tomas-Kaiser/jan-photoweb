@@ -95,6 +95,15 @@ const NavBar = ({ isAdmin }: Props) => {
             <Link href="/albums">{t("albums")}</Link>
           </li>
           <li>
+            <a
+              href="https://byjj.cz"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("workshops")}
+            </a>
+          </li>
+          <li>
             <Link href="/about">{t("about")}</Link>
           </li>
           <li>
@@ -132,6 +141,16 @@ const NavBar = ({ isAdmin }: Props) => {
               <Link href="/albums" onClick={blur}>
                 {t("albums")}
               </Link>
+            </li>
+            <li>
+              <a
+                href="https://byjj.cz"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={blur}
+              >
+                {t("workshops")}
+              </a>
             </li>
             <li>
               <Link href="/about" onClick={blur}>
