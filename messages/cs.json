@@ -63,6 +63,8 @@
   "services": {
     "heading": "Fotografické služby",
     "text": "Každé focení přizpůsobuji lidem a okamžikům, na kterých vám záleží.",
+    "previous": "Předchozí služba",
+    "next": "Další služba",
     "couples": {
       "title": "Párové focení",
       "text": "Uvolněné focení pro vás dva, zaměřené na přirozené propojení a opravdové okamžiky.",
@@ -77,6 +79,11 @@
       "title": "Dárkové poukazy",
       "text": "Promyšlený dárek k Vánocům, narozeninám nebo jiné výjimečné příležitosti. Poukazy domlouvám osobně e-mailem.",
       "btn": "Požádat o dárkový poukaz"
+    },
+    "workshops": {
+      "title": "Fotografické workshopy",
+      "text": "Objevte fotografické workshopy a rozvíjejte své dovednosti.",
+      "btn": "Navštívit byjj.cz"
     }
   },
   "aboutMe": {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/app/i18n/routing";
+import ServiceCarousel from "@/app/components/ServiceCarousel";
 
 export const metadata: Metadata = {
     title: "Photography Services | Jan Hájek",
@@ -14,22 +15,33 @@ export default async function ServicesPage() {
 
     const services = [
         {
-            key: "couples",
+            id: "couples",
             title: t("couples.title"),
             text: t("couples.text"),
             button: t("couples.btn"),
+            href: "/contact?service=couples"
         },
         {
-            key: "wedding",
+            id: "wedding",
             title: t("weddings.title"),
             text: t("weddings.text"),
             button: t("weddings.btn"),
+            href: "/contact?service=wedding"
         },
         {
-            key: "voucher",
+            id: "voucher",
             title: t("voucher.title"),
             text: t("voucher.text"),
             button: t("voucher.btn"),
+            href: "/contact?service=voucher"
+        },
+        {
+            id: "workshops",
+            title: t("workshops.title"),
+            text: t("workshops.text"),
+            button: t("workshops.btn"),
+            href: "https://byjj.cz",
+            isExternal: true,
         },
     ];
 
@@ -42,25 +54,11 @@ export default async function ServicesPage() {
                 <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-gray-600">
                     {t("text")}
                 </p>
-                <div className="mt-12 grid gap-6 md:grid-cols-3">
-                    {services.map((service) => (
-                        <article
-                            key={service.key}
-                            className="flex min-h-80 flex-col rounded-xl border border-stone-200 bg-white p-8 shadow-sm"
-                        >
-                            <h2 className="text-2xl font-semibold text-gray-900">
-                                {service.title}
-                            </h2>
-                            <p className="mt-4 text-gray-600">{service.text}</p>
-                            <Link
-                                href={`/contact?service=${service.key}`}
-                                className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
-                            >
-                                {service.button}
-                            </Link>
-                        </article>
-                    ))}
-                </div>
+                <ServiceCarousel
+                    services={services}
+                    previousLabel={t("previous")}
+                    nextLabel={t("next")}
+                />
             </div>
         </section>
     );

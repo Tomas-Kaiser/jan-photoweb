@@ -63,6 +63,8 @@
   "services": {
     "heading": "Photography Services",
     "text": "Every session is shaped around the people and moments that matter to you.",
+    "previous": "Previous service",
+    "next": "Next service",
     "couples": {
       "title": "Couples Photoshoots",
       "text": "A relaxed session for the two of you, focused on genuine connection and natural moments.",
@@ -77,6 +79,11 @@
       "title": "Gift Vouchers",
       "text": "A thoughtful gift for Christmas, birthdays, or any special occasion. Vouchers are arranged personally by email.",
       "btn": "Request a Gift Voucher"
+    },
+    "workshops": {
+      "title": "Photography Workshops",
+      "text": "Explore photography workshops and develop your skills.",
+      "btn": "Visit byjj.cz"
     }
   },
   "aboutMe": {
