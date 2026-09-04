@@ -1,6 +1,12 @@
 import React from 'react'
 import Image from 'next/image'
+import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
+
+export const metadata: Metadata = {
+    title: "About Jan Hájek | Photographer",
+    description: "Learn more about photographer Jan Hájek and his work.",
+};
 
 const AboutPage = () => {
     const t = useTranslations("aboutMe");
@@ -19,7 +25,7 @@ const AboutPage = () => {
                     <div className="block lg:hidden mb-6">
                         <Image
                             src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/full"
-                            alt="Jan Hajek"
+                            alt="Jan Hájek"
                             width={600}
                             height={800}
                             className="rounded-lg object-cover shadow-lg w-full h-auto"
@@ -43,7 +49,7 @@ const AboutPage = () => {
                 <div className="w-full lg:w-1/2 hidden lg:block order-2 lg:order-1">
                     <Image
                         src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/full"
-                        alt="Jan Hajek"
+                        alt="Jan Hájek"
                         width={600}
                         height={800}
                         className="rounded-lg object-cover shadow-lg w-full h-auto"

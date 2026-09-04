@@ -3,18 +3,44 @@
   "common": {
     "home": "Home",
     "albums": "Albums",
+    "services": "Services",
+    "workshops": "Workshops",
     "about": "About",
     "contact": "Contact",
     "photos": "Photos"
   },
   "hero": {
-    "CTAbtn": "Explore Albums"
+    "tagline": "Photography that holds on to real moments.",
+    "CTAbtn": "Explore Albums",
+    "bookBtn": "Book a Session"
   },
   "landingPage": {
     "intro": {
       "heading": "Meet Your Photographer",
-      "text": "With a passion for capturing emotion and elegance, I specialize in fashion, weddings, and editorial storytelling. Every shoot is a collaboration — let’s create something timeless.",
+      "text": "Photography is more than capturing a beautiful image — it is about preserving the feeling of a moment long after it has passed. I create natural, expressive photographs that reflect who you are, from quiet, unguarded details to the energy of a celebration.",
+      "text-2": "Whether it is a couples session, a wedding day, or an editorial project, every shoot is built around your story. My approach is relaxed, personal, and collaborative, so you can feel comfortable in front of the camera and leave with images that feel genuinely yours.",
+      "text-3": "Let’s create something real, beautiful, and lasting.",
       "btn": "Send a Query"
+    },
+    "services": {
+      "heading": "Photography Sessions",
+      "text": "Choose the experience that fits your story, then get in touch to plan it together.",
+      "all": "View All Services",
+      "couples": {
+        "title": "Couples Photoshoots",
+        "text": "Natural, relaxed photographs that celebrate your connection.",
+        "btn": "Enquire About a Couples Shoot"
+      },
+      "weddings": {
+        "title": "Wedding Photography",
+        "text": "Honest, beautiful coverage of every meaningful moment.",
+        "btn": "Enquire About a Wedding"
+      },
+      "voucher": {
+        "title": "Gift Vouchers",
+        "text": "Give someone a photoshoot for Christmas or any special occasion.",
+        "btn": "Request a Gift Voucher"
+      }
     },
     "portfolio": {
       "heading": "Portfolio Highlights"
@@ -34,6 +60,32 @@
     "subalbums": "Subalbums",
     "noContent": "No content yet."
   },
+  "services": {
+    "heading": "Photography Services",
+    "text": "Every session is shaped around the people and moments that matter to you.",
+    "previous": "Previous service",
+    "next": "Next service",
+    "couples": {
+      "title": "Couples Photoshoots",
+      "text": "A relaxed session for the two of you, focused on genuine connection and natural moments.",
+      "btn": "Enquire About a Couples Shoot"
+    },
+    "weddings": {
+      "title": "Wedding Photography",
+      "text": "Thoughtful coverage that preserves the atmosphere, emotion, and details of your wedding day.",
+      "btn": "Enquire About a Wedding"
+    },
+    "voucher": {
+      "title": "Gift Vouchers",
+      "text": "A thoughtful gift for Christmas, birthdays, or any special occasion. Vouchers are arranged personally by email.",
+      "btn": "Request a Gift Voucher"
+    },
+    "workshops": {
+      "title": "Photography Workshops",
+      "text": "Explore photography workshops and develop your skills.",
+      "btn": "Visit byjj.cz"
+    }
+  },
   "aboutMe": {
     "heading": "About Me",
     "text-1": "Hello, I’m Jan Hajek — a photographer driven by a deep passion for capturing the beauty, emotion, and individuality of people through fashion and portraiture.",
@@ -50,6 +102,9 @@
       "name": "Name",
       "email": "Email",
       "message": "Message",
+      "couplesMessage": "I would like to enquire about a couples photoshoot.",
+      "weddingMessage": "I would like to enquire about wedding photography.",
+      "voucherMessage": "I would like to request a gift voucher.",
       "btn": "Send Message"
     }
   },

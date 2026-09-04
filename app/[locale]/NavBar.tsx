@@ -26,7 +26,7 @@ const NavBar = ({ isAdmin }: Props) => {
   const locale = useLocale();
 
   return (
-    <div className="navbar bg-base-100 shadow-sm">
+    <div className="sticky top-0 z-40 navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
         <a
           href="https://www.facebook.com/share/jpVp8s9n6sw2aGfd"
@@ -78,15 +78,33 @@ const NavBar = ({ isAdmin }: Props) => {
       </div>
 
       <div className="navbar-center lg:flex">
-        <Link href="/" className="mr-1 text-xl font-semibold">
-          Jan Hajek
+        <Link
+          href="/"
+          className="mr-1 flex flex-col items-center font-semibold leading-none"
+        >
+          <span className="text-xl">Jan Hájek</span>
+          <span className="mt-1 text-[0.65rem] font-medium tracking-[0.2em]">
+            PHOTOGRAPHY
+          </span>
         </Link>
       </div>
 
       <div className="navbar-end">
-        <ul className="menu menu-horizontal hidden px-1 font-semibold lg:flex">
+        <ul className="menu menu-horizontal hidden px-1 text-base font-semibold lg:flex">
           <li>
             <Link href="/albums">{t("albums")}</Link>
+          </li>
+          <li>
+            <Link href="/services">{t("services")}</Link>
+          </li>
+          <li>
+            <a
+              href="https://byjj.cz"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("workshops")}
+            </a>
           </li>
           <li>
             <Link href="/about">{t("about")}</Link>
@@ -126,6 +144,21 @@ const NavBar = ({ isAdmin }: Props) => {
               <Link href="/albums" onClick={blur}>
                 {t("albums")}
               </Link>
+            </li>
+            <li>
+              <Link href="/services" onClick={blur}>
+                {t("services")}
+              </Link>
+            </li>
+            <li>
+              <a
+                href="https://byjj.cz"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={blur}
+              >
+                {t("workshops")}
+              </a>
             </li>
             <li>
               <Link href="/about" onClick={blur}>

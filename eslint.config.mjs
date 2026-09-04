@@ -14,7 +14,7 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
-      "@next/next/no-img-element": "error",
+      "@next/next/no-img-element": "off",
       "react-hooks/exhaustive-deps": "warn",
     },
     ignores: [

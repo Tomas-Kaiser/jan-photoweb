@@ -1,20 +1,46 @@
 {
-  "welcome": "Vitejte v mé aplikaci",
+  "welcome": "Vítejte na mém webu",
   "common": {
     "home": "Domů",
     "albums": "Alba",
+    "services": "Služby",
+    "workshops": "Workshopy",
     "about": "O mně",
     "contact": "Kontakt",
     "photos": "Fotky"
   },
   "hero": {
-    "CTAbtn": "Prozkoumat Alba"
+    "tagline": "Fotografie, která uchovává skutečné okamžiky.",
+    "CTAbtn": "Prozkoumat alba",
+    "bookBtn": "Rezervovat focení"
   },
   "landingPage": {
     "intro": {
-      "heading": "Poznejte Svého Fotografa",
-      "text": "S vášní pro zachycení emocí a elegance se specializuji na módu, svatby a editoriálovou tvorbu. Každé focení je pro mě spolupráce — pojďme společně vytvořit něco nadčasového.",
-      "btn": "Poslat Dotaz"
+      "heading": "Poznejte svého fotografa",
+      "text": "Fotografie pro mě znamená víc než jen zachytit krásný obraz — jde o uchování pocitu okamžiku i dlouho poté, co pomine. Vytvářím přirozené, působivé fotografie, které odrážejí, kým jste — od tichých, nenucených detailů až po energii oslavy.",
+      "text-2": "Ať už jde o párové focení, svatební den nebo editoriálový projekt, každé focení stavím na vašem příběhu. Pracuji uvolněně, osobně a ve spolupráci s vámi, abyste se před objektivem cítili přirozeně a odnesli si snímky, které budou opravdu vaše.",
+      "text-3": "Vytvořme společně něco opravdového, krásného a trvalého.",
+      "btn": "Poslat dotaz"
+    },
+    "services": {
+      "heading": "Focení na míru",
+      "text": "Vyberte si zážitek, který nejlépe vypráví váš příběh, a společně ho naplánujeme.",
+      "all": "Zobrazit všechny služby",
+      "couples": {
+        "title": "Párové focení",
+        "text": "Přirozené fotografie, které zachytí vaše spojení.",
+        "btn": "Poptat párové focení"
+      },
+      "weddings": {
+        "title": "Svatební fotografie",
+        "text": "Upřímné a krásné záběry všech důležitých okamžiků.",
+        "btn": "Poptat svatební focení"
+      },
+      "voucher": {
+        "title": "Dárkové poukazy",
+        "text": "Darujte focení k Vánocům nebo k jakékoli jiné příležitosti.",
+        "btn": "Požádat o dárkový poukaz"
+      }
     },
     "portfolio": {
       "heading": "To nejlepší z portfolia"
@@ -34,6 +60,32 @@
     "subalbums": "Podalba",
     "noContent": "Zatím žádný obsah."
   },
+  "services": {
+    "heading": "Fotografické služby",
+    "text": "Každé focení přizpůsobuji lidem a okamžikům, na kterých vám záleží.",
+    "previous": "Předchozí služba",
+    "next": "Další služba",
+    "couples": {
+      "title": "Párové focení",
+      "text": "Uvolněné focení pro vás dva, zaměřené na přirozené propojení a opravdové okamžiky.",
+      "btn": "Poptat párové focení"
+    },
+    "weddings": {
+      "title": "Svatební fotografie",
+      "text": "Citlivé zachycení atmosféry, emocí i detailů vašeho svatebního dne.",
+      "btn": "Poptat svatební focení"
+    },
+    "voucher": {
+      "title": "Dárkové poukazy",
+      "text": "Promyšlený dárek k Vánocům, narozeninám nebo jiné výjimečné příležitosti. Poukazy domlouvám osobně e-mailem.",
+      "btn": "Požádat o dárkový poukaz"
+    },
+    "workshops": {
+      "title": "Fotografické workshopy",
+      "text": "Objevte fotografické workshopy a rozvíjejte své dovednosti.",
+      "btn": "Navštívit byjj.cz"
+    }
+  },
   "aboutMe": {
     "heading": "O mně",
     "text-1": "Dobrý den, jsem Jan Hájek — fotograf, kterého pohání hluboká vášeň pro zachycení krásy, emocí a jedinečnosti lidí prostřednictvím módní a portrétní fotografie.",
@@ -50,6 +102,9 @@
       "name": "Jméno",
       "email": "E-mail",
       "message": "Zpráva",
+      "couplesMessage": "Mám zájem o párové focení.",
+      "weddingMessage": "Mám zájem o svatební focení.",
+      "voucherMessage": "Mám zájem o dárkový poukaz.",
       "btn": "Odeslat zprávu"
     }
   },
@@ -58,8 +113,8 @@
     "text": "Ať už jde o portréty, akce nebo kreativní focení – jsem tu, abych se postaral o nezapomenutelný zážitek.",
     "btn": "Rezervovat focení",
     "copyrightPrefix": "©",
-    "copyrightText": "Jan Hajek | created by Tomas Kaiser",
-    "cookieSettings": "Nastavení cookies"
+    "copyrightText": "Jan Hájek | vytvořil Tomas Kaiser",
+    "cookieSettings": "Nastavení souborů cookie"
   },
   "cookieConsent": {
     "line1": "Používáme nezbytné cookies, aby web správně fungoval, a volitelný externí obsah pro Google recenze.",
