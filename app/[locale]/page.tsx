@@ -133,6 +133,63 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="bg-stone-50 px-6 py-14">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-center text-3xl font-bold text-gray-900">
+            {t("services.heading")}
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-center text-lg text-gray-600">
+            {t("services.text")}
+          </p>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            <article className="flex min-h-72 flex-col rounded-xl border border-stone-200 bg-white p-7 shadow-sm">
+              <h3 className="text-2xl font-semibold text-gray-900">
+                {t("services.couples.title")}
+              </h3>
+              <p className="mt-3 text-gray-600">{t("services.couples.text")}</p>
+              <Link
+                href="/contact?service=couples"
+                className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
+              >
+                {t("services.couples.btn")}
+              </Link>
+            </article>
+            <article className="flex min-h-72 flex-col rounded-xl border border-stone-200 bg-white p-7 shadow-sm">
+              <h3 className="text-2xl font-semibold text-gray-900">
+                {t("services.weddings.title")}
+              </h3>
+              <p className="mt-3 text-gray-600">{t("services.weddings.text")}</p>
+              <Link
+                href="/contact?service=wedding"
+                className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
+              >
+                {t("services.weddings.btn")}
+              </Link>
+            </article>
+            <article className="flex min-h-72 flex-col rounded-xl border border-stone-200 bg-white p-7 shadow-sm">
+              <h3 className="text-2xl font-semibold text-gray-900">
+                {t("services.voucher.title")}
+              </h3>
+              <p className="mt-3 text-gray-600">{t("services.voucher.text")}</p>
+              <Link
+                href="/contact?service=voucher"
+                className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
+              >
+                {t("services.voucher.btn")}
+              </Link>
+            </article>
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/services"
+              className="rounded bg-black px-6 py-3 text-white transition hover:bg-gray-800"
+            >
+              {t("services.all")}
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-gray-50 px-4 py-8 text-center md:px-12 lg:px-24">
         <h2 className="mb-4 text-3xl font-bold">
           {t("albums.heading")}

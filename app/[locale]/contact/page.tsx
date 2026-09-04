@@ -1,10 +1,22 @@
 'use client';
 import React, { useRef } from 'react';
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 const ContactPage = () => {
     const t = useTranslations("contact");
+    const searchParams = useSearchParams();
     const formRef = useRef<HTMLFormElement>(null);
+    const service = searchParams.get("service");
+    const serviceMessages = {
+        couples: t("form.couplesMessage"),
+        wedding: t("form.weddingMessage"),
+        voucher: t("form.voucherMessage"),
+    };
+    const initialMessage =
+        service && service in serviceMessages
+            ? serviceMessages[service as keyof typeof serviceMessages]
+            : "";
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -69,6 +81,7 @@ const ContactPage = () => {
                         name="message"
                         rows={5}
                         required
+                        defaultValue={initialMessage}
                         className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black resize-none"
                     />
                 </div>

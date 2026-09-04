@@ -95,6 +95,9 @@ const NavBar = ({ isAdmin }: Props) => {
             <Link href="/albums">{t("albums")}</Link>
           </li>
           <li>
+            <Link href="/services">{t("services")}</Link>
+          </li>
+          <li>
             <a
               href="https://byjj.cz"
               target="_blank"
@@ -140,6 +143,11 @@ const NavBar = ({ isAdmin }: Props) => {
             <li>
               <Link href="/albums" onClick={blur}>
                 {t("albums")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/services" onClick={blur}>
+                {t("services")}
               </Link>
             </li>
             <li>
