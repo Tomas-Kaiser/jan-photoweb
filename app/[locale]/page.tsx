@@ -33,6 +33,24 @@ export const objectPosition: ObjectPosition = {
   center: "center",
 } as const;
 
+const serviceCards = [
+  {
+    key: "couples",
+    href: "/contact?service=couples",
+    backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/302f0c15-eec3-4117-9d5b-34b80556fe00/card",
+  },
+  {
+    key: "weddings",
+    href: "/contact?service=wedding",
+    backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/8d0ba214-31f8-470f-a3f2-1f247a40f000/card",
+  },
+  {
+    key: "voucher",
+    href: "/contact?service=voucher",
+    backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/50b4c52f-bd2f-4a2a-e144-06fd782ebe00/card",
+  },
+] as const;
+
 export default async function Home() {
   const t = await getTranslations("landingPage");
 
@@ -150,42 +168,47 @@ export default async function Home() {
             {t("services.text")}
           </p>
           <div className="mt-8 grid gap-6 md:grid-cols-3">
-            <article className="flex min-h-72 flex-col rounded-xl border border-gray-200 bg-white p-7 shadow-sm">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                {t("services.couples.title")}
-              </h3>
-              <p className="mt-3 text-gray-600">{t("services.couples.text")}</p>
-              <Link
-                href="/contact?service=couples"
-                className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
+            {serviceCards.map(({ key, href, backgroundImage }) => (
+              <article
+                key={key}
+                className="relative flex min-h-72 flex-col overflow-hidden rounded-xl border border-gray-200 p-7 shadow-sm"
               >
-                {t("services.couples.btn")}
-              </Link>
-            </article>
-            <article className="flex min-h-72 flex-col rounded-xl border border-gray-200 bg-white p-7 shadow-sm">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                {t("services.weddings.title")}
-              </h3>
-              <p className="mt-3 text-gray-600">{t("services.weddings.text")}</p>
-              <Link
-                href="/contact?service=wedding"
-                className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
-              >
-                {t("services.weddings.btn")}
-              </Link>
-            </article>
-            <article className="flex min-h-72 flex-col rounded-xl border border-gray-200 bg-white p-7 shadow-sm">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                {t("services.voucher.title")}
-              </h3>
-              <p className="mt-3 text-gray-600">{t("services.voucher.text")}</p>
-              <Link
-                href="/contact?service=voucher"
-                className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
-              >
-                {t("services.voucher.btn")}
-              </Link>
-            </article>
+                {backgroundImage && (
+                  <>
+                    <Image
+                      src={backgroundImage}
+                      alt=""
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50" />
+                  </>
+                )}
+                <div
+                  className={`relative flex h-full flex-col ${backgroundImage ? "text-white" : "bg-white"
+                    }`}
+                >
+                  <h3 className="text-2xl font-semibold">
+                    {t(`services.${key}.title`)}
+                  </h3>
+                  <p
+                    className={`mt-3 ${backgroundImage ? "text-gray-100" : "text-gray-600"
+                      }`}
+                  >
+                    {t(`services.${key}.text`)}
+                  </p>
+                  <Link
+                    href={href}
+                    className={`mt-auto pt-8 font-semibold underline underline-offset-4 transition ${backgroundImage
+                      ? "text-white hover:text-gray-200"
+                      : "text-gray-900 hover:text-gray-600"
+                      }`}
+                  >
+                    {t(`services.${key}.btn`)}
+                  </Link>
+                </div>
+              </article>
+            ))}
           </div>
           <div className="mt-8 text-center">
             <Link
