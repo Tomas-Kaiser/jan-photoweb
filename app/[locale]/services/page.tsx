@@ -34,7 +34,7 @@ export default async function ServicesPage() {
     ];
 
     return (
-        <section className="bg-stone-50 px-6 py-16">
+        <section className="bg-white px-6 py-16">
             <div className="mx-auto max-w-6xl">
                 <h1 className="text-center text-4xl font-bold text-gray-900">
                     {t("heading")}

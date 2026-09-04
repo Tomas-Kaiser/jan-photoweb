@@ -17,7 +17,9 @@
   "landingPage": {
     "intro": {
       "heading": "Meet Your Photographer",
-      "text": "With a passion for capturing emotion and elegance, I specialize in fashion, weddings, and editorial storytelling. Every shoot is a collaboration — let’s create something timeless.",
+      "text": "Photography is more than capturing a beautiful image — it is about preserving the feeling of a moment long after it has passed. I create natural, expressive photographs that reflect who you are, from quiet, unguarded details to the energy of a celebration.",
+      "text-2": "Whether it is a couples session, a wedding day, or an editorial project, every shoot is built around your story. My approach is relaxed, personal, and collaborative, so you can feel comfortable in front of the camera and leave with images that feel genuinely yours.",
+      "text-3": "Let’s create something real, beautiful, and lasting.",
       "btn": "Send a Query"
     },
     "services": {
