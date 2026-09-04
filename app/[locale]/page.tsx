@@ -173,36 +173,18 @@ export default async function Home() {
                 key={key}
                 className="relative flex min-h-72 flex-col overflow-hidden rounded-xl border border-gray-200 p-7 shadow-sm"
               >
-                {backgroundImage && (
-                  <>
-                    <Image
-                      src={backgroundImage}
-                      alt=""
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/50" />
-                  </>
-                )}
-                <div
-                  className={`relative flex h-full flex-col ${backgroundImage ? "text-white" : "bg-white"
-                    }`}
-                >
+                <Image src={backgroundImage} alt="" fill className="object-cover" />
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="relative flex h-full flex-col text-white">
                   <h3 className="text-2xl font-semibold">
                     {t(`services.${key}.title`)}
                   </h3>
-                  <p
-                    className={`mt-3 ${backgroundImage ? "text-gray-100" : "text-gray-600"
-                      }`}
-                  >
+                  <p className="mt-3 text-gray-100">
                     {t(`services.${key}.text`)}
                   </p>
                   <Link
                     href={href}
-                    className={`mt-auto pt-8 font-semibold underline underline-offset-4 transition ${backgroundImage
-                      ? "text-white hover:text-gray-200"
-                      : "text-gray-900 hover:text-gray-600"
-                      }`}
+                    className="mt-auto pt-8 font-semibold text-white underline underline-offset-4 transition hover:text-gray-200"
                   >
                     {t(`services.${key}.btn`)}
                   </Link>

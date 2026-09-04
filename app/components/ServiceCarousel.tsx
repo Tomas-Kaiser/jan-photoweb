@@ -12,7 +12,7 @@ type Service = {
     button: string;
     href?: string;
     isExternal?: boolean;
-    backgroundImage?: string;
+    backgroundImage: string;
 };
 
 type Props = {
@@ -50,55 +50,31 @@ export default function ServiceCarousel({
                         className="carousel-item w-full md:w-[calc((100%-3rem)/3)]"
                     >
                         <article className="relative flex min-h-80 w-full flex-col overflow-hidden rounded-xl border border-gray-200 p-8 shadow-sm">
-                            {service.backgroundImage && (
-                                <>
-                                    <Image
-                                        src={service.backgroundImage}
-                                        alt=""
-                                        fill
-                                        className="object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-black/50" />
-                                </>
-                            )}
-                            <div
-                                className={`relative flex h-full flex-col ${
-                                    service.backgroundImage ? "text-white" : "bg-white"
-                                }`}
-                            >
+                            <Image
+                                src={service.backgroundImage}
+                                alt=""
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/50" />
+                            <div className="relative flex h-full flex-col text-white">
                                 <h2 className="text-2xl font-semibold">
                                     {service.title}
                                 </h2>
-                                <p
-                                    className={`mt-4 ${
-                                        service.backgroundImage
-                                            ? "text-gray-100"
-                                            : "text-gray-600"
-                                    }`}
-                                >
-                                    {service.text}
-                                </p>
+                                <p className="mt-4 text-gray-100">{service.text}</p>
                                 {service.isExternal ? (
                                     <a
                                         href={service.href}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className={`mt-auto pt-8 font-semibold underline underline-offset-4 transition ${
-                                            service.backgroundImage
-                                                ? "text-white hover:text-gray-200"
-                                                : "text-gray-900 hover:text-gray-600"
-                                        }`}
+                                        className="mt-auto pt-8 font-semibold text-white underline underline-offset-4 transition hover:text-gray-200"
                                     >
                                         {service.button}
                                     </a>
                                 ) : (
                                     <Link
                                         href={service.href ? service.href : ''}
-                                        className={`mt-auto pt-8 font-semibold underline underline-offset-4 transition ${
-                                            service.backgroundImage
-                                                ? "text-white hover:text-gray-200"
-                                                : "text-gray-900 hover:text-gray-600"
-                                        }`}
+                                        className="mt-auto pt-8 font-semibold text-white underline underline-offset-4 transition hover:text-gray-200"
                                     >
                                         {service.button}
                                     </Link>
