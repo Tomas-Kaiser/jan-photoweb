@@ -89,7 +89,7 @@ export default function ServiceCarousel({
                 type="button"
                 aria-label={previousLabel}
                 onClick={() => scrollByCard(-1)}
-                className="btn btn-circle absolute top-1/2 left-2 z-10 -translate-y-1/2 border-gray-200 bg-white/90 shadow-md hover:bg-white"
+                className="btn btn-circle absolute top-1/2 left-0 z-10 -translate-x-1/2 -translate-y-1/2 border-gray-200 bg-white/90 shadow-md hover:bg-white"
             >
                 <svg
                     aria-hidden="true"
@@ -110,7 +110,7 @@ export default function ServiceCarousel({
                 type="button"
                 aria-label={nextLabel}
                 onClick={() => scrollByCard(1)}
-                className="btn btn-circle absolute top-1/2 right-2 z-10 -translate-y-1/2 border-gray-200 bg-white/90 shadow-md hover:bg-white"
+                className="btn btn-circle absolute top-1/2 right-0 z-10 translate-x-1/2 -translate-y-1/2 border-gray-200 bg-white/90 shadow-md hover:bg-white"
             >
                 <svg
                     aria-hidden="true"
