@@ -21,7 +21,7 @@ const Footer = () => {
         </p>
         <Link
           href="/contact"
-          className="inline-flex h-10 cursor-pointer items-center justify-center rounded bg-gradient-to-br from-purple-700 to-indigo-900 px-6 text-lg font-medium text-white transition-all duration-300 hover:from-pink-600 hover:to-purple-800 hover:shadow-md"
+          className="inline-flex cursor-pointer items-center justify-center rounded-full bg-black px-10 py-4 text-lg font-semibold text-white transition hover:bg-gray-800"
         >
           {t("btn")}
         </Link>
