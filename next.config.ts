@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   images: {
+    // Cloudflare Images already resizes/re-encodes everything via its own
+    // named variants (card/detail/full)
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
