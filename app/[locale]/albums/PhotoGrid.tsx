@@ -276,6 +276,211 @@ const PhotoGrid = ({
     }
   };
 
+  const isAlbumGridLayout = reorderType === "albums";
+  // Only worth carving out a featured "big" row when there are enough
+  // remaining albums to fill a real row underneath it — otherwise (2, 3,
+  // or 4 subalbums) a plain evenly-sized grid looks better than a forced
+  // 2-big/rest-small split.
+  const useFeaturedAlbumSplit = isAlbumGridLayout && items.length >= 5;
+
+  // Balances items into rows so no row ends up with a single item that
+  // would otherwise be stretched (or left stranded) as one oversized or
+  // misaligned card — e.g. 7 items over a max of 5 per row become rows of
+  // [4, 3], not [5, 1].
+  const getBalancedRowSizes = (total: number, maxPerRow: number): number[] => {
+    if (total <= 0) return [];
+    const rows = Math.ceil(total / maxPerRow);
+    const base = Math.floor(total / rows);
+    const remainder = total % rows;
+    return Array.from({ length: rows }, (_, i) => base + (i < remainder ? 1 : 0));
+  };
+
+  const buildBalancedRows = (source: GridItem[], startIndex: number, maxPerRow: number) => {
+    const rowSizes = getBalancedRowSizes(source.length, maxPerRow);
+    let cursor = 0;
+    return rowSizes.map((size) => {
+      const rowItems = source.slice(cursor, cursor + size);
+      const rowStartIndex = startIndex + cursor;
+      cursor += size;
+      return { size, rowItems, startIndex: rowStartIndex };
+    });
+  };
+
+  const smallAlbumRows = useFeaturedAlbumSplit
+    ? buildBalancedRows(items.slice(2), 2, 5)
+    : [];
+
+  const renderGridItem = (
+    photo: GridItem,
+    index: number,
+    options?: { aspectClass?: string; roundedClass?: string; noWidthCap?: boolean }
+  ) => {
+    const aspectClass = options?.aspectClass ?? "aspect-[3/4]";
+    const roundedClass = options?.roundedClass ?? "";
+    const noWidthCap = options?.noWidthCap ?? false;
+
+    const isDeleting = deletingPhotoId === photo.id;
+    const isSelected = photo.id ? selectedPhotoIds.has(photo.id) : false;
+
+    const image = (
+      <div
+        className={`relative ${aspectClass} w-full overflow-hidden bg-black ${roundedClass}`}
+      >
+        <Image
+          src={photo.imgSrc}
+          alt={photo.name ?? `Photo ${index + 1}`}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
+          style={{
+            objectPosition: normalizePhotoPosition(photo.objectPosition),
+          }}
+          className={`object-cover transition-transform duration-300 ${isSelected ? "scale-[1.02] opacity-80" : "group-hover:scale-105"
+            }`}
+        />
+
+        {isSelected ? (
+          <div className="pointer-events-none absolute inset-0 z-10 ring-4 ring-white/80 ring-inset" />
+        ) : null}
+      </div>
+    );
+
+    const cardWidthClass = noWidthCap
+      ? ""
+      : items.length === 1
+        ? "max-w-sm"
+        : items.length === 2
+          ? "max-w-md"
+          : "";
+
+    const adminMoveControls =
+      isAdmin && reorderType && photo.id ? (
+        <div className="absolute left-3 top-3 z-20 flex gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              void moveItem(index, index - 1);
+            }}
+            disabled={index === 0 || savingOrder || selectedCount > 0 || movingPhotos}
+            className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Move earlier"
+            title="Move earlier"
+          >
+            ←
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              void moveItem(index, index + 1);
+            }}
+            disabled={
+              index === items.length - 1 ||
+              savingOrder ||
+              selectedCount > 0 ||
+              movingPhotos
+            }
+            className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Move later"
+            title="Move later"
+          >
+            →
+          </button>
+        </div>
+      ) : null;
+
+    const adminDeleteButton =
+      isAdmin && isPhotoMode && photo.id ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void handleDeletePhoto(photo.id!, photo.name);
+          }}
+          disabled={isDeleting || movingPhotos}
+          className="absolute right-3 top-3 z-20 rounded bg-red-600/90 px-3 py-2 text-xs font-medium text-white shadow hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isDeleting ? "Deleting..." : "Delete"}
+        </button>
+      ) : null;
+
+    const selectButton =
+      canBulkMove && photo.id ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSelectedPhoto(photo.id!);
+          }}
+          disabled={movingPhotos}
+          className={`absolute bottom-3 right-3 z-20 inline-flex h-11 items-center gap-2 rounded-full border-2 px-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${isSelected
+              ? "border-white bg-emerald-800 text-white hover:bg-emerald-900"
+              : "border-white bg-black/80 text-white hover:bg-black"
+            }`}
+          aria-pressed={isSelected}
+          aria-label={isSelected ? "Deselect photo" : "Select photo"}
+          title={isSelected ? "Deselect photo" : "Select photo"}
+        >
+          <span aria-hidden="true">{isSelected ? "✓" : "○"}</span>
+          <span>{isSelected ? "Selected" : "Select"}</span>
+        </button>
+      ) : null;
+
+    const showCaption =
+      Boolean(photo.name) && (Boolean(photo.href) || isAdmin);
+
+    const caption = showCaption ? (
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+        <p className="text-sm font-medium">
+          {photo.name}
+          {savingOrder ? " · Saving order..." : ""}
+        </p>
+      </div>
+    ) : null;
+
+    if (photo.href) {
+      return (
+        <div
+          key={`${photo.id ?? photo.href}-${index}`}
+          className={`group relative overflow-hidden w-full ${cardWidthClass} ${roundedClass}`}
+        >
+          <Link href={photo.href} className="block overflow-hidden">
+            {image}
+          </Link>
+
+          {adminMoveControls}
+          {selectButton}
+          {caption}
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={`${photo.id ?? photo.imgSrc}-${index}`}
+        className={`group relative overflow-hidden w-full ${cardWidthClass} ${roundedClass}`}
+      >
+        <button
+          type="button"
+          onClick={() => openLightboxForGridIndex(index)}
+          className="block w-full cursor-pointer overflow-hidden text-left"
+        >
+          {image}
+        </button>
+
+        {adminMoveControls}
+        {adminDeleteButton}
+        {selectButton}
+        {caption}
+      </div>
+    );
+  };
+
   return (
     <>
       {canBulkMove ? (
@@ -322,170 +527,72 @@ const PhotoGrid = ({
         </div>
       ) : null}
 
-      <div
-        className={`grid ${getGridColsClass(items.length)} gap-0 p-0 ${items.length <= 2 ? "justify-items-center" : ""
-          }`}
-      >
-        {items.map((photo, index) => {
-          const isDeleting = deletingPhotoId === photo.id;
-          const isSelected = photo.id ? selectedPhotoIds.has(photo.id) : false;
+      {isAlbumGridLayout ? (
+        <>
+          <div
+            className={`grid ${getGridColsClass(items.length)} gap-4 p-0 lg:hidden`}
+          >
+            {items.map((photo, index) => renderGridItem(photo, index, { noWidthCap: true }))}
+          </div>
 
-          const image = (
-            <div className="relative aspect-[3/4] w-full overflow-hidden bg-black">
-              <Image
-                src={photo.imgSrc}
-                alt={photo.name ?? `Photo ${index + 1}`}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
-                style={{
-                  objectPosition: normalizePhotoPosition(photo.objectPosition),
-                }}
-                className={`object-cover transition-transform duration-300 ${isSelected ? "scale-[1.02] opacity-80" : "group-hover:scale-105"
-                  }`}
-              />
+          <div className="hidden lg:block">
+            {useFeaturedAlbumSplit ? (
+              <>
+                {/*
+                  With enough albums to fill a real row underneath, the
+                  first two get a featured "big" row on top. The rest are
+                  balanced into evenly-sized rows below — each row gets its
+                  own column count, so a leftover row never ends up with a
+                  single stretched or left-stranded card.
+                */}
+                <div className="mb-6 grid grid-cols-2 gap-6">
+                  {items.slice(0, 2).map((photo, index) =>
+                    renderGridItem(photo, index, {
+                      aspectClass: "aspect-[16/10]",
+                      noWidthCap: true,
+                    })
+                  )}
+                </div>
 
-              {isSelected ? (
-                <div className="pointer-events-none absolute inset-0 z-10 ring-4 ring-white/80 ring-inset" />
-              ) : null}
-            </div>
-          );
-
-          const cardWidthClass =
-            items.length === 1
-              ? "max-w-sm"
-              : items.length === 2
-                ? "max-w-md"
-                : "";
-
-          const adminMoveControls =
-            isAdmin && reorderType && photo.id ? (
-              <div className="absolute left-3 top-3 z-20 flex gap-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    void moveItem(index, index - 1);
-                  }}
-                  disabled={index === 0 || savingOrder || selectedCount > 0 || movingPhotos}
-                  className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Move earlier"
-                  title="Move earlier"
-                >
-                  ←
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    void moveItem(index, index + 1);
-                  }}
-                  disabled={
-                    index === items.length - 1 ||
-                    savingOrder ||
-                    selectedCount > 0 ||
-                    movingPhotos
-                  }
-                  className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Move later"
-                  title="Move later"
-                >
-                  →
-                </button>
-              </div>
-            ) : null;
-
-          const adminDeleteButton =
-            isAdmin && isPhotoMode && photo.id ? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  void handleDeletePhoto(photo.id!, photo.name);
-                }}
-                disabled={isDeleting || movingPhotos}
-                className="absolute right-3 top-3 z-20 rounded bg-red-600/90 px-3 py-2 text-xs font-medium text-white shadow hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
-            ) : null;
-
-          const selectButton =
-            canBulkMove && photo.id ? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleSelectedPhoto(photo.id!);
-                }}
-                disabled={movingPhotos}
-                className={`absolute bottom-3 right-3 z-20 inline-flex h-11 items-center gap-2 rounded-full border-2 px-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${isSelected
-                    ? "border-white bg-emerald-800 text-white hover:bg-emerald-900"
-                    : "border-white bg-black/80 text-white hover:bg-black"
-                  }`}
-                aria-pressed={isSelected}
-                aria-label={isSelected ? "Deselect photo" : "Select photo"}
-                title={isSelected ? "Deselect photo" : "Select photo"}
-              >
-                <span aria-hidden="true">{isSelected ? "✓" : "○"}</span>
-                <span>{isSelected ? "Selected" : "Select"}</span>
-              </button>
-            ) : null;
-
-          const showCaption =
-            Boolean(photo.name) && (Boolean(photo.href) || isAdmin);
-
-          const caption = showCaption ? (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-              <p className="text-sm font-medium">
-                {photo.name}
-                {savingOrder ? " · Saving order..." : ""}
-              </p>
-            </div>
-          ) : null;
-
-          if (photo.href) {
-            return (
+                <div className="space-y-6">
+                  {smallAlbumRows.map(({ size, rowItems, startIndex }, rowIndex) => (
+                    <div
+                      key={`small-row-${rowIndex}`}
+                      className="grid gap-6"
+                      style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
+                    >
+                      {rowItems.map((photo, i) =>
+                        renderGridItem(photo, startIndex + i, { noWidthCap: true })
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              // Too few albums for a featured split to make sense. Stretching
+              // 1–4 cards to fill the full row width (1fr columns) made them
+              // huge, so instead cap each card's width and center the row —
+              // cards stay a sane size and the row itself is still centered
+              // rather than stranded on the left.
               <div
-                key={`${photo.id ?? photo.href}-${index}`}
-                className={`group relative overflow-hidden w-full ${cardWidthClass}`}
+                className="grid justify-center gap-6"
+                style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 320px))" }}
               >
-                <Link href={photo.href} className="block overflow-hidden">
-                  {image}
-                </Link>
-
-                {adminMoveControls}
-                {selectButton}
-                {caption}
+                {items.map((photo, index) =>
+                  renderGridItem(photo, index, { noWidthCap: true })
+                )}
               </div>
-            );
-          }
-
-          return (
-            <div
-              key={`${photo.id ?? photo.imgSrc}-${index}`}
-              className={`group relative overflow-hidden w-full ${cardWidthClass}`}
-            >
-              <button
-                type="button"
-                onClick={() => openLightboxForGridIndex(index)}
-                className="block w-full cursor-pointer overflow-hidden text-left"
-              >
-                {image}
-              </button>
-
-              {adminMoveControls}
-              {adminDeleteButton}
-              {selectButton}
-              {caption}
-            </div>
-          );
-        })}
-      </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div
+          className={`grid ${getGridColsClass(items.length)} gap-0 p-0 ${items.length <= 2 ? "justify-items-center" : ""
+            }`}
+        >
+          {items.map((photo, index) => renderGridItem(photo, index))}
+        </div>
+      )}
 
       {isPhotoMode ? (
         <Lightbox
