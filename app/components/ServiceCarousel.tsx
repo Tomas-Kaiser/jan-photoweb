@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 
 import { Link } from "@/app/i18n/routing";
 
@@ -11,6 +12,7 @@ type Service = {
     button: string;
     href?: string;
     isExternal?: boolean;
+    backgroundImage: string;
 };
 
 type Props = {
@@ -47,28 +49,37 @@ export default function ServiceCarousel({
                         data-service-card
                         className="carousel-item w-full md:w-[calc((100%-3rem)/3)]"
                     >
-                        <article className="flex min-h-80 w-full flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-                            <h2 className="text-2xl font-semibold text-gray-900">
-                                {service.title}
-                            </h2>
-                            <p className="mt-4 text-gray-600">{service.text}</p>
-                            {service.isExternal ? (
-                                <a
-                                    href={service.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
-                                >
-                                    {service.button}
-                                </a>
-                            ) : (
-                                <Link
-                                    href={service.href ? service.href : ''}
-                                    className="mt-auto pt-8 font-semibold text-gray-900 underline underline-offset-4 transition hover:text-gray-600"
-                                >
-                                    {service.button}
-                                </Link>
-                            )}
+                        <article className="relative flex min-h-80 w-full flex-col overflow-hidden rounded-xl border border-gray-200 p-8 shadow-sm">
+                            <Image
+                                src={service.backgroundImage}
+                                alt=""
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/50" />
+                            <div className="relative flex h-full flex-col text-white">
+                                <h2 className="text-2xl font-semibold">
+                                    {service.title}
+                                </h2>
+                                <p className="mt-4 text-gray-100">{service.text}</p>
+                                {service.isExternal ? (
+                                    <a
+                                        href={service.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-auto pt-8 font-semibold text-white underline underline-offset-4 transition hover:text-gray-200"
+                                    >
+                                        {service.button}
+                                    </a>
+                                ) : (
+                                    <Link
+                                        href={service.href ? service.href : ''}
+                                        className="mt-auto pt-8 font-semibold text-white underline underline-offset-4 transition hover:text-gray-200"
+                                    >
+                                        {service.button}
+                                    </Link>
+                                )}
+                            </div>
                         </article>
                     </div>
                 ))}

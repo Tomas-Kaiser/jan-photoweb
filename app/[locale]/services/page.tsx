@@ -19,21 +19,24 @@ export default async function ServicesPage() {
             title: t("couples.title"),
             text: t("couples.text"),
             button: t("couples.btn"),
-            href: "/contact?service=couples"
+            href: "/contact?service=couples",
+            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/302f0c15-eec3-4117-9d5b-34b80556fe00/card",
         },
         {
             id: "wedding",
             title: t("weddings.title"),
             text: t("weddings.text"),
             button: t("weddings.btn"),
-            href: "/contact?service=wedding"
+            href: "/contact?service=wedding",
+            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/8d0ba214-31f8-470f-a3f2-1f247a40f000/card",
         },
         {
             id: "voucher",
             title: t("voucher.title"),
             text: t("voucher.text"),
             button: t("voucher.btn"),
-            href: "/contact?service=voucher"
+            href: "/contact?service=voucher",
+            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/50b4c52f-bd2f-4a2a-e144-06fd782ebe00/card",
         },
         {
             id: "workshops",
@@ -42,6 +45,7 @@ export default async function ServicesPage() {
             button: t("workshops.btn"),
             href: "https://byjj.cz",
             isExternal: true,
+            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/367c8001-42ef-40cc-7523-2d4ed4f04600/card",
         },
     ];
 
