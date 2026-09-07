@@ -83,6 +83,21 @@
       "title": "Photography Workshops",
       "text": "Explore photography workshops and develop your skills.",
       "btn": "Visit byjj.cz"
+    },
+    "portrait": {
+      "title": "Portrait Photography",
+      "text": "Personal portraits that capture who you are — solo, professional, or creative.",
+      "btn": "Enquire About a Portrait Session"
+    },
+    "personalWorkshops": {
+      "title": "Personal Workshops",
+      "text": "One-on-one photography coaching tailored to your pace and goals.",
+      "btn": "Enquire About a Personal Workshop"
+    },
+    "other": {
+      "title": "Something Else in Mind?",
+      "text": "Freestyle sessions tailored to whatever you're looking for — just tell me your idea.",
+      "btn": "Tell Me What You Have in Mind"
     }
   },
   "aboutMe": {

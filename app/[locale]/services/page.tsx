@@ -47,6 +47,30 @@ export default async function ServicesPage() {
             isExternal: true,
             backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/367c8001-42ef-40cc-7523-2d4ed4f04600/card",
         },
+        {
+            id: "portrait",
+            title: t("portrait.title"),
+            text: t("portrait.text"),
+            button: t("portrait.btn"),
+            href: "/contact?service=portrait",
+            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/a4b24e0f-c98a-4558-10a6-e7ccdc3a3e00/card",
+        },
+        {
+            id: "personalWorkshops",
+            title: t("personalWorkshops.title"),
+            text: t("personalWorkshops.text"),
+            button: t("personalWorkshops.btn"),
+            href: "/contact?service=personal-workshops",
+            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/16f10ff3-5c79-4a1a-fb64-7a2932507400/card",
+        },
+        {
+            id: "other",
+            title: t("other.title"),
+            text: t("other.text"),
+            button: t("other.btn"),
+            href: "/contact?service=other",
+            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/50c784ff-0022-47f1-34d2-712371221800/full",
+        },
     ];
 
     return (

@@ -83,6 +83,21 @@
       "title": "Fotografické workshopy",
       "text": "Objevte fotografické workshopy a rozvíjejte své dovednosti.",
       "btn": "Navštívit byjj.cz"
+    },
+    "portrait": {
+      "title": "Portrétní fotografie",
+      "text": "Osobní portréty, které zachytí, kdo jste – ať už sólo, profesně nebo kreativně.",
+      "btn": "Poptat portrétní focení"
+    },
+    "personalWorkshops": {
+      "title": "Osobní workshopy",
+      "text": "Individuální fotografické konzultace přizpůsobené vašemu tempu a cílům.",
+      "btn": "Poptat osobní workshop"
+    },
+    "other": {
+      "title": "Máte jinou představu?",
+      "text": "Freestyle focení podle toho, co přesně hledáte – stačí mi napsat svůj nápad.",
+      "btn": "Napište mi, co máte na mysli"
     }
   },
   "aboutMe": {
