@@ -487,6 +487,7 @@ const PhotoGrid = ({
 
   return (
     <>
+      <div className="lg:px-8 xl:px-16">
       {canBulkMove ? (
         <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
           <div className="text-sm text-gray-700">
@@ -597,6 +598,7 @@ const PhotoGrid = ({
           {items.map((photo, index) => renderGridItem(photo, index))}
         </div>
       )}
+      </div>
 
       {isPhotoMode ? (
         <Lightbox

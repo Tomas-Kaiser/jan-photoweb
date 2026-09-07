@@ -3,7 +3,7 @@
   "common": {
     "home": "Domů",
     "albums": "Alba",
-    "services": "Služby",
+    "services": "Focení",
     "workshops": "Workshopy",
     "about": "O mně",
     "contact": "Kontakt",
@@ -25,7 +25,7 @@
     "services": {
       "heading": "Focení na míru",
       "text": "Vyberte si zážitek, který nejlépe vypráví váš příběh, a společně ho naplánujeme.",
-      "all": "Zobrazit všechny služby",
+      "all": "Zobrazit všechny druhy focení",
       "couples": {
         "title": "Párové focení",
         "text": "Přirozené fotografie, které zachytí vaše spojení.",
@@ -57,14 +57,11 @@
   "albums": {
     "heading": "Prozkoumejte naše ikonické kolekce",
     "text": "Každá z níže uvedených kolekcí zachycuje jedinečný příběh, náladu a okamžik. Prolistujte si je a objevte umění, které se skrývá za každým snímkem.",
-    "subalbums": "Podalba",
     "noContent": "Zatím žádný obsah."
   },
   "services": {
-    "heading": "Fotografické služby",
+    "heading": "Focení na míru",
     "text": "Každé focení přizpůsobuji lidem a okamžikům, na kterých vám záleží.",
-    "previous": "Předchozí služba",
-    "next": "Další služba",
     "couples": {
       "title": "Párové focení",
       "text": "Uvolněné focení pro vás dva, zaměřené na přirozené propojení a opravdové okamžiky.",
@@ -84,6 +81,21 @@
       "title": "Fotografické workshopy",
       "text": "Objevte fotografické workshopy a rozvíjejte své dovednosti.",
       "btn": "Navštívit byjj.cz"
+    },
+    "portrait": {
+      "title": "Portrétní fotografie",
+      "text": "Osobní portréty, které zachytí, kdo jste – ať už sólo, profesně nebo kreativně.",
+      "btn": "Poptat portrétní focení"
+    },
+    "personalWorkshops": {
+      "title": "Osobní workshopy",
+      "text": "Individuální fotografické konzultace přizpůsobené vašemu tempu a cílům.",
+      "btn": "Poptat osobní workshop"
+    },
+    "other": {
+      "title": "Máte jinou představu?",
+      "text": "Freestyle focení podle toho, co přesně hledáte – stačí mi napsat svůj nápad.",
+      "btn": "Napište mi, co máte na mysli"
     }
   },
   "aboutMe": {

@@ -236,21 +236,13 @@ const AlbumsPage = async ({ params }: Props) => {
             <div className="mx-auto my-6 h-1 w-16 rounded-full bg-gray-300" />
 
             {hasChildren ? (
-                <>
-                    <div className="mb-6 px-4 text-center">
-                        <h3 className="text-2xl font-bold text-gray-900">
-                            {t("subalbums")}
-                        </h3>
-                    </div>
-
-                    <PhotoGrid
-                        photos={childAlbumCards}
-                        isAdmin={isAdmin}
-                        reorderType="albums"
-                        reorderParentId={album.id}
-                        revalidatePaths={[`/${locale}/albums`, currentAlbumPath]}
-                    />
-                </>
+                <PhotoGrid
+                    photos={childAlbumCards}
+                    isAdmin={isAdmin}
+                    reorderType="albums"
+                    reorderParentId={album.id}
+                    revalidatePaths={[`/${locale}/albums`, currentAlbumPath]}
+                />
             ) : null}
 
             {hasPhotos ? (

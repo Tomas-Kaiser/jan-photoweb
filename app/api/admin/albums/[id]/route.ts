@@ -15,6 +15,7 @@ type Params = {
 type RequestBody = {
     name?: string;
     slug?: string;
+    coverCloudflareId?: string;
 };
 
 function normalize(value: unknown) {
@@ -107,6 +108,7 @@ export async function PATCH(req: Request, { params }: Params) {
         const name = normalize(body.name);
         const inputSlug = normalize(body.slug);
         const slug = slugify(inputSlug || name);
+        const coverCloudflareId = normalize(body.coverCloudflareId);
 
         if (!name) {
             return NextResponse.json(
@@ -122,6 +124,13 @@ export async function PATCH(req: Request, { params }: Params) {
             );
         }
 
+        if (body.coverCloudflareId !== undefined && !coverCloudflareId) {
+            return NextResponse.json(
+                { error: "Cover image is required" },
+                { status: 400 }
+            );
+        }
+
         const existingRows = await db
             .select({
                 id: albums.id,
@@ -129,6 +138,7 @@ export async function PATCH(req: Request, { params }: Params) {
                 slug: albums.slug,
                 path: albums.path,
                 parentId: albums.parentId,
+                coverCloudflareId: albums.coverCloudflareId,
             })
             .from(albums)
             .where(eq(albums.id, id))
@@ -185,6 +195,10 @@ export async function PATCH(req: Request, { params }: Params) {
             );
         }
 
+        const previousCoverCloudflareId = currentAlbum.coverCloudflareId;
+        const coverChanged =
+            !!coverCloudflareId && coverCloudflareId !== previousCoverCloudflareId;
+
         await db.transaction(async (tx) => {
             await tx
                 .update(albums)
@@ -192,6 +206,7 @@ export async function PATCH(req: Request, { params }: Params) {
                     name,
                     slug,
                     path: newPath,
+                    ...(coverChanged ? { coverCloudflareId } : {}),
                 })
                 .where(eq(albums.id, id));
 
@@ -207,6 +222,18 @@ export async function PATCH(req: Request, { params }: Params) {
                     )
                 );
         });
+
+        if (coverChanged && previousCoverCloudflareId) {
+            const result = await deleteCloudflareImage(previousCoverCloudflareId);
+
+            if (!result.ok && !result.missing) {
+                console.error("Failed to delete old cover image from Cloudflare:", {
+                    imageId: previousCoverCloudflareId,
+                    status: result.status,
+                    body: result.data,
+                });
+            }
+        }
 
         revalidatePath("/albums");
         revalidatePath(`/albums/${oldPath}`);

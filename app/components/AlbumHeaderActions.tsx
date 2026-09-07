@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 
 import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
 import CreateAlbumButton from "./CreateAlbumButton";
+import {
+    MAX_UPLOAD_BYTES,
+    optimizeImageForUpload,
+} from "../utils/optimize-image-for-upload";
 
 type AlbumOption = {
     id: string;
@@ -33,11 +37,15 @@ export default function AlbumHeaderActions({
 }: Props) {
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
+    const coverInputRef = useRef<HTMLInputElement>(null);
 
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(albumName);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
+
+    const [coverSaving, setCoverSaving] = useState(false);
+    const [coverMessage, setCoverMessage] = useState("");
 
     useEffect(() => {
         if (isEditing) {
@@ -92,6 +100,71 @@ export default function AlbumHeaderActions({
         setMessage("");
     }
 
+    async function handleCoverFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        e.target.value = "";
+
+        if (!file) return;
+
+        try {
+            setCoverSaving(true);
+            setCoverMessage("");
+
+            const optimized = await optimizeImageForUpload(file);
+
+            if (optimized.size > MAX_UPLOAD_BYTES) {
+                throw new Error(`Cover image is still too large after optimization: ${file.name}`);
+            }
+
+            const uploadUrlRes = await fetch("/api/admin/photos/upload-url", {
+                method: "POST",
+            });
+            const uploadUrlData = await uploadUrlRes.json().catch(() => null);
+
+            if (!uploadUrlRes.ok) {
+                throw new Error(uploadUrlData?.error || "Failed to create upload URL.");
+            }
+
+            const formData = new FormData();
+            formData.append("file", optimized, file.name);
+
+            const uploadRes = await fetch(uploadUrlData.uploadURL, {
+                method: "POST",
+                body: formData,
+            });
+            const uploadData = await uploadRes.json().catch(() => null);
+
+            if (!uploadRes.ok || uploadData?.success === false) {
+                throw new Error(`Failed to upload image: ${file.name}`);
+            }
+
+            const res = await fetch(`/api/admin/albums/${albumId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: albumName,
+                    coverCloudflareId: uploadUrlData.id,
+                }),
+            });
+
+            const data = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                throw new Error(data?.error || "Failed to update cover image.");
+            }
+
+            router.refresh();
+        } catch (error) {
+            setCoverMessage(
+                error instanceof Error ? error.message : "Something went wrong."
+            );
+        } finally {
+            setCoverSaving(false);
+        }
+    }
+
     async function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -140,6 +213,28 @@ export default function AlbumHeaderActions({
                                 >
                                     <span aria-hidden="true">✏️</span>
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setCoverMessage("");
+                                        coverInputRef.current?.click();
+                                    }}
+                                    disabled={coverSaving}
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900 disabled:opacity-50"
+                                    aria-label="Replace cover photo"
+                                    title="Replace cover photo"
+                                >
+                                    <span aria-hidden="true">
+                                        {coverSaving ? "⏳" : "🖼️"}
+                                    </span>
+                                </button>
+                                <input
+                                    ref={coverInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="sr-only"
+                                    onChange={handleCoverFileChange}
+                                />
                                 <CreateAlbumButton
                                     albums={albums}
                                     fixedParent={{
@@ -191,6 +286,12 @@ export default function AlbumHeaderActions({
             {message ? (
                 <div className="mt-3 inline-block rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
                     {message}
+                </div>
+            ) : null}
+
+            {coverMessage ? (
+                <div className="mt-3 inline-block rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                    {coverMessage}
                 </div>
             ) : null}
         </>
