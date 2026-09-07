@@ -128,7 +128,7 @@ export async function DELETE(req: Request) {
                 }
             );
 
-            if (!cfRes.ok) {
+            if (!cfRes.ok && cfRes.status !== 404) {
                 const cfText = await cfRes.text();
                 console.error("Cloudflare delete failed:", cfText);
 
