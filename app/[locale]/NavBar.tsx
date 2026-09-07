@@ -29,7 +29,7 @@ const NavBar = ({ isAdmin }: Props) => {
     <div className="sticky top-0 z-40 navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
         <a
-          href="https://www.facebook.com/share/jpVp8s9n6sw2aGfd"
+          href="https://www.facebook.com/honzik.hajek.5"
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-ghost btn-circle"
