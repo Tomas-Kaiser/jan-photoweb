@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 
 import { Link } from "@/app/i18n/routing";
@@ -27,21 +27,48 @@ export default function ServiceCarousel({
     nextLabel,
 }: Props) {
     const carouselRef = useRef<HTMLDivElement>(null);
+    const isPausedRef = useRef(false);
 
-    const scrollByCard = (direction: 1 | -1) => {
+    const scrollByCard = useCallback((direction: 1 | -1) => {
         const carousel = carouselRef.current;
         const card = carousel?.querySelector<HTMLElement>("[data-service-card]");
 
         if (!carousel || !card) return;
 
+        const step = card.offsetWidth + 24;
+        const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+
+        if (direction === 1 && carousel.scrollLeft + step >= maxScrollLeft - 1) {
+            carousel.scrollTo({ left: 0, behavior: "smooth" });
+            return;
+        }
+
         carousel.scrollBy({
-            left: direction * (card.offsetWidth + 24),
+            left: direction * step,
             behavior: "smooth",
         });
-    };
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (!isPausedRef.current) {
+                scrollByCard(1);
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [scrollByCard]);
 
     return (
-        <div className="relative mt-12">
+        <div
+            className="relative mt-12"
+            onMouseEnter={() => {
+                isPausedRef.current = true;
+            }}
+            onMouseLeave={() => {
+                isPausedRef.current = false;
+            }}
+        >
             <div ref={carouselRef} className="carousel w-full gap-6">
                 {services.map((service) => (
                     <div
