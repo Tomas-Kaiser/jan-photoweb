@@ -3,7 +3,7 @@
   "common": {
     "home": "Domů",
     "albums": "Alba",
-    "services": "Služby",
+    "services": "Focení",
     "workshops": "Workshopy",
     "about": "O mně",
     "contact": "Kontakt",
@@ -25,7 +25,7 @@
     "services": {
       "heading": "Focení na míru",
       "text": "Vyberte si zážitek, který nejlépe vypráví váš příběh, a společně ho naplánujeme.",
-      "all": "Zobrazit všechny služby",
+      "all": "Zobrazit všechny druhy focení",
       "couples": {
         "title": "Párové focení",
         "text": "Přirozené fotografie, které zachytí vaše spojení.",
@@ -61,7 +61,7 @@
     "noContent": "Zatím žádný obsah."
   },
   "services": {
-    "heading": "Fotografické služby",
+    "heading": "Focení na míru",
     "text": "Každé focení přizpůsobuji lidem a okamžikům, na kterých vám záleží.",
     "previous": "Předchozí služba",
     "next": "Další služba",
