@@ -419,8 +419,8 @@ const PhotoGrid = ({
           }}
           disabled={movingPhotos}
           className={`absolute bottom-3 right-3 z-20 inline-flex h-11 items-center gap-2 rounded-full border-2 px-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${isSelected
-              ? "border-white bg-emerald-800 text-white hover:bg-emerald-900"
-              : "border-white bg-black/80 text-white hover:bg-black"
+            ? "border-white bg-emerald-800 text-white hover:bg-emerald-900"
+            : "border-white bg-black/80 text-white hover:bg-black"
             }`}
           aria-pressed={isSelected}
           aria-label={isSelected ? "Deselect photo" : "Select photo"}
@@ -435,8 +435,12 @@ const PhotoGrid = ({
       Boolean(photo.name) && (Boolean(photo.href) || isAdmin);
 
     const caption = showCaption ? (
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-        <p className="text-sm font-medium">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-6 text-white">
+        <span className="mb-3 block h-px w-8 bg-white/80 transition-all duration-300 group-hover:w-14" />
+        <p
+          className="text-sm font-light uppercase tracking-[0.2em] md:text-md"
+          style={{ textShadow: "0 2px 10px rgba(0,0,0,0.7)" }}
+        >
           {photo.name}
           {savingOrder ? " · Saving order..." : ""}
         </p>
