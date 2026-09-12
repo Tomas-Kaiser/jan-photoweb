@@ -117,7 +117,10 @@
       "couplesMessage": "Mám zájem o párové focení.",
       "weddingMessage": "Mám zájem o svatební focení.",
       "voucherMessage": "Mám zájem o dárkový poukaz.",
-      "btn": "Odeslat zprávu"
+      "btn": "Odeslat zprávu",
+      "sending": "Odesílání…",
+      "success": "Děkuji za zprávu! Brzy se vám ozvu.",
+      "error": "Jejda, něco se nepovedlo. Zkuste to prosím znovu."
     }
   },
   "footer": {

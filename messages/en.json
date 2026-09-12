@@ -117,7 +117,10 @@
       "couplesMessage": "I would like to enquire about a couples photoshoot.",
       "weddingMessage": "I would like to enquire about wedding photography.",
       "voucherMessage": "I would like to request a gift voucher.",
-      "btn": "Send Message"
+      "btn": "Send Message",
+      "sending": "Sending…",
+      "success": "Thanks for reaching out! I'll get back to you soon.",
+      "error": "Oops, something went wrong on my end — please try again."
     }
   },
   "footer": {
