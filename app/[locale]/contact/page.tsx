@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -7,6 +7,7 @@ const ContactPage = () => {
     const t = useTranslations("contact");
     const searchParams = useSearchParams();
     const formRef = useRef<HTMLFormElement>(null);
+    const [renderedAt] = useState(() => Date.now());
     const service = searchParams.get("service");
     const serviceMessages = {
         couples: t("form.couplesMessage"),
@@ -43,6 +44,21 @@ const ContactPage = () => {
             </p>
 
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+                <input type="hidden" name="ts" value={renderedAt} />
+                <div
+                    style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
+                    aria-hidden="true"
+                >
+                    <label htmlFor="website">Leave this field blank</label>
+                    <input
+                        type="text"
+                        id="website"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                    />
+                </div>
+
                 {/* Name */}
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-800 mb-1">
