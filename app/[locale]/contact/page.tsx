@@ -1,12 +1,16 @@
 'use client';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+type Status = "idle" | "submitting" | "success" | "error";
 
 const ContactPage = () => {
     const t = useTranslations("contact");
     const searchParams = useSearchParams();
     const formRef = useRef<HTMLFormElement>(null);
+    const [renderedAt] = useState(() => Date.now());
+    const [status, setStatus] = useState<Status>("idle");
     const service = searchParams.get("service");
     const serviceMessages = {
         couples: t("form.couplesMessage"),
@@ -20,18 +24,23 @@ const ContactPage = () => {
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        setStatus("submitting");
         const formData = new FormData(e.currentTarget);
 
-        const response = await fetch('/api/contact', {
-            method: 'POST',
-            body: formData,
-        });
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                body: formData,
+            });
 
-        if (response.ok) {
-            alert('Message sent!');
-            formRef.current?.reset(); // ✅ Safely reset the form
-        } else {
-            alert('Something went wrong.');
+            if (response.ok) {
+                setStatus("success");
+                formRef.current?.reset();
+            } else {
+                setStatus("error");
+            }
+        } catch {
+            setStatus("error");
         }
     }
 
@@ -42,7 +51,41 @@ const ContactPage = () => {
                 {t("text")}
             </p>
 
+            <div aria-live="polite">
+                {status === "success" ? (
+                    <div
+                        role="alert"
+                        className="alert mb-6 border border-green-200 bg-green-50 text-green-800"
+                    >
+                        <span>{t("form.success")}</span>
+                    </div>
+                ) : null}
+                {status === "error" ? (
+                    <div
+                        role="alert"
+                        className="alert mb-6 border border-red-200 bg-red-50 text-red-800"
+                    >
+                        <span>{t("form.error")}</span>
+                    </div>
+                ) : null}
+            </div>
+
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+                <input type="hidden" name="ts" value={renderedAt} />
+                <div
+                    style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
+                    aria-hidden="true"
+                >
+                    <label htmlFor="website">Leave this field blank</label>
+                    <input
+                        type="text"
+                        id="website"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                    />
+                </div>
+
                 {/* Name */}
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-800 mb-1">
@@ -90,9 +133,10 @@ const ContactPage = () => {
                 <div className="flex justify-center">
                     <button
                         type="submit"
-                        className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-800 transition cursor-pointer"
+                        disabled={status === "submitting"}
+                        className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-800 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {t("form.btn")}
+                        {status === "submitting" ? t("form.sending") : t("form.btn")}
                     </button>
                 </div>
             </form>
