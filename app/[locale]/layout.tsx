@@ -21,6 +21,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
     title: "Jan Hájek - Photography",
     description: "Photography portfolio of Jan Hájek.",
+    icons: {
+        icon: "/icon.png",
+    },
 };
 
 const personStructuredData = {
