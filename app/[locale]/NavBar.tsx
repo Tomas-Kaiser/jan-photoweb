@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { faInstagram, faFacebook } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { signOut } from "next-auth/react";
@@ -140,6 +141,15 @@ const NavBar = ({ isAdmin }: Props) => {
             tabIndex={0}
             className="menu dropdown-content z-50 mt-3 w-56 rounded-box bg-base-100 p-2 shadow"
           >
+            <li className="pointer-events-none mb-1 flex items-center border-b border-base-200 pb-2">
+              <Image
+                src="/icon.png"
+                alt="Jan Hájek Photography"
+                width={80}
+                height={72}
+                className="h-auto w-16"
+              />
+            </li>
             <li>
               <Link href="/albums" onClick={blur}>
                 {t("albums")}
