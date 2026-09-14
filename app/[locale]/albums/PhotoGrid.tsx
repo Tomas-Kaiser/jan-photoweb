@@ -55,6 +55,7 @@ const PhotoGrid = ({
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set());
   const [destinationAlbumId, setDestinationAlbumId] = useState("");
   const [movingPhotos, setMovingPhotos] = useState(false);
+  const [savingPositionId, setSavingPositionId] = useState<string | null>(null);
 
   useEffect(() => {
     setItems(photos);
@@ -243,6 +244,72 @@ const PhotoGrid = ({
     await persistOrder(next);
   };
 
+  const POSITION_STEP = 10;
+
+  // Reads the vertical component of an objectPosition value (keyword,
+  // "topNN" shorthand, or raw "X% Y%" CSS) back out as a 0-100 percent,
+  // so nudging always has a numeric starting point to adjust from.
+  const getVerticalPercent = (value?: string): number => {
+    if (!value) return 50;
+
+    const trimmed = value.trim().toLowerCase();
+    if (trimmed === "center") return 50;
+    if (trimmed === "top") return 0;
+    if (trimmed === "bottom") return 100;
+
+    const topMatch = trimmed.match(/^top(\d{1,3})$/);
+    if (topMatch) return Number(topMatch[1]);
+
+    const parts = trimmed.split(/\s+/);
+    const verticalToken = parts.length > 1 ? parts[1] : parts[0];
+    const percentMatch = verticalToken?.match(/^(\d{1,3})%$/);
+    if (percentMatch) return Math.min(100, Number(percentMatch[1]));
+
+    return 50;
+  };
+
+  const persistPosition = async (itemId: string, objectPosition: string) => {
+    setSavingPositionId(itemId);
+
+    try {
+      const res = await fetch("/api/admin/albums/position", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ albumId: itemId, objectPosition, revalidatePaths }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to update position");
+      }
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Failed to update position");
+      setItems(photos);
+    } finally {
+      setSavingPositionId(null);
+    }
+  };
+
+  const nudgePosition = (itemId: string, direction: "up" | "down") => {
+    const current = items.find((item) => item.id === itemId);
+    if (!current) return;
+
+    const currentPercent = getVerticalPercent(current.objectPosition);
+    const delta = direction === "up" ? -POSITION_STEP : POSITION_STEP;
+    const nextPercent = Math.min(100, Math.max(0, currentPercent + delta));
+    const nextPosition = `50% ${nextPercent}%`;
+
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, objectPosition: nextPosition } : item
+      )
+    );
+
+    void persistPosition(itemId, nextPosition);
+  };
+
   const handleDeletePhoto = async (photoId: string, photoName?: string) => {
     const confirmed = window.confirm(
       `Delete this photo${photoName ? ` (${photoName})` : ""}?`
@@ -352,6 +419,8 @@ const PhotoGrid = ({
           ? "max-w-md"
           : "";
 
+    const isSavingPosition = savingPositionId === photo.id;
+
     const adminMoveControls =
       isAdmin && reorderType && photo.id ? (
         <div className="absolute left-3 top-3 z-20 flex gap-2">
@@ -389,6 +458,40 @@ const PhotoGrid = ({
           >
             →
           </button>
+
+          {isAlbumGridLayout ? (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  nudgePosition(photo.id!, "up");
+                }}
+                disabled={isSavingPosition || movingPhotos}
+                className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Shift image focus up"
+                title="Shift image focus up"
+              >
+                ↑
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  nudgePosition(photo.id!, "down");
+                }}
+                disabled={isSavingPosition || movingPhotos}
+                className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Shift image focus down"
+                title="Shift image focus down"
+              >
+                ↓
+              </button>
+            </>
+          ) : null}
         </div>
       ) : null;
 
