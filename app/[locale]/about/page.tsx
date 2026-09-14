@@ -24,10 +24,10 @@ const AboutPage = () => {
                     {/* Photo appears after intro on mobile, beside text on desktop */}
                     <div className="block lg:hidden mb-6">
                         <Image
-                            src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/full"
+                            src="/jan_long.JPEG"
                             alt="Jan Hájek"
                             width={600}
-                            height={800}
+                            height={900}
                             className="rounded-lg object-cover shadow-lg w-full h-auto"
                             priority
                         />
@@ -48,10 +48,10 @@ const AboutPage = () => {
                 {/* Photo for desktop view */}
                 <div className="w-full lg:w-1/2 hidden lg:block order-2 lg:order-1">
                     <Image
-                        src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/full"
+                        src="/jan_long.JPEG"
                         alt="Jan Hájek"
                         width={600}
-                        height={800}
+                        height={900}
                         className="rounded-lg object-cover shadow-lg w-full h-auto"
                         priority
                     />
