@@ -2,18 +2,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { albums } from "@/app/db/schema";
+import { slugify } from "@/app/lib/slugify";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-
-function slugify(value: string) {
-    return value
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-}
 
 type DbLikeError = {
     code?: string;

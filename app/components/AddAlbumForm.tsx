@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { slugify } from "@/app/lib/slugify";
 import {
     MAX_UPLOAD_BYTES,
     optimizeImageForUpload,
@@ -38,16 +39,6 @@ type UploadStage =
     | "optimizing-photo"
     | "uploading-photo"
     | "saving-photo";
-
-function slugify(value: string) {
-    return value
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-}
 
 export default function AddAlbumForm({
     albums = [],

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { albums } from "@/app/db/schema";
+import { slugify } from "@/app/lib/slugify";
 
 type Params = {
     params: Promise<{
@@ -21,17 +22,6 @@ type RequestBody = {
 function normalize(value: unknown) {
     if (typeof value !== "string") return "";
     return value.trim();
-}
-
-function slugify(value: string) {
-    return value
-        .toLowerCase()
-        .trim()
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .replace(/-{2,}/g, "-");
 }
 
 async function requireAdmin() {
