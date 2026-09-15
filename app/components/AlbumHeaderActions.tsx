@@ -23,6 +23,7 @@ type Props = {
   isAdmin: boolean;
   albums: AlbumOption[];
   hasSubalbums: boolean;
+  hasPhotos: boolean;
   locale: string;
 };
 
@@ -33,6 +34,7 @@ export default function AlbumHeaderActions({
   isAdmin,
   albums,
   hasSubalbums,
+  hasPhotos,
   locale,
 }: Props) {
   const router = useRouter();
@@ -251,6 +253,7 @@ export default function AlbumHeaderActions({
                   albumName={albumName}
                   redirectTo={`/${locale}/albums`}
                   hasSubalbums={hasSubalbums}
+                  hasPhotos={hasPhotos}
                   iconOnly
                 />
               </>

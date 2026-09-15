@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { albums } from "@/app/db/schema";
+import { albums, photos } from "@/app/db/schema";
 import { slugify } from "@/app/lib/slugify";
 
 type Params = {
@@ -281,6 +281,19 @@ export async function DELETE(_req: Request, { params }: Params) {
         if (childRows.length) {
             return NextResponse.json(
                 { error: "Cannot delete an album that still has subalbums." },
+                { status: 409 }
+            );
+        }
+
+        const photoRows = await db
+            .select({ id: photos.id })
+            .from(photos)
+            .where(eq(photos.albumId, album.id))
+            .limit(1);
+
+        if (photoRows.length) {
+            return NextResponse.json(
+                { error: "Cannot delete an album that still has photos." },
                 { status: 409 }
             );
         }

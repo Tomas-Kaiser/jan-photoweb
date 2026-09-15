@@ -12,6 +12,7 @@ type Props = {
   className?: string;
   iconOnly?: boolean;
   hasSubalbums?: boolean;
+  hasPhotos?: boolean;
 };
 
 const DeleteAlbumButton = ({
@@ -21,17 +22,20 @@ const DeleteAlbumButton = ({
   className,
   iconOnly = false,
   hasSubalbums = false,
+  hasPhotos = false,
 }: Props) => {
   const router = useRouter();
   const confirm = useConfirm();
   const { showError } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const isBlocked = hasSubalbums || hasPhotos;
+
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (hasSubalbums) return;
+    if (isBlocked) return;
 
     const confirmed = await confirm({
       title: "Delete album",
@@ -74,14 +78,20 @@ const DeleteAlbumButton = ({
     <button
       type="button"
       onClick={handleDelete}
-      disabled={isDeleting || hasSubalbums}
+      disabled={isDeleting || isBlocked}
       aria-label={
-        hasSubalbums ? "Delete album (remove subalbums first)" : "Delete album"
+        hasSubalbums
+          ? "Delete album (remove subalbums first)"
+          : hasPhotos
+            ? "Delete album (remove photos first)"
+            : "Delete album"
       }
       title={
         hasSubalbums
           ? "Remove or move subalbums before deleting this album"
-          : "Delete album"
+          : hasPhotos
+            ? "Remove or move photos before deleting this album"
+            : "Delete album"
       }
       className={
         className ??

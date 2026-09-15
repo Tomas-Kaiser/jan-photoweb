@@ -229,6 +229,7 @@ const AlbumsPage = async ({ params }: Props) => {
                     isAdmin={isAdmin}
                     albums={allAlbums}
                     hasSubalbums={hasChildren}
+                    hasPhotos={hasPhotos}
                     locale={locale}
                 />
             </div>
