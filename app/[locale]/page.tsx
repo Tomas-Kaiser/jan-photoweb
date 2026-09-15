@@ -11,7 +11,6 @@ import SwiperWrapper from "../components/swiper/SwiperWrapper";
 import { portfolioHighlights, photos as photosTable } from "../db/schema";
 import { db } from "../db";
 import ConsentGate from "../components/consent/ConsentGate";
-import CookieConsentBanner from "../components/consent/CookieConsentBanner";
 
 export const metadata: Metadata = {
   title: "Jan Hájek | Photography Portfolio & Workshops",

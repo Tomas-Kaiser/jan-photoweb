@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { albums } from "@/app/db/schema";
-import { asc, eq, inArray, isNull } from "drizzle-orm";
+import { asc, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 type ReorderItem = {
