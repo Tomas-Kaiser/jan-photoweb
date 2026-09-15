@@ -56,6 +56,11 @@ const PhotoGrid = ({
   const [destinationAlbumId, setDestinationAlbumId] = useState("");
   const [movingPhotos, setMovingPhotos] = useState(false);
   const [savingPositionId, setSavingPositionId] = useState<string | null>(null);
+  const [loadedKeys, setLoadedKeys] = useState<Set<string>>(new Set());
+
+  const markLoaded = (key: string) => {
+    setLoadedKeys((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+  };
 
   useEffect(() => {
     setItems(photos);
@@ -388,11 +393,17 @@ const PhotoGrid = ({
 
     const isDeleting = deletingPhotoId === photo.id;
     const isSelected = photo.id ? selectedPhotoIds.has(photo.id) : false;
+    const loadKey = photo.id ?? photo.imgSrc;
+    const isLoaded = loadedKeys.has(loadKey);
 
     const image = (
       <div
         className={`relative ${aspectClass} w-full overflow-hidden bg-black ${roundedClass}`}
       >
+        {!isLoaded ? (
+          <div className="skeleton absolute inset-0 h-full w-full rounded-none" />
+        ) : null}
+
         <Image
           src={photo.imgSrc}
           alt={photo.name ?? `Photo ${index + 1}`}
@@ -401,8 +412,10 @@ const PhotoGrid = ({
           style={{
             objectPosition: normalizePhotoPosition(photo.objectPosition),
           }}
-          className={`object-cover transition-transform duration-300 ${isSelected ? "scale-[1.02] opacity-80" : "group-hover:scale-105"
-            }`}
+          onLoad={() => markLoaded(loadKey)}
+          onError={() => markLoaded(loadKey)}
+          className={`object-cover transition-[opacity,transform] duration-300 ${!isLoaded ? "opacity-0" : isSelected ? "opacity-80" : "opacity-100"
+            } ${isSelected ? "scale-[1.02]" : "group-hover:scale-105"}`}
         />
 
         {isSelected ? (
