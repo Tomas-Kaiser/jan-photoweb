@@ -400,9 +400,10 @@ const PhotoGrid = ({
       <div
         className={`relative ${aspectClass} w-full overflow-hidden bg-black ${roundedClass}`}
       >
-        {!isLoaded ? (
-          <div className="skeleton absolute inset-0 h-full w-full rounded-none" />
-        ) : null}
+        <div
+          className={`skeleton pointer-events-none absolute inset-0 h-full w-full rounded-none transition-opacity duration-300 ${isLoaded ? "opacity-0" : "opacity-100"
+            }`}
+        />
 
         <Image
           src={photo.imgSrc}
