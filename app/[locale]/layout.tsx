@@ -2,76 +2,85 @@ import { setRequestLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
 import { auth } from "@/auth";
+import { routing } from "../i18n/routing";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
 import CookieConsentBanner from "../components/consent/CookieConsentBanner";
+import { ToastProvider } from "../components/Toast";
+import { ConfirmProvider } from "../components/ConfirmDialog";
 
 const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-    title: "Jan Hájek - Photography",
-    description: "Photography portfolio of Jan Hájek.",
-    icons: {
-        icon: "/icon.png",
-    },
+  title: "Jan Hájek - Photography",
+  description: "Photography portfolio of Jan Hájek.",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 const personStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: "Jan Hájek",
-    alternateName: "Jan Hajek",
-    jobTitle: "Photographer",
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Jan Hájek",
+  alternateName: "Jan Hajek",
+  jobTitle: "Photographer",
 };
 
 type ConsentValue = "accepted" | "rejected" | null;
 
 export default async function LocaleLayout(props: {
-    children: React.ReactNode;
-    params: Promise<{ locale: string }>;
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-    const { locale } = await props.params;
+  const { locale } = await props.params;
 
-    setRequestLocale(locale);
-    const messages = await getMessages();
+  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
+    notFound();
+  }
 
-    const session = await auth();
-    const isAdmin =
-        !!session?.user &&
-        (session.user as { role?: string }).role === "admin";
+  setRequestLocale(locale);
+  const messages = await getMessages();
 
-    const cookieStore = await cookies();
-    const rawConsent = cookieStore.get("site_consent_external")?.value;
+  const session = await auth();
+  const isAdmin =
+    !!session?.user && (session.user as { role?: string }).role === "admin";
 
-    const initialConsent: ConsentValue =
-        rawConsent === "accepted" || rawConsent === "rejected"
-            ? rawConsent
-            : null;
+  const cookieStore = await cookies();
+  const rawConsent = cookieStore.get("site_consent_external")?.value;
 
-    return (
-        <div className={`${geistSans.variable} ${geistMono.variable}`}>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(personStructuredData),
-                }}
-            />
-            <NextIntlClientProvider locale={locale} messages={messages}>
-                <NavBar isAdmin={isAdmin} />
-                {props.children}
-                <Footer />
-                <CookieConsentBanner initialConsent={initialConsent} />
-            </NextIntlClientProvider>
-        </div>
-    );
+  const initialConsent: ConsentValue =
+    rawConsent === "accepted" || rawConsent === "rejected" ? rawConsent : null;
+
+  return (
+    <div className={`${geistSans.variable} ${geistMono.variable}`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(personStructuredData),
+        }}
+      />
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <ToastProvider>
+          <ConfirmProvider>
+            <NavBar isAdmin={isAdmin} />
+            {props.children}
+            <Footer />
+            <CookieConsentBanner initialConsent={initialConsent} />
+          </ConfirmProvider>
+        </ToastProvider>
+      </NextIntlClientProvider>
+    </div>
+  );
 }
