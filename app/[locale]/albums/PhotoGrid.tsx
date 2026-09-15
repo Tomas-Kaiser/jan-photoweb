@@ -7,6 +7,23 @@ import { useRouter } from "next/navigation";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
 
 type GridItem = {
@@ -23,6 +40,56 @@ type MoveAlbumOption = {
   id: string;
   name: string;
   path: string;
+};
+
+type UseSortableReturn = ReturnType<typeof useSortable>;
+
+type SortableRenderProps = {
+  setNodeRef: (node: HTMLElement | null) => void;
+  style: React.CSSProperties;
+  handle: {
+    ref: (node: HTMLElement | null) => void;
+    attributes: UseSortableReturn["attributes"];
+    listeners: UseSortableReturn["listeners"];
+  };
+};
+
+const SortablePhotoItem = ({
+  id,
+  disabled,
+  children,
+}: {
+  id: string;
+  disabled?: boolean;
+  children: (sortable: SortableRenderProps) => React.ReactNode;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id, disabled });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 30 : undefined,
+    position: "relative",
+  };
+
+  return (
+    <>
+      {children({
+        setNodeRef,
+        style,
+        handle: { ref: setActivatorNodeRef, attributes, listeners },
+      })}
+    </>
+  );
 };
 
 interface Props {
@@ -52,7 +119,9 @@ const PhotoGrid = ({
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
   const [savingOrder, setSavingOrder] = useState(false);
 
-  const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set());
+  const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [destinationAlbumId, setDestinationAlbumId] = useState("");
   const [movingPhotos, setMovingPhotos] = useState(false);
   const [savingPositionId, setSavingPositionId] = useState<string | null>(null);
@@ -76,7 +145,10 @@ const PhotoGrid = ({
   const isPhotoMode = reorderType === "photos";
   const canBulkMove = isAdmin && isPhotoMode && Boolean(reorderAlbumId);
 
-  const lightboxItems = useMemo(() => items.filter((item) => !item.href), [items]);
+  const lightboxItems = useMemo(
+    () => items.filter((item) => !item.href),
+    [items],
+  );
 
   const slides = lightboxItems.map((photo) => ({
     src: toFullVariant(photo.imgSrc),
@@ -108,7 +180,7 @@ const PhotoGrid = ({
     if (selectedCount > 0) return;
 
     const lightboxIndex = lightboxItems.findIndex(
-      (photo) => photo.imgSrc === item.imgSrc && photo.name === item.name
+      (photo) => photo.imgSrc === item.imgSrc && photo.name === item.name,
     );
 
     if (lightboxIndex === -1) return;
@@ -183,7 +255,7 @@ const PhotoGrid = ({
     if (!reorderType) return;
 
     const reorderable = nextItems.filter(
-      (item): item is GridItem & { id: string } => Boolean(item.id)
+      (item): item is GridItem & { id: string } => Boolean(item.id),
     );
 
     setSavingOrder(true);
@@ -197,21 +269,21 @@ const PhotoGrid = ({
       const payload =
         reorderType === "albums"
           ? {
-            parentId: reorderParentId ?? null,
-            items: reorderable.map((item, index) => ({
-              id: item.id,
-              sortOrder: index,
-            })),
-            revalidatePaths,
-          }
+              parentId: reorderParentId ?? null,
+              items: reorderable.map((item, index) => ({
+                id: item.id,
+                sortOrder: index,
+              })),
+              revalidatePaths,
+            }
           : {
-            albumId: reorderAlbumId,
-            items: reorderable.map((item, index) => ({
-              id: item.id,
-              sortOrder: index,
-            })),
-            revalidatePaths,
-          };
+              albumId: reorderAlbumId,
+              items: reorderable.map((item, index) => ({
+                id: item.id,
+                sortOrder: index,
+              })),
+              revalidatePaths,
+            };
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -249,6 +321,34 @@ const PhotoGrid = ({
     await persistOrder(next);
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const sortablePhotoIds = useMemo(
+    () =>
+      items
+        .filter((item): item is GridItem & { id: string } => Boolean(item.id))
+        .map((item) => item.id),
+    [items],
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((item) => item.id === active.id);
+    const newIndex = items.findIndex((item) => item.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const next = arrayMove(items, oldIndex, newIndex);
+    setItems(next);
+    void persistOrder(next);
+  };
+
   const POSITION_STEP = 10;
 
   // Reads the vertical component of an objectPosition value (keyword,
@@ -280,7 +380,11 @@ const PhotoGrid = ({
       const res = await fetch("/api/admin/albums/position", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ albumId: itemId, objectPosition, revalidatePaths }),
+        body: JSON.stringify({
+          albumId: itemId,
+          objectPosition,
+          revalidatePaths,
+        }),
       });
 
       const data = await res.json();
@@ -290,7 +394,9 @@ const PhotoGrid = ({
       }
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Failed to update position");
+      alert(
+        error instanceof Error ? error.message : "Failed to update position",
+      );
       setItems(photos);
     } finally {
       setSavingPositionId(null);
@@ -308,8 +414,8 @@ const PhotoGrid = ({
 
     setItems((prev) =>
       prev.map((item) =>
-        item.id === itemId ? { ...item, objectPosition: nextPosition } : item
-      )
+        item.id === itemId ? { ...item, objectPosition: nextPosition } : item,
+      ),
     );
 
     void persistPosition(itemId, nextPosition);
@@ -317,7 +423,7 @@ const PhotoGrid = ({
 
   const handleDeletePhoto = async (photoId: string, photoName?: string) => {
     const confirmed = window.confirm(
-      `Delete this photo${photoName ? ` (${photoName})` : ""}?`
+      `Delete this photo${photoName ? ` (${photoName})` : ""}?`,
     );
 
     if (!confirmed) return;
@@ -364,10 +470,17 @@ const PhotoGrid = ({
     const rows = Math.ceil(total / maxPerRow);
     const base = Math.floor(total / rows);
     const remainder = total % rows;
-    return Array.from({ length: rows }, (_, i) => base + (i < remainder ? 1 : 0));
+    return Array.from(
+      { length: rows },
+      (_, i) => base + (i < remainder ? 1 : 0),
+    );
   };
 
-  const buildBalancedRows = (source: GridItem[], startIndex: number, maxPerRow: number) => {
+  const buildBalancedRows = (
+    source: GridItem[],
+    startIndex: number,
+    maxPerRow: number,
+  ) => {
     const rowSizes = getBalancedRowSizes(source.length, maxPerRow);
     let cursor = 0;
     return rowSizes.map((size) => {
@@ -385,7 +498,12 @@ const PhotoGrid = ({
   const renderGridItem = (
     photo: GridItem,
     index: number,
-    options?: { aspectClass?: string; roundedClass?: string; noWidthCap?: boolean }
+    options?: {
+      aspectClass?: string;
+      roundedClass?: string;
+      noWidthCap?: boolean;
+    },
+    sortable?: SortableRenderProps,
   ) => {
     const aspectClass = options?.aspectClass ?? "aspect-[3/4]";
     const roundedClass = options?.roundedClass ?? "";
@@ -401,8 +519,9 @@ const PhotoGrid = ({
         className={`relative ${aspectClass} w-full overflow-hidden bg-black ${roundedClass}`}
       >
         <div
-          className={`skeleton pointer-events-none absolute inset-0 h-full w-full rounded-none transition-opacity duration-300 ${isLoaded ? "opacity-0" : "opacity-100"
-            }`}
+          className={`skeleton pointer-events-none absolute inset-0 h-full w-full rounded-none transition-opacity duration-300 ${
+            isLoaded ? "opacity-0" : "opacity-100"
+          }`}
         />
 
         <Image
@@ -415,8 +534,9 @@ const PhotoGrid = ({
           }}
           onLoad={() => markLoaded(loadKey)}
           onError={() => markLoaded(loadKey)}
-          className={`object-cover transition-[opacity,transform] duration-300 ${!isLoaded ? "opacity-0" : isSelected ? "opacity-80" : "opacity-100"
-            } ${isSelected ? "scale-[1.02]" : "group-hover:scale-105"}`}
+          className={`object-cover transition-[opacity,transform] duration-300 ${
+            !isLoaded ? "opacity-0" : isSelected ? "opacity-80" : "opacity-100"
+          } ${isSelected ? "scale-[1.02]" : "group-hover:scale-105"}`}
         />
 
         {isSelected ? (
@@ -434,80 +554,111 @@ const PhotoGrid = ({
           : "";
 
     const isSavingPosition = savingPositionId === photo.id;
+    const dragDisabled = savingOrder || selectedCount > 0 || movingPhotos;
 
-    const adminMoveControls =
-      isAdmin && reorderType && photo.id ? (
-        <div className="absolute left-3 top-3 z-20 flex gap-2">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              void moveItem(index, index - 1);
-            }}
-            disabled={index === 0 || savingOrder || selectedCount > 0 || movingPhotos}
-            className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Move earlier"
-            title="Move earlier"
+    const dragHandle =
+      sortable && photo.id ? (
+        <button
+          type="button"
+          ref={sortable.handle.ref}
+          {...sortable.handle.attributes}
+          {...sortable.handle.listeners}
+          disabled={dragDisabled}
+          className="absolute left-3 top-3 z-20 flex h-10 w-10 touch-none cursor-grab items-center justify-center rounded border border-white/10 bg-green-800/80 text-white shadow-md transition hover:bg-green-900 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Drag to reorder"
+          title="Drag to reorder"
+        >
+          <svg
+            viewBox="0 0 20 20"
+            className="h-4 w-4 fill-current"
+            aria-hidden="true"
           >
-            ←
-          </button>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              void moveItem(index, index + 1);
-            }}
-            disabled={
-              index === items.length - 1 ||
-              savingOrder ||
-              selectedCount > 0 ||
-              movingPhotos
-            }
-            className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Move later"
-            title="Move later"
-          >
-            →
-          </button>
-
-          {isAlbumGridLayout ? (
-            <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  nudgePosition(photo.id!, "up");
-                }}
-                disabled={isSavingPosition || movingPhotos}
-                className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Shift image focus up"
-                title="Shift image focus up"
-              >
-                ↑
-              </button>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  nudgePosition(photo.id!, "down");
-                }}
-                disabled={isSavingPosition || movingPhotos}
-                className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Shift image focus down"
-                title="Shift image focus down"
-              >
-                ↓
-              </button>
-            </>
-          ) : null}
-        </div>
+            <circle cx="7" cy="5" r="1.4" />
+            <circle cx="13" cy="5" r="1.4" />
+            <circle cx="7" cy="10" r="1.4" />
+            <circle cx="13" cy="10" r="1.4" />
+            <circle cx="7" cy="15" r="1.4" />
+            <circle cx="13" cy="15" r="1.4" />
+          </svg>
+        </button>
       ) : null;
+
+    const adminMoveControls = sortable ? (
+      dragHandle
+    ) : isAdmin && reorderType && photo.id ? (
+      <div className="absolute left-3 top-3 z-20 flex gap-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void moveItem(index, index - 1);
+          }}
+          disabled={
+            index === 0 || savingOrder || selectedCount > 0 || movingPhotos
+          }
+          className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Move earlier"
+          title="Move earlier"
+        >
+          ←
+        </button>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void moveItem(index, index + 1);
+          }}
+          disabled={
+            index === items.length - 1 ||
+            savingOrder ||
+            selectedCount > 0 ||
+            movingPhotos
+          }
+          className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Move later"
+          title="Move later"
+        >
+          →
+        </button>
+
+        {isAlbumGridLayout ? (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                nudgePosition(photo.id!, "up");
+              }}
+              disabled={isSavingPosition || movingPhotos}
+              className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Shift image focus up"
+              title="Shift image focus up"
+            >
+              ↑
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                nudgePosition(photo.id!, "down");
+              }}
+              disabled={isSavingPosition || movingPhotos}
+              className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Shift image focus down"
+              title="Shift image focus down"
+            >
+              ↓
+            </button>
+          </>
+        ) : null}
+      </div>
+    ) : null;
 
     const adminDeleteButton =
       isAdmin && isPhotoMode && photo.id ? (
@@ -535,10 +686,11 @@ const PhotoGrid = ({
             toggleSelectedPhoto(photo.id!);
           }}
           disabled={movingPhotos}
-          className={`absolute bottom-3 right-3 z-20 inline-flex h-11 items-center gap-2 rounded-full border-2 px-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${isSelected
-            ? "border-white bg-emerald-800 text-white hover:bg-emerald-900"
-            : "border-white bg-black/80 text-white hover:bg-black"
-            }`}
+          className={`absolute bottom-3 right-3 z-20 inline-flex h-11 items-center gap-2 rounded-full border-2 px-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            isSelected
+              ? "border-white bg-emerald-800 text-white hover:bg-emerald-900"
+              : "border-white bg-black/80 text-white hover:bg-black"
+          }`}
           aria-pressed={isSelected}
           aria-label={isSelected ? "Deselect photo" : "Select photo"}
           title={isSelected ? "Deselect photo" : "Select photo"}
@@ -548,8 +700,7 @@ const PhotoGrid = ({
         </button>
       ) : null;
 
-    const showCaption =
-      Boolean(photo.name) && (Boolean(photo.href) || isAdmin);
+    const showCaption = Boolean(photo.name) && (Boolean(photo.href) || isAdmin);
 
     const caption = showCaption ? (
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-6 text-white">
@@ -568,6 +719,8 @@ const PhotoGrid = ({
       return (
         <div
           key={`${photo.id ?? photo.href}-${index}`}
+          ref={sortable?.setNodeRef}
+          style={sortable?.style}
           className={`group relative overflow-hidden w-full ${cardWidthClass} ${roundedClass}`}
         >
           <Link href={photo.href} className="block overflow-hidden">
@@ -584,6 +737,8 @@ const PhotoGrid = ({
     return (
       <div
         key={`${photo.id ?? photo.imgSrc}-${index}`}
+        ref={sortable?.setNodeRef}
+        style={sortable?.style}
         className={`group relative overflow-hidden w-full ${cardWidthClass} ${roundedClass}`}
       >
         <button
@@ -605,116 +760,163 @@ const PhotoGrid = ({
   return (
     <>
       <div className="lg:px-8 xl:px-16">
-      {canBulkMove ? (
-        <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
-          <div className="text-sm text-gray-700">
-            {selectedCount > 0
-              ? `${selectedCount} photo${selectedCount > 1 ? "s" : ""} selected`
-              : "Select photos to move them to another album"}
+        {canBulkMove ? (
+          <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+            <div className="text-sm text-gray-700">
+              {selectedCount > 0
+                ? `${selectedCount} photo${selectedCount > 1 ? "s" : ""} selected`
+                : "Select photos to move them to another album"}
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <select
+                value={destinationAlbumId}
+                onChange={(e) => setDestinationAlbumId(e.target.value)}
+                disabled={movingPhotos}
+                className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              >
+                <option value="">Choose destination album</option>
+                {movableAlbums.map((album) => (
+                  <option key={album.id} value={album.id}>
+                    {album.name}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={() => void handleMoveSelectedPhotos()}
+                disabled={!selectedCount || !destinationAlbumId || movingPhotos}
+                className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              >
+                {movingPhotos ? "Moving..." : "Move selected"}
+              </button>
+
+              <button
+                type="button"
+                onClick={clearSelection}
+                disabled={!selectedCount || movingPhotos}
+                className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 disabled:opacity-50"
+              >
+                Clear
+              </button>
+            </div>
           </div>
+        ) : null}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <select
-              value={destinationAlbumId}
-              onChange={(e) => setDestinationAlbumId(e.target.value)}
-              disabled={movingPhotos}
-              className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
+        {isAlbumGridLayout ? (
+          <>
+            <div
+              className={`grid ${getGridColsClass(items.length)} gap-4 p-0 lg:hidden`}
             >
-              <option value="">Choose destination album</option>
-              {movableAlbums.map((album) => (
-                <option key={album.id} value={album.id}>
-                  {album.name}
-                </option>
-              ))}
-            </select>
+              {items.map((photo, index) =>
+                renderGridItem(photo, index, { noWidthCap: true }),
+              )}
+            </div>
 
-            <button
-              type="button"
-              onClick={() => void handleMoveSelectedPhotos()}
-              disabled={!selectedCount || !destinationAlbumId || movingPhotos}
-              className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-            >
-              {movingPhotos ? "Moving..." : "Move selected"}
-            </button>
-
-            <button
-              type="button"
-              onClick={clearSelection}
-              disabled={!selectedCount || movingPhotos}
-              className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 disabled:opacity-50"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {isAlbumGridLayout ? (
-        <>
-          <div
-            className={`grid ${getGridColsClass(items.length)} gap-4 p-0 lg:hidden`}
-          >
-            {items.map((photo, index) => renderGridItem(photo, index, { noWidthCap: true }))}
-          </div>
-
-          <div className="hidden lg:block">
-            {useFeaturedAlbumSplit ? (
-              <>
-                {/*
+            <div className="hidden lg:block">
+              {useFeaturedAlbumSplit ? (
+                <>
+                  {/*
                   With enough albums to fill a real row underneath, the
                   first two get a featured "big" row on top. The rest are
                   balanced into evenly-sized rows below — each row gets its
                   own column count, so a leftover row never ends up with a
                   single stretched or left-stranded card.
                 */}
-                <div className="mb-6 grid grid-cols-2 gap-6">
-                  {items.slice(0, 2).map((photo, index) =>
-                    renderGridItem(photo, index, {
-                      aspectClass: "aspect-[16/10]",
-                      noWidthCap: true,
-                    })
+                  <div className="mb-6 grid grid-cols-2 gap-6">
+                    {items.slice(0, 2).map((photo, index) =>
+                      renderGridItem(photo, index, {
+                        aspectClass: "aspect-[16/10]",
+                        noWidthCap: true,
+                      }),
+                    )}
+                  </div>
+
+                  <div className="space-y-6">
+                    {smallAlbumRows.map(
+                      ({ size, rowItems, startIndex }, rowIndex) => (
+                        <div
+                          key={`small-row-${rowIndex}`}
+                          className="grid gap-6"
+                          style={{
+                            gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+                          }}
+                        >
+                          {rowItems.map((photo, i) =>
+                            renderGridItem(photo, startIndex + i, {
+                              noWidthCap: true,
+                            }),
+                          )}
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </>
+              ) : (
+                // Too few albums for a featured split to make sense. Stretching
+                // 1–4 cards to fill the full row width (1fr columns) made them
+                // huge, so instead cap each card's width and center the row —
+                // cards stay a sane size and the row itself is still centered
+                // rather than stranded on the left.
+                <div
+                  className="grid justify-center gap-6"
+                  style={{
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(240px, 320px))",
+                  }}
+                >
+                  {items.map((photo, index) =>
+                    renderGridItem(photo, index, { noWidthCap: true }),
                   )}
                 </div>
-
-                <div className="space-y-6">
-                  {smallAlbumRows.map(({ size, rowItems, startIndex }, rowIndex) => (
-                    <div
-                      key={`small-row-${rowIndex}`}
-                      className="grid gap-6"
-                      style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
-                    >
-                      {rowItems.map((photo, i) =>
-                        renderGridItem(photo, startIndex + i, { noWidthCap: true })
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              // Too few albums for a featured split to make sense. Stretching
-              // 1–4 cards to fill the full row width (1fr columns) made them
-              // huge, so instead cap each card's width and center the row —
-              // cards stay a sane size and the row itself is still centered
-              // rather than stranded on the left.
+              )}
+            </div>
+          </>
+        ) : isAdmin && isPhotoMode ? (
+          <DndContext
+            id={`photo-reorder-${reorderAlbumId ?? "grid"}`}
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sortablePhotoIds}
+              strategy={rectSortingStrategy}
+            >
               <div
-                className="grid justify-center gap-6"
-                style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 320px))" }}
+                className={`grid ${getGridColsClass(items.length)} gap-0 p-0 ${
+                  items.length <= 2 ? "justify-items-center" : ""
+                }`}
               >
-                {items.map((photo, index) =>
-                  renderGridItem(photo, index, { noWidthCap: true })
-                )}
+                {items.map((photo, index) => (
+                  <SortablePhotoItem
+                    key={photo.id ?? `${photo.imgSrc}-${index}`}
+                    id={photo.id ?? `${photo.imgSrc}-${index}`}
+                    disabled={
+                      !photo.id ||
+                      savingOrder ||
+                      selectedCount > 0 ||
+                      movingPhotos
+                    }
+                  >
+                    {(sortable) =>
+                      renderGridItem(photo, index, undefined, sortable)
+                    }
+                  </SortablePhotoItem>
+                ))}
               </div>
-            )}
-          </div>
-        </>
-      ) : (
-        <div
-          className={`grid ${getGridColsClass(items.length)} gap-0 p-0 ${items.length <= 2 ? "justify-items-center" : ""
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div
+            className={`grid ${getGridColsClass(items.length)} gap-0 p-0 ${
+              items.length <= 2 ? "justify-items-center" : ""
             }`}
-        >
-          {items.map((photo, index) => renderGridItem(photo, index))}
-        </div>
-      )}
+          >
+            {items.map((photo, index) => renderGridItem(photo, index))}
+          </div>
+        )}
       </div>
 
       {isPhotoMode ? (
