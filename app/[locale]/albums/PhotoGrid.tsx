@@ -25,6 +25,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
+import { useConfirm } from "@/app/components/ConfirmDialog";
+import { useToast } from "@/app/components/Toast";
 
 type GridItem = {
   id?: string;
@@ -112,6 +114,8 @@ const PhotoGrid = ({
   moveAlbums = [],
 }: Props) => {
   const router = useRouter();
+  const confirm = useConfirm();
+  const { showError } = useToast();
 
   const [items, setItems] = useState<GridItem[]>(photos);
   const [isOpen, setIsOpen] = useState(false);
@@ -208,14 +212,14 @@ const PhotoGrid = ({
 
   const handleMoveSelectedPhotos = async () => {
     if (!destinationAlbumId) {
-      alert("Please choose a destination album.");
+      showError("Please choose a destination album.");
       return;
     }
 
     const photoIds = Array.from(selectedPhotoIds);
 
     if (!photoIds.length) {
-      alert("Please select at least one photo.");
+      showError("Please select at least one photo.");
       return;
     }
 
@@ -245,7 +249,9 @@ const PhotoGrid = ({
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Failed to move photos");
+      showError(
+        error instanceof Error ? error.message : "Failed to move photos",
+      );
     } finally {
       setMovingPhotos(false);
     }
@@ -302,7 +308,9 @@ const PhotoGrid = ({
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Failed to save order");
+      showError(
+        error instanceof Error ? error.message : "Failed to save order",
+      );
       setItems(photos);
     } finally {
       setSavingOrder(false);
@@ -394,7 +402,7 @@ const PhotoGrid = ({
       }
     } catch (error) {
       console.error(error);
-      alert(
+      showError(
         error instanceof Error ? error.message : "Failed to update position",
       );
       setItems(photos);
@@ -422,9 +430,12 @@ const PhotoGrid = ({
   };
 
   const handleDeletePhoto = async (photoId: string, photoName?: string) => {
-    const confirmed = window.confirm(
-      `Delete this photo${photoName ? ` (${photoName})` : ""}?`,
-    );
+    const confirmed = await confirm({
+      title: "Delete photo",
+      message: `Delete this photo${photoName ? ` (${photoName})` : ""}? This can't be undone.`,
+      confirmLabel: "Delete",
+      danger: true,
+    });
 
     if (!confirmed) return;
 
@@ -448,7 +459,9 @@ const PhotoGrid = ({
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Failed to delete photo");
+      showError(
+        error instanceof Error ? error.message : "Failed to delete photo",
+      );
     } finally {
       setDeletingPhotoId(null);
     }
