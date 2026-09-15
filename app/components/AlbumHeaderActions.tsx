@@ -288,13 +288,13 @@ export default function AlbumHeaderActions({
       ) : null}
 
       {message ? (
-        <div className="mt-3 inline-block rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+        <div className="mt-3 inline-block rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {message}
         </div>
       ) : null}
 
       {coverMessage ? (
-        <div className="mt-3 inline-block rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+        <div className="mt-3 inline-block rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {coverMessage}
         </div>
       ) : null}

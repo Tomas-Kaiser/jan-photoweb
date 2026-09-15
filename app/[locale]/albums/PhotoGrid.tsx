@@ -610,7 +610,7 @@ const PhotoGrid = ({
           disabled={
             index === 0 || savingOrder || selectedCount > 0 || movingPhotos
           }
-          className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-green-800/80 text-sm font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Move earlier"
           title="Move earlier"
         >
@@ -630,48 +630,52 @@ const PhotoGrid = ({
             selectedCount > 0 ||
             movingPhotos
           }
-          className="rounded border border-white/10 bg-green-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-green-800/80 text-sm font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Move later"
           title="Move later"
         >
           →
         </button>
-
-        {isAlbumGridLayout ? (
-          <>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                nudgePosition(photo.id!, "up");
-              }}
-              disabled={isSavingPosition || movingPhotos}
-              className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Shift image focus up"
-              title="Shift image focus up"
-            >
-              ↑
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                nudgePosition(photo.id!, "down");
-              }}
-              disabled={isSavingPosition || movingPhotos}
-              className="rounded border border-white/10 bg-blue-800/80 px-3 py-2 text-xs font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Shift image focus down"
-              title="Shift image focus down"
-            >
-              ↓
-            </button>
-          </>
-        ) : null}
       </div>
     ) : null;
+
+    // Rendered in the opposite corner from the move controls so the two
+    // unrelated actions (reorder vs. nudging the cover's focus point) don't
+    // crowd into the same tiny stack, which was easy to mis-tap on mobile.
+    const positionControls =
+      isAdmin && isAlbumGridLayout && photo.id ? (
+        <div className="absolute right-3 top-3 z-20 flex gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              nudgePosition(photo.id!, "up");
+            }}
+            disabled={isSavingPosition || movingPhotos}
+            className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-blue-800/80 text-sm font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Shift image focus up"
+            title="Shift image focus up"
+          >
+            ↑
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              nudgePosition(photo.id!, "down");
+            }}
+            disabled={isSavingPosition || movingPhotos}
+            className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-blue-800/80 text-sm font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Shift image focus down"
+            title="Shift image focus down"
+          >
+            ↓
+          </button>
+        </div>
+      ) : null;
 
     const adminDeleteButton =
       isAdmin && isPhotoMode && photo.id ? (
@@ -741,6 +745,7 @@ const PhotoGrid = ({
           </Link>
 
           {adminMoveControls}
+          {positionControls}
           {selectButton}
           {caption}
         </div>
