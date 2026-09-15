@@ -30,6 +30,13 @@ There is no test suite in this repo. `pnpm build` runs database migrations as
 a side effect — only run it when that's intended and `DATABASE_URL` is
 configured. Do not run destructive database commands unless explicitly asked.
 
+The user often has their own `pnpm dev` running in a separate terminal. Before
+starting a dev server to verify a change, check for an existing one (e.g.
+`ps aux | grep "next dev"`) and prefer reusing it (hit its port directly)
+instead of spawning a second one. If you do start your own, track its exact
+PID and stop only that PID afterward — never stop a dev server by pattern
+(e.g. `pkill -f "next dev"`), since that kills the user's server too.
+
 ## Architecture
 
 ### Routing & i18n
