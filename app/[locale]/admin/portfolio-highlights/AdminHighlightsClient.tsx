@@ -36,11 +36,11 @@ type Props = {
   addAlbums: AddAlbum[];
 };
 
-type AddMode = "existing" | "upload";
+type AddMode = "existing" | "upload" | null;
 
 export default function AdminHighlightsClient({ photos, addAlbums }: Props) {
   const t = useTranslations("admin");
-  const [mode, setMode] = useState<AddMode>("existing");
+  const [mode, setMode] = useState<AddMode>(null);
   const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null);
   const [pendingPhotoId, setPendingPhotoId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -62,6 +62,17 @@ export default function AdminHighlightsClient({ photos, addAlbums }: Props) {
   const handleBackToAlbums = () => {
     setActiveAlbumId(null);
     setPendingPhotoId(null);
+  };
+
+  const handleChangeMethod = () => {
+    setMode(null);
+    setActiveAlbumId(null);
+    setPendingPhotoId(null);
+    setUploadFile(null);
+    setUploadError(null);
+    if (uploadInputRef.current) {
+      uploadInputRef.current.value = "";
+    }
   };
 
   const handleAdd = (photoId: string) => {
@@ -136,32 +147,51 @@ export default function AdminHighlightsClient({ photos, addAlbums }: Props) {
           {t("highlights.addHighlight")}
         </h2>
 
-        <div className="mb-4 flex gap-2">
-          <button
-            type="button"
-            onClick={() => setMode("existing")}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-              mode === "existing"
-                ? "bg-gray-900 text-white"
-                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            {t("highlights.chooseExistingPhoto")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("upload")}
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-              mode === "upload"
-                ? "bg-gray-900 text-white"
-                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            {t("highlights.uploadNewPhoto")}
-          </button>
-        </div>
+        {mode === null ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setMode("existing")}
+              className="flex flex-col items-start gap-2 rounded-2xl border border-gray-200 p-4 text-left transition hover:border-gray-400 hover:shadow-sm"
+            >
+              <span aria-hidden="true" className="text-2xl">
+                🖼️
+              </span>
+              <span className="font-semibold text-gray-900">
+                {t("highlights.chooseExistingPhoto")}
+              </span>
+              <span className="text-sm text-gray-600">
+                {t("highlights.selectAlbum")}
+              </span>
+            </button>
 
-        {mode === "upload" ? (
+            <button
+              type="button"
+              onClick={() => setMode("upload")}
+              className="flex flex-col items-start gap-2 rounded-2xl border border-gray-200 p-4 text-left transition hover:border-gray-400 hover:shadow-sm"
+            >
+              <span aria-hidden="true" className="text-2xl">
+                ⬆️
+              </span>
+              <span className="font-semibold text-gray-900">
+                {t("highlights.uploadNewPhoto")}
+              </span>
+              <span className="text-sm text-gray-600">
+                {t("highlights.uploadHint")}
+              </span>
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleChangeMethod}
+            className="mb-4 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            ← {t("highlights.changeMethod")}
+          </button>
+        )}
+
+        {mode === null ? null : mode === "upload" ? (
           <form onSubmit={handleUploadSubmit} className="space-y-4">
             <p className="text-sm text-gray-600">
               {t("highlights.uploadHint")}

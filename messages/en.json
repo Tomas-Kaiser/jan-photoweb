@@ -198,6 +198,7 @@
       "moveRight": "Move right",
       "remove": "Remove",
       "chooseExistingPhoto": "Choose existing photo",
+      "changeMethod": "Change method",
       "uploadNewPhoto": "Upload new photo",
       "uploadHint": "Upload a photo from your computer and add it straight to the highlights.",
       "chooseFile": "Choose photo",
