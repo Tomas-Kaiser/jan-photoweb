@@ -30,12 +30,18 @@ const DeleteAlbumButton = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isBlocked = hasSubalbums || hasPhotos;
+  const blockedReason = hasSubalbums
+    ? "Remove or move subalbums before deleting this album."
+    : "Remove or move photos before deleting this album.";
 
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (isBlocked) return;
+    if (isBlocked) {
+      showError(blockedReason);
+      return;
+    }
 
     const confirmed = await confirm({
       title: "Delete album",
@@ -78,7 +84,8 @@ const DeleteAlbumButton = ({
     <button
       type="button"
       onClick={handleDelete}
-      disabled={isDeleting || isBlocked}
+      disabled={isDeleting}
+      aria-disabled={isBlocked}
       aria-label={
         hasSubalbums
           ? "Delete album (remove subalbums first)"
@@ -96,8 +103,12 @@ const DeleteAlbumButton = ({
       className={
         className ??
         (iconOnly
-          ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-          : "rounded bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60")
+          ? isBlocked
+            ? "inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 transition"
+            : "inline-flex h-10 w-10 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          : isBlocked
+            ? "cursor-not-allowed rounded bg-gray-200 px-4 py-2 text-sm font-medium text-gray-500 transition"
+            : "rounded bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60")
       }
     >
       {iconOnly ? (
