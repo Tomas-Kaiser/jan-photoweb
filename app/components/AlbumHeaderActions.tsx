@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
 import CreateAlbumButton from "./CreateAlbumButton";
+import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
 import {
   MAX_UPLOAD_BYTES,
   optimizeImageForUpload,
@@ -25,6 +27,8 @@ type Props = {
   hasSubalbums: boolean;
   hasPhotos: boolean;
   locale: string;
+  coverImgSrc: string;
+  coverObjectPosition?: string;
 };
 
 export default function AlbumHeaderActions({
@@ -36,6 +40,8 @@ export default function AlbumHeaderActions({
   hasSubalbums,
   hasPhotos,
   locale,
+  coverImgSrc,
+  coverObjectPosition,
 }: Props) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -217,26 +223,6 @@ export default function AlbumHeaderActions({
                 >
                   <span aria-hidden="true">✏️</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCoverMessage("");
-                    coverInputRef.current?.click();
-                  }}
-                  disabled={coverSaving}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900 disabled:opacity-50"
-                  aria-label="Replace cover photo"
-                  title="Replace cover photo"
-                >
-                  <span aria-hidden="true">{coverSaving ? "⏳" : "🖼️"}</span>
-                </button>
-                <input
-                  ref={coverInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={handleCoverFileChange}
-                />
                 <CreateAlbumButton
                   albums={albums}
                   fixedParent={{
@@ -285,6 +271,49 @@ export default function AlbumHeaderActions({
         <p className="mt-2 text-xs text-gray-500">
           Press Enter to save or Escape to cancel.
         </p>
+      ) : null}
+
+      {isAdmin ? (
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <p className="text-sm font-medium text-gray-700">
+            Preview cover photo
+          </p>
+
+          <div className="group relative h-32 w-32 overflow-hidden rounded-2xl border border-gray-200 shadow-sm sm:h-40 sm:w-40">
+            <Image
+              src={coverImgSrc}
+              alt={`${albumName} cover`}
+              fill
+              sizes="160px"
+              style={{
+                objectPosition: normalizePhotoPosition(coverObjectPosition),
+              }}
+              className="object-cover"
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setCoverMessage("");
+                coverInputRef.current?.click();
+              }}
+              disabled={coverSaving}
+              className="absolute bottom-1.5 right-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-black/60 text-white shadow-md backdrop-blur transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="Change cover photo"
+              title="Change cover photo"
+            >
+              <span aria-hidden="true">{coverSaving ? "⏳" : "🖼️"}</span>
+            </button>
+
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handleCoverFileChange}
+            />
+          </div>
+        </div>
       ) : null}
 
       {message ? (
