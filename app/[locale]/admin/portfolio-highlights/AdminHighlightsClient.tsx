@@ -1,11 +1,27 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import SwiperWrapper, {
-  PortfolioHighlightPhoto,
-} from "@/app/components/swiper/SwiperWrapper";
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { PortfolioHighlightPhoto } from "@/app/components/swiper/SwiperWrapper";
+import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
 import {
   MAX_UPLOAD_BYTES,
   optimizeImageForUpload,
@@ -13,10 +29,59 @@ import {
 import {
   addPortfolioHighlight,
   deletePortfolioHighlight,
-  movePortfolioHighlightLeft,
-  movePortfolioHighlightRight,
+  reorderPortfolioHighlights,
   uploadPhotoToHighlights,
 } from "./actions";
+
+type SortableCardProps = {
+  id: string;
+  disabled?: boolean;
+  children: (sortable: {
+    setNodeRef: (node: HTMLElement | null) => void;
+    style: React.CSSProperties;
+    isDragging: boolean;
+    handleRef: (node: HTMLElement | null) => void;
+    handleAttributes: ReturnType<typeof useSortable>["attributes"];
+    handleListeners: ReturnType<typeof useSortable>["listeners"];
+  }) => React.ReactNode;
+};
+
+const SortableHighlightCard = ({
+  id,
+  disabled,
+  children,
+}: SortableCardProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id, disabled });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 30 : undefined,
+    position: "relative",
+  };
+
+  return (
+    <>
+      {children({
+        setNodeRef,
+        style,
+        isDragging,
+        handleRef: setActivatorNodeRef,
+        handleAttributes: attributes,
+        handleListeners: listeners,
+      })}
+    </>
+  );
+};
 
 type AlbumPhoto = {
   id: string;
@@ -49,6 +114,49 @@ export default function AdminHighlightsClient({ photos, addAlbums }: Props) {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, startUploadTransition] = useTransition();
+
+  const [items, setItems] = useState(photos);
+  const [selectedPhoto, setSelectedPhoto] =
+    useState<PortfolioHighlightPhoto | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [isReordering, startReorderTransition] = useTransition();
+
+  useEffect(() => {
+    setItems(photos);
+  }, [photos]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((item) => item.id === active.id);
+    const newIndex = items.findIndex((item) => item.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const next = arrayMove(items, oldIndex, newIndex);
+    setItems(next);
+
+    startReorderTransition(async () => {
+      await reorderPortfolioHighlights(next.map((item) => item.id));
+    });
+  };
+
+  const handleRemove = (highlightId: string) => {
+    setRemovingId(highlightId);
+    setItems((prev) => prev.filter((item) => item.id !== highlightId));
+
+    startReorderTransition(async () => {
+      await deletePortfolioHighlight(highlightId);
+      setRemovingId(null);
+    });
+  };
 
   const activeAlbum = useMemo(
     () => addAlbums.find((album) => album.id === activeAlbumId) ?? null,
@@ -371,17 +479,152 @@ export default function AdminHighlightsClient({ photos, addAlbums }: Props) {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold">
-          {t("highlights.currentHighlights")}
-        </h2>
-        <SwiperWrapper
-          photos={photos}
-          isAdmin
-          onDelete={deletePortfolioHighlight}
-          onMoveLeft={movePortfolioHighlightLeft}
-          onMoveRight={movePortfolioHighlightRight}
-        />
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">
+            {t("highlights.currentHighlights")}
+          </h2>
+          {items.length > 0 ? (
+            <p className="text-sm text-gray-500">
+              {t("highlights.dragToReorderHint")}
+            </p>
+          ) : null}
+        </div>
+
+        {items.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            {t("highlights.noHighlightsYet")}
+          </p>
+        ) : (
+          <DndContext
+            id="portfolio-highlights-reorder"
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={items.map((item) => item.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {items.map((photo) => (
+                  <SortableHighlightCard
+                    key={photo.id}
+                    id={photo.id}
+                    disabled={isReordering}
+                  >
+                    {({
+                      setNodeRef,
+                      style,
+                      isDragging,
+                      handleRef,
+                      handleAttributes,
+                      handleListeners,
+                    }) => (
+                      <div
+                        ref={setNodeRef}
+                        style={style}
+                        className={`group relative overflow-hidden rounded-xl border bg-white ${
+                          isDragging
+                            ? "border-gray-400 shadow-lg"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPhoto(photo)}
+                          className="block w-full cursor-pointer overflow-hidden text-left"
+                        >
+                          <div className="relative aspect-[3/4] w-full bg-gray-100">
+                            <Image
+                              src={photo.cardSrc}
+                              alt={photo.alt}
+                              fill
+                              className="object-cover"
+                              style={{
+                                objectPosition: normalizePhotoPosition(
+                                  photo.objectPosition,
+                                ),
+                              }}
+                              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 200px"
+                            />
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          ref={handleRef}
+                          {...handleAttributes}
+                          {...handleListeners}
+                          disabled={isReordering}
+                          className="absolute left-2 top-2 z-20 flex h-9 w-9 touch-none cursor-grab items-center justify-center rounded border border-white/10 bg-green-800/80 text-white shadow-md transition hover:bg-green-900 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
+                          aria-label={t("grid.dragToReorder")}
+                          title={t("grid.dragToReorder")}
+                        >
+                          <svg
+                            viewBox="0 0 20 20"
+                            className="h-4 w-4 fill-current"
+                            aria-hidden="true"
+                          >
+                            <circle cx="7" cy="5" r="1.4" />
+                            <circle cx="13" cy="5" r="1.4" />
+                            <circle cx="7" cy="10" r="1.4" />
+                            <circle cx="13" cy="10" r="1.4" />
+                            <circle cx="7" cy="15" r="1.4" />
+                            <circle cx="13" cy="15" r="1.4" />
+                          </svg>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleRemove(photo.id);
+                          }}
+                          disabled={removingId === photo.id}
+                          className="absolute right-2 top-2 z-20 rounded bg-red-600/90 px-2.5 py-1.5 text-xs font-medium text-white shadow hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {removingId === photo.id
+                            ? t("common.deleting")
+                            : t("highlights.remove")}
+                        </button>
+                      </div>
+                    )}
+                  </SortableHighlightCard>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
       </div>
+
+      {selectedPhoto ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setSelectedPhoto(null)}
+            className="absolute right-4 top-4 text-3xl font-bold text-white hover:cursor-pointer"
+          >
+            ×
+          </button>
+
+          <div
+            className="relative h-[80vh] w-[90vw] max-w-5xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={selectedPhoto.fullSrc}
+              alt={selectedPhoto.alt}
+              fill
+              className="rounded-lg object-contain"
+              sizes="90vw"
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

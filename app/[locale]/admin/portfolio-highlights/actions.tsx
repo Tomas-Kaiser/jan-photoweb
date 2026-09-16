@@ -152,73 +152,22 @@ export async function deletePortfolioHighlight(highlightId: string) {
   revalidatePath("/");
 }
 
-export async function movePortfolioHighlightLeft(highlightId: string) {
+// Persists a full new ordering in one shot (drag-and-drop hands us the
+// complete list already in its new order), rather than repeated adjacent
+// swaps — one write per row, but only ever called once per drag gesture.
+export async function reorderPortfolioHighlights(
+  orderedHighlightIds: string[],
+) {
   await requireAdmin();
 
-  const rows = await db
-    .select({
-      id: portfolioHighlights.id,
-      photoId: portfolioHighlights.photoId,
-      sortOrder: portfolioHighlights.sortOrder,
-      createdAt: portfolioHighlights.createdAt,
-    })
-    .from(portfolioHighlights)
-    .orderBy(
-      asc(portfolioHighlights.sortOrder),
-      asc(portfolioHighlights.createdAt),
-    );
-
-  const index = rows.findIndex((row) => row.id === highlightId);
-  if (index <= 0) return;
-
-  const reordered = [...rows];
-  [reordered[index - 1], reordered[index]] = [
-    reordered[index],
-    reordered[index - 1],
-  ];
-
-  for (const [sortOrder, row] of reordered.entries()) {
-    await db
-      .update(portfolioHighlights)
-      .set({ sortOrder })
-      .where(eq(portfolioHighlights.id, row.id));
-  }
-
-  revalidatePath("/admin/portfolio-highlights");
-  revalidatePath("/");
-}
-
-export async function movePortfolioHighlightRight(highlightId: string) {
-  await requireAdmin();
-
-  const rows = await db
-    .select({
-      id: portfolioHighlights.id,
-      photoId: portfolioHighlights.photoId,
-      sortOrder: portfolioHighlights.sortOrder,
-      createdAt: portfolioHighlights.createdAt,
-    })
-    .from(portfolioHighlights)
-    .orderBy(
-      asc(portfolioHighlights.sortOrder),
-      asc(portfolioHighlights.createdAt),
-    );
-
-  const index = rows.findIndex((row) => row.id === highlightId);
-  if (index === -1 || index >= rows.length - 1) return;
-
-  const reordered = [...rows];
-  [reordered[index], reordered[index + 1]] = [
-    reordered[index + 1],
-    reordered[index],
-  ];
-
-  for (const [sortOrder, row] of reordered.entries()) {
-    await db
-      .update(portfolioHighlights)
-      .set({ sortOrder })
-      .where(eq(portfolioHighlights.id, row.id));
-  }
+  await db.transaction(async (tx) => {
+    for (const [index, highlightId] of orderedHighlightIds.entries()) {
+      await tx
+        .update(portfolioHighlights)
+        .set({ sortOrder: index })
+        .where(eq(portfolioHighlights.id, highlightId));
+    }
+  });
 
   revalidatePath("/admin/portfolio-highlights");
   revalidatePath("/");

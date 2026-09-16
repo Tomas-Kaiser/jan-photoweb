@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   EffectCoverflow,
@@ -26,47 +25,11 @@ export interface PortfolioHighlightPhoto {
 
 interface Props {
   photos: PortfolioHighlightPhoto[];
-  isAdmin?: boolean;
-  onDelete?: (highlightId: string) => Promise<void>;
-  onMoveLeft?: (highlightId: string) => Promise<void>;
-  onMoveRight?: (highlightId: string) => Promise<void>;
 }
 
-const SwiperWrapper = ({
-  photos,
-  isAdmin = false,
-  onDelete,
-  onMoveLeft,
-  onMoveRight,
-}: Props) => {
-  const t = useTranslations("admin");
+const SwiperWrapper = ({ photos }: Props) => {
   const [selectedPhoto, setSelectedPhoto] =
     useState<PortfolioHighlightPhoto | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  const handleDelete = (highlightId: string) => {
-    if (!onDelete) return;
-
-    startTransition(async () => {
-      await onDelete(highlightId);
-    });
-  };
-
-  const handleMoveLeft = (highlightId: string) => {
-    if (!onMoveLeft) return;
-
-    startTransition(async () => {
-      await onMoveLeft(highlightId);
-    });
-  };
-
-  const handleMoveRight = (highlightId: string) => {
-    if (!onMoveRight) return;
-
-    startTransition(async () => {
-      await onMoveRight(highlightId);
-    });
-  };
 
   return (
     <>
@@ -89,64 +52,35 @@ const SwiperWrapper = ({
           scale: 0.94,
         }}
         modules={[EffectCoverflow, Autoplay, Navigation, Pagination]}
-        className={`${styles.photoSwiper} ${isAdmin ? styles.photoSwiperAdmin : styles.photoSwiperPublic} mx-auto w-full max-w-6xl`}
+        className={`${styles.photoSwiper} ${styles.photoSwiperPublic} mx-auto w-full max-w-6xl`}
       >
         {photos.map((photo, index) => (
           <SwiperSlide
             key={photo.id}
             className="!w-[220px] sm:!w-[280px] lg:!w-[320px]"
           >
-            {({ isActive }) => (
-              <div className="overflow-hidden rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPhoto(photo)}
-                  className="block w-full cursor-pointer overflow-hidden rounded-xl"
-                >
-                  <div className="relative h-[280px] w-full overflow-hidden rounded-xl sm:h-[340px] lg:h-[420px]">
-                    <Image
-                      src={photo.cardSrc}
-                      alt={photo.alt || `Photo ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      style={{ objectPosition: normalizePhotoPosition(photo.objectPosition) }}
-                      sizes="(max-width: 640px) 220px, (max-width: 1024px) 280px, 320px"
-                    />
-                  </div>
-                </button>
-
-                {isAdmin && isActive && (
-                  <div className="mt-3 flex flex-wrap justify-center gap-2 px-2 pb-2">
-                    <button
-                      type="button"
-                      onClick={() => handleMoveLeft(photo.id)}
-                      disabled={isPending}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isPending ? t("highlights.working") : t("highlights.moveLeft")}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleMoveRight(photo.id)}
-                      disabled={isPending}
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isPending ? t("highlights.working") : t("highlights.moveRight")}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(photo.id)}
-                      disabled={isPending}
-                      className="rounded-lg bg-red-600 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isPending ? t("highlights.working") : t("highlights.remove")}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="overflow-hidden rounded-xl">
+              <button
+                type="button"
+                onClick={() => setSelectedPhoto(photo)}
+                className="block w-full cursor-pointer overflow-hidden rounded-xl"
+              >
+                <div className="relative h-[280px] w-full overflow-hidden rounded-xl sm:h-[340px] lg:h-[420px]">
+                  <Image
+                    src={photo.cardSrc}
+                    alt={photo.alt || `Photo ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    style={{
+                      objectPosition: normalizePhotoPosition(
+                        photo.objectPosition,
+                      ),
+                    }}
+                    sizes="(max-width: 640px) 220px, (max-width: 1024px) 280px, 320px"
+                  />
+                </div>
+              </button>
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>
