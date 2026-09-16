@@ -4,8 +4,10 @@
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function AdminLoginPage() {
+  const t = useTranslations("admin");
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/en/admin";
 
@@ -27,7 +29,7 @@ export default function AdminLoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError(t("login.invalidCredentials"));
       setSubmitting(false);
       return;
     }
@@ -37,15 +39,13 @@ export default function AdminLoginPage() {
 
   return (
     <section className="mx-auto max-w-md px-6 py-20">
-      <h1 className="mb-2 text-3xl font-bold">Admin login</h1>
-      <p className="mb-8 text-sm text-gray-600">
-        Sign in to access the admin area.
-      </p>
+      <h1 className="mb-2 text-3xl font-bold">{t("login.title")}</h1>
+      <p className="mb-8 text-sm text-gray-600">{t("login.subtitle")}</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="mb-2 block text-sm font-medium">
-            Email
+            {t("login.email")}
           </label>
           <input
             id="email"
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
 
         <div>
           <label htmlFor="password" className="mb-2 block text-sm font-medium">
-            Password
+            {t("login.password")}
           </label>
           <input
             id="password"
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
           disabled={submitting}
           className="w-full rounded-md bg-black px-4 py-3 text-white transition disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitting ? "Signing in..." : "Sign in"}
+          {submitting ? t("login.signingIn") : t("login.signIn")}
         </button>
       </form>
     </section>

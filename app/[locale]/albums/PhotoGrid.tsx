@@ -24,6 +24,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useTranslations } from "next-intl";
 import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { useToast } from "@/app/components/Toast";
@@ -113,6 +114,7 @@ const PhotoGrid = ({
   revalidatePaths = [],
   moveAlbums = [],
 }: Props) => {
+  const t = useTranslations("admin");
   const router = useRouter();
   const confirm = useConfirm();
   const { showError } = useToast();
@@ -229,14 +231,14 @@ const PhotoGrid = ({
 
   const handleMoveSelectedPhotos = async () => {
     if (!destinationAlbumId) {
-      showError("Please choose a destination album.");
+      showError(t("grid.chooseDestinationRequired"));
       return;
     }
 
     const photoIds = Array.from(selectedPhotoIds);
 
     if (!photoIds.length) {
-      showError("Please select at least one photo.");
+      showError(t("form.selectAtLeastOnePhoto"));
       return;
     }
 
@@ -259,7 +261,7 @@ const PhotoGrid = ({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to move photos");
+        throw new Error(data?.error || t("grid.moveFailed"));
       }
 
       exitSelectionMode();
@@ -267,7 +269,7 @@ const PhotoGrid = ({
     } catch (error) {
       console.error(error);
       showError(
-        error instanceof Error ? error.message : "Failed to move photos",
+        error instanceof Error ? error.message : t("grid.moveFailed"),
       );
     } finally {
       setMovingPhotos(false);
@@ -319,14 +321,14 @@ const PhotoGrid = ({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to save order");
+        throw new Error(data?.error || t("grid.saveOrderFailed"));
       }
 
       router.refresh();
     } catch (error) {
       console.error(error);
       showError(
-        error instanceof Error ? error.message : "Failed to save order",
+        error instanceof Error ? error.message : t("grid.saveOrderFailed"),
       );
       setItems(photos);
     } finally {
@@ -415,12 +417,12 @@ const PhotoGrid = ({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to update position");
+        throw new Error(data?.error || t("grid.updatePositionFailed"));
       }
     } catch (error) {
       console.error(error);
       showError(
-        error instanceof Error ? error.message : "Failed to update position",
+        error instanceof Error ? error.message : t("grid.updatePositionFailed"),
       );
       setItems(photos);
     } finally {
@@ -448,9 +450,11 @@ const PhotoGrid = ({
 
   const handleDeletePhoto = async (photoId: string, photoName?: string) => {
     const confirmed = await confirm({
-      title: "Delete photo",
-      message: `Delete this photo${photoName ? ` (${photoName})` : ""}? This can't be undone.`,
-      confirmLabel: "Delete",
+      title: t("grid.deletePhotoTitle"),
+      message: t("grid.deletePhotoMessage", {
+        name: photoName ? ` (${photoName})` : "",
+      }),
+      confirmLabel: t("common.delete"),
       danger: true,
     });
 
@@ -470,14 +474,14 @@ const PhotoGrid = ({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to delete photo");
+        throw new Error(data?.error || t("grid.deletePhotoFailed"));
       }
 
       router.refresh();
     } catch (error) {
       console.error(error);
       showError(
-        error instanceof Error ? error.message : "Failed to delete photo",
+        error instanceof Error ? error.message : t("grid.deletePhotoFailed"),
       );
     } finally {
       setDeletingPhotoId(null);
@@ -595,8 +599,8 @@ const PhotoGrid = ({
           {...sortable.handle.listeners}
           disabled={dragDisabled}
           className="absolute left-3 top-3 z-20 flex h-10 w-10 touch-none cursor-grab items-center justify-center rounded border border-white/10 bg-green-800/80 text-white shadow-md transition hover:bg-green-900 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Drag to reorder"
-          title="Drag to reorder"
+          aria-label={t("grid.dragToReorder")}
+          title={t("grid.dragToReorder")}
         >
           <svg
             viewBox="0 0 20 20"
@@ -628,8 +632,8 @@ const PhotoGrid = ({
             index === 0 || savingOrder || selectedCount > 0 || movingPhotos
           }
           className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-green-800/80 text-sm font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Move earlier"
-          title="Move earlier"
+          aria-label={t("grid.moveEarlier")}
+          title={t("grid.moveEarlier")}
         >
           ←
         </button>
@@ -648,8 +652,8 @@ const PhotoGrid = ({
             movingPhotos
           }
           className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-green-800/80 text-sm font-medium text-white shadow-md hover:bg-green-900 active:bg-green-950 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Move later"
-          title="Move later"
+          aria-label={t("grid.moveLater")}
+          title={t("grid.moveLater")}
         >
           →
         </button>
@@ -671,8 +675,8 @@ const PhotoGrid = ({
             }}
             disabled={isSavingPosition || movingPhotos}
             className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-blue-800/80 text-sm font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Shift image focus up"
-            title="Shift image focus up"
+            aria-label={t("grid.shiftFocusUp")}
+            title={t("grid.shiftFocusUp")}
           >
             ↑
           </button>
@@ -686,8 +690,8 @@ const PhotoGrid = ({
             }}
             disabled={isSavingPosition || movingPhotos}
             className="flex h-9 w-9 items-center justify-center rounded border border-white/10 bg-blue-800/80 text-sm font-medium text-white shadow-md hover:bg-blue-900 active:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Shift image focus down"
-            title="Shift image focus down"
+            aria-label={t("grid.shiftFocusDown")}
+            title={t("grid.shiftFocusDown")}
           >
             ↓
           </button>
@@ -706,7 +710,7 @@ const PhotoGrid = ({
           disabled={isDeleting || movingPhotos}
           className="absolute right-3 top-3 z-20 rounded bg-red-600/90 px-3 py-2 text-xs font-medium text-white shadow hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isDeleting ? "Deleting..." : "Delete"}
+          {isDeleting ? t("common.deleting") : t("common.delete")}
         </button>
       ) : null;
 
@@ -730,8 +734,8 @@ const PhotoGrid = ({
               : "border-white/90 bg-black/40 hover:bg-black/60"
           }`}
           aria-pressed={isSelected}
-          aria-label={isSelected ? "Deselect photo" : "Select photo"}
-          title={isSelected ? "Deselect photo" : "Select photo"}
+          aria-label={isSelected ? t("grid.deselectPhoto") : t("grid.selectPhoto")}
+          title={isSelected ? t("grid.deselectPhoto") : t("grid.selectPhoto")}
         >
           {isSelected ? (
             <svg
@@ -755,7 +759,7 @@ const PhotoGrid = ({
           style={{ textShadow: "0 2px 10px rgba(0,0,0,0.7)" }}
         >
           {photo.name}
-          {savingOrder ? " · Saving order..." : ""}
+          {savingOrder ? t("grid.savingOrderSuffix") : ""}
         </p>
       </div>
     ) : null;
@@ -811,8 +815,8 @@ const PhotoGrid = ({
             <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
               <div className="text-sm text-gray-700">
                 {selectedCount > 0
-                  ? `${selectedCount} photo${selectedCount > 1 ? "s" : ""} selected`
-                  : "Tap photos below to select them"}
+                  ? t("grid.photosSelectedCount", { count: selectedCount })
+                  : t("grid.tapToSelect")}
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -823,7 +827,7 @@ const PhotoGrid = ({
                     disabled={movingPhotos}
                     className="appearance-none rounded-xl border border-gray-300 py-2 pl-3 pr-10 text-sm"
                   >
-                    <option value="">Choose destination album</option>
+                    <option value="">{t("grid.chooseDestinationOption")}</option>
                     {movableAlbums.map((album) => (
                       <option key={album.id} value={album.id}>
                         {album.name}
@@ -855,7 +859,7 @@ const PhotoGrid = ({
                   }
                   className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                 >
-                  {movingPhotos ? "Moving..." : "Move selected"}
+                  {movingPhotos ? t("grid.moving") : t("grid.moveSelected")}
                 </button>
 
                 <button
@@ -864,7 +868,7 @@ const PhotoGrid = ({
                   disabled={movingPhotos}
                   className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 disabled:opacity-50"
                 >
-                  Done
+                  {t("common.done")}
                 </button>
               </div>
             </div>
@@ -875,7 +879,7 @@ const PhotoGrid = ({
                 onClick={() => setSelectionMode(true)}
                 className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500 hover:bg-gray-50"
               >
-                Select photos to move
+                {t("grid.selectPhotosToMove")}
               </button>
             </div>
           )

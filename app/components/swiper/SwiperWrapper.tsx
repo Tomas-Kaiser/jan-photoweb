@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   EffectCoverflow,
@@ -38,6 +39,7 @@ const SwiperWrapper = ({
   onMoveLeft,
   onMoveRight,
 }: Props) => {
+  const t = useTranslations("admin");
   const [selectedPhoto, setSelectedPhoto] =
     useState<PortfolioHighlightPhoto | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -121,7 +123,7 @@ const SwiperWrapper = ({
                       disabled={isPending}
                       className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      {isPending ? "Working..." : "Move left"}
+                      {isPending ? t("highlights.working") : t("highlights.moveLeft")}
                     </button>
 
                     <button
@@ -130,7 +132,7 @@ const SwiperWrapper = ({
                       disabled={isPending}
                       className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      {isPending ? "Working..." : "Move right"}
+                      {isPending ? t("highlights.working") : t("highlights.moveRight")}
                     </button>
 
                     <button
@@ -139,7 +141,7 @@ const SwiperWrapper = ({
                       disabled={isPending}
                       className="rounded-lg bg-red-600 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      {isPending ? "Working..." : "Remove"}
+                      {isPending ? t("highlights.working") : t("highlights.remove")}
                     </button>
                   </div>
                 )}

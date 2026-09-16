@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
 import CreateAlbumButton from "./CreateAlbumButton";
@@ -43,6 +44,7 @@ export default function AlbumHeaderActions({
   coverImgSrc,
   coverObjectPosition,
 }: Props) {
+  const t = useTranslations("admin");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -66,7 +68,7 @@ export default function AlbumHeaderActions({
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      setMessage("Album name is required.");
+      setMessage(t("album.nameRequired"));
       return;
     }
 
@@ -87,7 +89,7 @@ export default function AlbumHeaderActions({
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to update album.");
+        throw new Error(data?.error || t("album.updateFailed"));
       }
 
       setIsEditing(false);
@@ -95,7 +97,7 @@ export default function AlbumHeaderActions({
       router.refresh();
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Something went wrong.",
+        error instanceof Error ? error.message : t("common.genericError"),
       );
     } finally {
       setSaving(false);
@@ -122,7 +124,7 @@ export default function AlbumHeaderActions({
 
       if (optimized.size > MAX_UPLOAD_BYTES) {
         throw new Error(
-          `Cover image is still too large after optimization: ${file.name}`,
+          t("upload.coverTooLarge", { name: file.name }),
         );
       }
 
@@ -132,7 +134,7 @@ export default function AlbumHeaderActions({
       const uploadUrlData = await uploadUrlRes.json().catch(() => null);
 
       if (!uploadUrlRes.ok) {
-        throw new Error(uploadUrlData?.error || "Failed to create upload URL.");
+        throw new Error(uploadUrlData?.error || t("upload.createUrlFailed"));
       }
 
       const formData = new FormData();
@@ -145,7 +147,7 @@ export default function AlbumHeaderActions({
       const uploadData = await uploadRes.json().catch(() => null);
 
       if (!uploadRes.ok || uploadData?.success === false) {
-        throw new Error(`Failed to upload image: ${file.name}`);
+        throw new Error(t("upload.uploadImageFailed", { name: file.name }));
       }
 
       const res = await fetch(`/api/admin/albums/${albumId}`, {
@@ -162,13 +164,13 @@ export default function AlbumHeaderActions({
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to update cover image.");
+        throw new Error(data?.error || t("album.coverUpdateFailed"));
       }
 
       router.refresh();
     } catch (error) {
       setCoverMessage(
-        error instanceof Error ? error.message : "Something went wrong.",
+        error instanceof Error ? error.message : t("common.genericError"),
       );
     } finally {
       setCoverSaving(false);
@@ -199,7 +201,7 @@ export default function AlbumHeaderActions({
             onKeyDown={handleKeyDown}
             disabled={saving}
             className="min-w-[220px] rounded-xl border border-gray-300 px-3 py-2 text-center text-4xl font-extrabold tracking-tight text-gray-900 outline-none transition focus:border-gray-900 focus:ring-4 focus:ring-gray-200"
-            aria-label="Album name"
+            aria-label={t("album.nameFieldLabel")}
           />
         ) : (
           <h2 className="text-4xl font-extrabold tracking-tight text-gray-900 capitalize">
@@ -218,8 +220,8 @@ export default function AlbumHeaderActions({
                     setMessage("");
                   }}
                   className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
-                  aria-label="Edit album name"
-                  title="Edit album name"
+                  aria-label={t("album.editName")}
+                  title={t("album.editName")}
                 >
                   <span aria-hidden="true">✏️</span>
                 </button>
@@ -251,7 +253,7 @@ export default function AlbumHeaderActions({
                   disabled={saving}
                   className="rounded-full bg-gray-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-50"
                 >
-                  {saving ? "Saving..." : "Save"}
+                  {saving ? t("common.saving") : t("common.save")}
                 </button>
                 <button
                   type="button"
@@ -259,7 +261,7 @@ export default function AlbumHeaderActions({
                   disabled={saving}
                   className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500 disabled:opacity-50"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
               </>
             )}
@@ -269,14 +271,14 @@ export default function AlbumHeaderActions({
 
       {isEditing ? (
         <p className="mt-2 text-xs text-gray-500">
-          Press Enter to save or Escape to cancel.
+          {t("album.editHint")}
         </p>
       ) : null}
 
       {isAdmin ? (
         <div className="mt-4 flex flex-col items-center gap-2">
           <p className="text-sm font-medium text-gray-700">
-            Preview cover photo
+            {t("album.previewCover")}
           </p>
 
           <div className="group relative h-32 w-32 overflow-hidden rounded-2xl border border-gray-200 shadow-sm sm:h-40 sm:w-40">
@@ -299,8 +301,8 @@ export default function AlbumHeaderActions({
               }}
               disabled={coverSaving}
               className="absolute bottom-1.5 right-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-black/60 text-white shadow-md backdrop-blur transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label="Change cover photo"
-              title="Change cover photo"
+              aria-label={t("album.changeCover")}
+              title={t("album.changeCover")}
             >
               <span aria-hidden="true">{coverSaving ? "⏳" : "🖼️"}</span>
             </button>

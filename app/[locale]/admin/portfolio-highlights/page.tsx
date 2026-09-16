@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { asc, eq, notInArray } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
 import {
@@ -18,6 +19,8 @@ export default async function PortfolioHighlightsAdminPage() {
     if (!isAdmin) {
         redirect("/");
     }
+
+    const t = await getTranslations("admin");
 
     const highlightRows = await db
         .select({
@@ -68,7 +71,7 @@ export default async function PortfolioHighlightsAdminPage() {
         photoId: row.photoId,
         cardSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/card`,
         fullSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/full`,
-        alt: row.name ?? "Portfolio highlight",
+        alt: row.name ?? t("highlights.fallbackAlt"),
         objectPosition: row.objectPosition ?? "center",
     }));
 
@@ -112,7 +115,7 @@ export default async function PortfolioHighlightsAdminPage() {
 
     return (
         <div className="mx-auto max-w-6xl px-6 py-10">
-            <h1 className="mb-6 text-3xl font-bold">Portfolio highlights</h1>
+            <h1 className="mb-6 text-3xl font-bold">{t("highlights.pageTitle")}</h1>
             <AdminHighlightsClient photos={photos} addAlbums={addAlbums} />
         </div>
     );

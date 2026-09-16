@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import AddAlbumForm from "./AddAlbumForm";
 import AddPhotosForm from "./AddPhotosForm";
 import { useConfirm } from "@/app/components/ConfirmDialog";
@@ -34,6 +35,7 @@ export default function CreateAlbumButton({
   iconOnly = true,
   locale,
 }: Props) {
+  const t = useTranslations("admin");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -55,10 +57,9 @@ export default function CreateAlbumButton({
   const handleClose = useCallback(async () => {
     if (busy) {
       const confirmed = await confirm({
-        title: "Upload in progress",
-        message:
-          "Photos are still uploading. Closing now won't stop already-started uploads, but you'll lose track of their progress here. Close anyway?",
-        confirmLabel: "Close anyway",
+        title: t("upload.inProgressTitle"),
+        message: t("upload.closeConfirmMessage"),
+        confirmLabel: t("upload.closeAnyway"),
         danger: true,
       });
 
@@ -68,7 +69,7 @@ export default function CreateAlbumButton({
     setOpen(false);
     setMode(defaultMode);
     setBusy(false);
-  }, [busy, confirm, defaultMode]);
+  }, [busy, confirm, defaultMode, t]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -94,8 +95,8 @@ export default function CreateAlbumButton({
       <button
         type="button"
         onClick={handleOpen}
-        aria-label="Create album or add photos"
-        title="Create album or add photos"
+        aria-label={t("createButton.ariaLabel")}
+        title={t("createButton.ariaLabel")}
         className={
           iconOnly
             ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
@@ -103,7 +104,7 @@ export default function CreateAlbumButton({
         }
       >
         <span aria-hidden="true">＋</span>
-        {!iconOnly ? <span>Add</span> : null}
+        {!iconOnly ? <span>{t("common.add")}</span> : null}
       </button>
 
       {open ? (
@@ -125,13 +126,15 @@ export default function CreateAlbumButton({
                     id="create-modal-title"
                     className="text-xl font-bold text-gray-900"
                   >
-                    {mode === "album" ? "Create album" : "Add photos"}
+                    {mode === "album"
+                      ? t("createButton.createAlbum")
+                      : t("createButton.addPhotos")}
                   </h3>
 
                   <p className="mt-1 text-sm text-gray-600">
                     {mode === "album"
-                      ? "Create a new album and optionally upload photos into it."
-                      : "Upload photos directly into this album."}
+                      ? t("createButton.createAlbumDesc")
+                      : t("createButton.addPhotosDesc")}
                   </p>
                 </div>
 
@@ -139,7 +142,7 @@ export default function CreateAlbumButton({
                   ref={closeButtonRef}
                   type="button"
                   onClick={handleClose}
-                  aria-label="Close modal"
+                  aria-label={t("common.closeModal")}
                   className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-gray-500 hover:text-gray-900"
                 >
                   <span aria-hidden="true">✕</span>
@@ -150,7 +153,7 @@ export default function CreateAlbumButton({
                 {canShowPhotoMode ? (
                   <fieldset className="mb-6">
                     <legend className="mb-3 text-sm font-medium text-gray-900">
-                      Choose action
+                      {t("createButton.chooseAction")}
                     </legend>
 
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -166,11 +169,10 @@ export default function CreateAlbumButton({
                         />
                         <span>
                           <span className="block text-sm font-semibold text-gray-900">
-                            Create new album
+                            {t("createButton.createNewAlbumLabel")}
                           </span>
                           <span className="mt-1 block text-sm text-gray-600">
-                            Add a child album under this album, with a cover and
-                            optional photos.
+                            {t("createButton.createNewAlbumDesc")}
                           </span>
                         </span>
                       </label>
@@ -187,11 +189,10 @@ export default function CreateAlbumButton({
                         />
                         <span>
                           <span className="block text-sm font-semibold text-gray-900">
-                            Add photos only
+                            {t("createButton.addPhotosOnlyLabel")}
                           </span>
                           <span className="mt-1 block text-sm text-gray-600">
-                            Upload photos directly into the current album
-                            without creating a new one.
+                            {t("createButton.addPhotosOnlyDesc")}
                           </span>
                         </span>
                       </label>

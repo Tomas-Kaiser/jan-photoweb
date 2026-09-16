@@ -21,23 +21,26 @@ type Props = {
 
 const NavBar = ({ isAdmin }: Props) => {
   const t = useTranslations("common");
+  const tAdmin = useTranslations("admin");
   const locale = useLocale();
 
   return (
     <div className="sticky top-0 z-40">
       {isAdmin ? (
         <div className="relative flex items-center justify-center gap-4 bg-green-900 py-1.5 text-xs font-semibold text-white">
-          <span className="uppercase tracking-wide">Admin enabled</span>
+          <span className="uppercase tracking-wide">
+            {tAdmin("nav.enabled")}
+          </span>
           <div className="hidden items-center gap-4 lg:absolute lg:right-6 lg:top-1/2 lg:flex lg:-translate-y-1/2">
             <Link href="/admin" className="underline-offset-2 hover:underline">
-              Dashboard
+              {tAdmin("nav.dashboard")}
             </Link>
             <button
               type="button"
               className="cursor-pointer underline-offset-2 hover:underline"
               onClick={() => signOut({ callbackUrl: `/${locale}` })}
             >
-              Logout
+              {tAdmin("nav.logout")}
             </button>
           </div>
         </div>
@@ -178,7 +181,7 @@ const NavBar = ({ isAdmin }: Props) => {
               {isAdmin ? (
                 <>
                   <li className="menu-title mt-2 border-t border-base-200 pt-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
-                    Admin
+                    {tAdmin("nav.sectionLabel")}
                   </li>
                   <li>
                     <Link
@@ -186,7 +189,7 @@ const NavBar = ({ isAdmin }: Props) => {
                       onClick={blur}
                       className="font-semibold text-green-800"
                     >
-                      Dashboard
+                      {tAdmin("nav.dashboard")}
                     </Link>
                   </li>
                   <li>
@@ -198,7 +201,7 @@ const NavBar = ({ isAdmin }: Props) => {
                       }}
                       className="font-semibold text-green-800"
                     >
-                      Logout
+                      {tAdmin("nav.logout")}
                     </button>
                   </li>
                 </>

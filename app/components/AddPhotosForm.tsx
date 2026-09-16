@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   MAX_UPLOAD_BYTES,
   optimizeImageForUpload,
@@ -31,6 +32,7 @@ type UploadFailure = {
 };
 
 export default function AddPhotosForm({ album, onBusyChange }: Props) {
+  const t = useTranslations("admin");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -54,7 +56,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data?.error || "Failed to create upload URL.");
+      throw new Error(data?.error || t("upload.createUrlFailed"));
     }
 
     return data;
@@ -73,18 +75,18 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     const position = Math.min(currentIndex + 1, total);
 
     if (stage === "optimizing") {
-      return `Optimizing ${position} of ${total}: ${currentFileName}`;
+      return t("upload.optimizingPhoto", { position, total, name: currentFileName });
     }
 
     if (stage === "uploading") {
-      return `Uploading ${position} of ${total}: ${currentFileName}`;
+      return t("upload.uploadingPhoto", { position, total, name: currentFileName });
     }
 
     if (stage === "saving") {
-      return `Saving ${position} of ${total}: ${currentFileName}`;
+      return t("upload.savingPhoto", { position, total, name: currentFileName });
     }
 
-    return "Processing photos...";
+    return t("upload.processing");
   }
 
   async function uploadOneFile(file: File): Promise<void> {
@@ -92,7 +94,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     const optimizedFile = await optimizeImageForUpload(file);
 
     if (optimizedFile.size > MAX_UPLOAD_BYTES) {
-      throw new Error("Still too large after optimization.");
+      throw new Error(t("upload.stillTooLarge"));
     }
 
     setStage("uploading");
@@ -109,7 +111,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     const uploadData = await uploadRes.json().catch(() => null);
 
     if (!uploadRes.ok || uploadData?.success === false) {
-      throw new Error("Upload to image storage failed.");
+      throw new Error(t("upload.uploadStorageFailed"));
     }
 
     setStage("saving");
@@ -128,7 +130,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     const photoData = await photoRes.json().catch(() => null);
 
     if (!photoRes.ok) {
-      throw new Error(photoData?.error || "Failed to save photo.");
+      throw new Error(photoData?.error || t("upload.savePhotoFailed"));
     }
   }
 
@@ -136,7 +138,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     e.preventDefault();
 
     if (!files.length) {
-      setError("Please select at least one photo.");
+      setError(t("form.selectAtLeastOnePhoto"));
       return;
     }
 
@@ -161,7 +163,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
       } catch (err) {
         failed.push({
           file,
-          message: err instanceof Error ? err.message : "Something went wrong.",
+          message: err instanceof Error ? err.message : t("common.genericError"),
         });
       }
     }
@@ -186,8 +188,12 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     setFailures(failed);
     setError(
       succeeded.length
-        ? `${succeeded.length} of ${totalAttempted} photos uploaded. ${failed.length} failed and stayed selected below — fix and try again.`
-        : `All ${failed.length} photo${failed.length > 1 ? "s" : ""} failed to upload — see details below.`,
+        ? t("form.photosPartialFailure", {
+            succeeded: succeeded.length,
+            total: totalAttempted,
+            failed: failed.length,
+          })
+        : t("form.photosAllFailed", { failed: failed.length }),
     );
   }
 
@@ -197,7 +203,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
-          Add photos
+          {t("form.addPhotosLabel")}
         </label>
 
         <label
@@ -226,20 +232,20 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
 
             <div className="min-w-0 text-center">
               <div className="text-sm font-semibold text-gray-900">
-                {files.length > 0 ? "Change selected photos" : "Choose photos"}
+                {files.length > 0 ? t("form.changeSelectedPhotos") : t("form.choosePhotos")}
               </div>
 
               <div className="mt-1 text-sm text-gray-600">
-                Select one or many photos to add to this album.
+                {t("form.addPhotosHint")}
               </div>
 
               <div className="mt-2 text-sm text-gray-500">
                 {files.length > 0 ? (
                   <span className="font-medium text-gray-800">
-                    {files.length} file{files.length > 1 ? "s" : ""} selected
+                    {t("form.filesSelected", { count: files.length })}
                   </span>
                 ) : (
-                  "You can select multiple image files at once."
+                  t("form.multipleFilesHint")
                 )}
               </div>
 
@@ -251,7 +257,9 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
                     </li>
                   ))}
                   {files.length > 5 ? (
-                    <li className="text-gray-500">+ {files.length - 5} more</li>
+                    <li className="text-gray-500">
+                      {t("form.moreFiles", { count: files.length - 5 })}
+                    </li>
                   ) : null}
                 </ul>
               ) : null}
@@ -288,10 +296,10 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
         className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
       >
         {saving
-          ? "Uploading..."
+          ? t("common.uploading")
           : failures.length > 0
-            ? `Retry ${failures.length} failed photo${failures.length > 1 ? "s" : ""}`
-            : "Add photos"}
+            ? t("form.retryFailedPhotos", { count: failures.length })
+            : t("createButton.addPhotos")}
       </button>
     </form>
   );

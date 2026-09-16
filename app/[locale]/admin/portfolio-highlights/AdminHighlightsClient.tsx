@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import SwiperWrapper, {
     PortfolioHighlightPhoto,
 } from "@/app/components/swiper/SwiperWrapper";
@@ -34,6 +35,7 @@ export default function AdminHighlightsClient({
     photos,
     addAlbums,
 }: Props) {
+    const t = useTranslations("admin");
     const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null);
     const [pendingPhotoId, setPendingPhotoId] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -65,16 +67,16 @@ export default function AdminHighlightsClient({
     return (
         <div className="space-y-8">
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <h2 className="mb-4 text-xl font-semibold">Add highlight</h2>
+                <h2 className="mb-4 text-xl font-semibold">{t("highlights.addHighlight")}</h2>
 
                 {addAlbums.length === 0 ? (
                     <p className="text-sm text-gray-500">
-                        All photos are already in highlights.
+                        {t("highlights.allInHighlights")}
                     </p>
                 ) : !activeAlbum ? (
                     <>
                         <p className="mb-4 text-sm text-gray-600">
-                            Select an album to browse its photos.
+                            {t("highlights.selectAlbum")}
                         </p>
 
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -98,7 +100,7 @@ export default function AdminHighlightsClient({
                                     <div className="p-3">
                                         <div className="font-medium text-gray-900">{album.name}</div>
                                         <div className="text-sm text-gray-500">
-                                            {album.photos.length} photo{album.photos.length === 1 ? "" : "s"}
+                                            {t("highlights.photoCount", { count: album.photos.length })}
                                         </div>
                                     </div>
                                 </button>
@@ -109,7 +111,7 @@ export default function AdminHighlightsClient({
                     <>
                         <div className="mb-4 flex items-center justify-between gap-3">
                             <div>
-                                <p className="text-sm text-gray-500">Album</p>
+                                <p className="text-sm text-gray-500">{t("highlights.albumLabel")}</p>
                                 <h3 className="text-lg font-semibold text-gray-900">
                                     {activeAlbum.name}
                                 </h3>
@@ -120,13 +122,13 @@ export default function AdminHighlightsClient({
                                 onClick={handleBackToAlbums}
                                 className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                             >
-                                Back to albums
+                                {t("highlights.backToAlbums")}
                             </button>
                         </div>
 
                         {activeAlbum.photos.length === 0 ? (
                             <p className="text-sm text-gray-500">
-                                No available photos in this album.
+                                {t("highlights.noAvailablePhotos")}
                             </p>
                         ) : (
                             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -159,7 +161,7 @@ export default function AdminHighlightsClient({
                                                     disabled={isPending}
                                                     className="w-full rounded-lg bg-black px-3 py-2 text-sm text-white disabled:opacity-50"
                                                 >
-                                                    {isThisPending ? "Adding..." : "Add to highlights"}
+                                                    {isThisPending ? t("highlights.adding") : t("highlights.addToHighlights")}
                                                 </button>
                                             </div>
                                         </div>
@@ -172,7 +174,7 @@ export default function AdminHighlightsClient({
             </div>
 
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <h2 className="mb-4 text-xl font-semibold">Current highlights</h2>
+                <h2 className="mb-4 text-xl font-semibold">{t("highlights.currentHighlights")}</h2>
                 <SwiperWrapper
                     photos={photos}
                     isAdmin

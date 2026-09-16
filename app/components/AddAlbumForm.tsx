@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { slugify } from "@/app/lib/slugify";
 import {
   MAX_UPLOAD_BYTES,
@@ -52,6 +53,7 @@ export default function AddAlbumForm({
   locale,
   onBusyChange,
 }: Props) {
+  const t = useTranslations("admin");
   const router = useRouter();
 
   const coverInputRef = useRef<HTMLInputElement | null>(null);
@@ -105,7 +107,7 @@ export default function AddAlbumForm({
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data?.error || "Failed to create upload URL.");
+      throw new Error(data?.error || t("upload.createUrlFailed"));
     }
 
     return data;
@@ -128,7 +130,7 @@ export default function AddAlbumForm({
     const uploadData = await uploadRes.json().catch(() => null);
 
     if (!uploadRes.ok || uploadData?.success === false) {
-      throw new Error(`Failed to upload image: ${file.name}`);
+      throw new Error(t("upload.uploadImageFailed", { name: file.name }));
     }
 
     return {
@@ -151,33 +153,45 @@ export default function AddAlbumForm({
     if (!saving) return null;
 
     if (stage === "optimizing-cover") {
-      return `Optimizing cover image: ${currentFileName}`;
+      return t("upload.optimizingCover", { name: currentFileName });
     }
 
     if (stage === "uploading-cover") {
-      return `Uploading cover image: ${currentFileName}`;
+      return t("upload.uploadingCover", { name: currentFileName });
     }
 
     if (stage === "creating-album") {
-      return "Creating album...";
+      return t("upload.creatingAlbum");
     }
 
     const totalPhotos = photoFiles.length;
     const position = Math.min(currentPhotoIndex + 1, totalPhotos);
 
     if (stage === "optimizing-photo") {
-      return `Optimizing photo ${position} of ${totalPhotos}: ${currentFileName}`;
+      return t("upload.optimizingPhoto", {
+        position,
+        total: totalPhotos,
+        name: currentFileName,
+      });
     }
 
     if (stage === "uploading-photo") {
-      return `Uploading photo ${position} of ${totalPhotos}: ${currentFileName}`;
+      return t("upload.uploadingPhoto", {
+        position,
+        total: totalPhotos,
+        name: currentFileName,
+      });
     }
 
     if (stage === "saving-photo") {
-      return `Saving photo ${position} of ${totalPhotos}: ${currentFileName}`;
+      return t("upload.savingPhoto", {
+        position,
+        total: totalPhotos,
+        name: currentFileName,
+      });
     }
 
-    return "Processing...";
+    return t("upload.processing");
   }
 
   async function uploadOnePhoto(albumId: string, file: File): Promise<void> {
@@ -185,7 +199,7 @@ export default function AddAlbumForm({
     const optimizedPhoto = await optimizeImageForUpload(file);
 
     if (optimizedPhoto.size > MAX_UPLOAD_BYTES) {
-      throw new Error("Still too large after optimization.");
+      throw new Error(t("upload.stillTooLarge"));
     }
 
     setStage("uploading-photo");
@@ -207,7 +221,7 @@ export default function AddAlbumForm({
     const photoData = await photoRes.json().catch(() => null);
 
     if (!photoRes.ok) {
-      throw new Error(photoData?.error || "Failed to save photo.");
+      throw new Error(photoData?.error || t("upload.savePhotoFailed"));
     }
   }
 
@@ -216,12 +230,12 @@ export default function AddAlbumForm({
 
     if (!createdAlbum) {
       if (!name.trim()) {
-        setError("Album name is required.");
+        setError(t("album.nameRequired"));
         return;
       }
 
       if (!coverFile) {
-        setError("Cover image is required.");
+        setError(t("album.coverRequired"));
         return;
       }
     }
@@ -249,7 +263,7 @@ export default function AddAlbumForm({
 
         if (optimizedCover.size > MAX_UPLOAD_BYTES) {
           throw new Error(
-            `Cover image is still too large after optimization: ${coverFile!.name}`,
+            t("upload.coverTooLarge", { name: coverFile!.name }),
           );
         }
 
@@ -272,14 +286,14 @@ export default function AddAlbumForm({
         const albumData = await albumRes.json().catch(() => null);
 
         if (!albumRes.ok) {
-          throw new Error(albumData?.error || "Failed to create album.");
+          throw new Error(albumData?.error || t("album.createFailed"));
         }
 
         albumId = albumData.album.id as string;
         albumPath = albumData.album.path as string;
         setCreatedAlbum({ id: albumId, path: albumPath });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong.");
+        setError(err instanceof Error ? err.message : t("common.genericError"));
         setSaving(false);
         return;
       }
@@ -299,7 +313,7 @@ export default function AddAlbumForm({
       } catch (err) {
         failed.push({
           file,
-          message: err instanceof Error ? err.message : "Something went wrong.",
+          message: err instanceof Error ? err.message : t("common.genericError"),
         });
       }
     }
@@ -329,8 +343,13 @@ export default function AddAlbumForm({
     setFailures(failed);
     setError(
       succeeded.length
-        ? `Album "${name}" was created. ${succeeded.length} of ${totalAttempted} additional photos uploaded; ${failed.length} failed and stayed selected below — fix and try again.`
-        : `Album "${name}" was created, but all ${failed.length} additional photo${failed.length > 1 ? "s" : ""} failed to upload — see details below.`,
+        ? t("form.albumCreatedPartialFailure", {
+            name,
+            succeeded: succeeded.length,
+            total: totalAttempted,
+            failed: failed.length,
+          })
+        : t("form.albumCreatedAllFailed", { name, failed: failed.length }),
     );
   }
 
@@ -343,7 +362,7 @@ export default function AddAlbumForm({
           htmlFor="name"
           className="mb-2 block text-sm font-medium text-gray-700"
         >
-          Album name
+          {t("form.albumNameLabel")}
         </label>
         <input
           id="name"
@@ -355,7 +374,7 @@ export default function AddAlbumForm({
           }}
           disabled={saving || !!createdAlbum}
           className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-          placeholder="Summer wedding"
+          placeholder={t("form.albumNamePlaceholder")}
           required
         />
       </div>
@@ -366,7 +385,7 @@ export default function AddAlbumForm({
             htmlFor="parentId"
             className="mb-2 block text-sm font-medium text-gray-700"
           >
-            Parent album
+            {t("form.parentAlbumLabel")}
           </label>
           <select
             id="parentId"
@@ -375,7 +394,7 @@ export default function AddAlbumForm({
             disabled={saving || !!createdAlbum}
             className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
           >
-            <option value="">None</option>
+            <option value="">{t("form.noneOption")}</option>
             {albums.map((album) => (
               <option key={album.id} value={album.id}>
                 {album.name}
@@ -385,7 +404,7 @@ export default function AddAlbumForm({
         </div>
       ) : (
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-          <p className="text-sm font-medium text-gray-700">Parent album</p>
+          <p className="text-sm font-medium text-gray-700">{t("form.parentAlbumLabel")}</p>
           <p className="mt-1 text-sm text-gray-900">{fixedParent.name}</p>
           <p className="mt-1 break-all text-sm text-gray-500">
             {fixedParent.path}
@@ -394,21 +413,20 @@ export default function AddAlbumForm({
       )}
 
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-        <p className="mb-2 text-sm font-medium text-gray-700">Live preview</p>
+        <p className="mb-2 text-sm font-medium text-gray-700">{t("form.livePreview")}</p>
 
         <div className="space-y-2 text-sm">
           <div>
-            <span className="font-medium text-gray-600">Slug:</span>{" "}
+            <span className="font-medium text-gray-600">{t("form.slugLabel")}</span>{" "}
             <span className="text-gray-900">
-              {generatedSlug || "Will be generated while you type"}
+              {generatedSlug || t("form.slugPlaceholder")}
             </span>
           </div>
 
           <div>
-            <span className="font-medium text-gray-600">Path:</span>{" "}
+            <span className="font-medium text-gray-600">{t("form.pathLabel")}</span>{" "}
             <span className="break-all text-gray-900">
-              {generatedPath ||
-                "Path preview will appear while you type the album name"}
+              {generatedPath || t("form.pathPlaceholder")}
             </span>
           </div>
         </div>
@@ -416,7 +434,7 @@ export default function AddAlbumForm({
 
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
-          Cover image
+          {t("form.coverImageLabel")}
         </label>
 
         <label
@@ -445,16 +463,16 @@ export default function AddAlbumForm({
             <div className="min-w-0 text-center">
               <div className="text-sm font-semibold text-gray-900">
                 {createdAlbum
-                  ? "Cover image saved"
+                  ? t("form.coverImageSaved")
                   : coverFile
-                    ? "Change cover image"
-                    : "Choose cover image"}
+                    ? t("form.changeCoverImage")
+                    : t("form.chooseCoverImage")}
               </div>
 
               <div className="mt-1 text-sm text-gray-600">
                 {createdAlbum
-                  ? "The album already has a cover — only the additional photos below need retrying."
-                  : "Click to browse and select the album cover."}
+                  ? t("form.coverImageSavedHint")
+                  : t("form.coverImageHint")}
               </div>
 
               <div className="mt-2 text-sm text-gray-500">
@@ -463,7 +481,7 @@ export default function AddAlbumForm({
                     {coverFile.name}
                   </span>
                 ) : (
-                  "PNG, JPG, WEBP and other image formats supported."
+                  t("form.coverFormatsHint")
                 )}
               </div>
             </div>
@@ -473,7 +491,7 @@ export default function AddAlbumForm({
 
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
-          Additional photos
+          {t("form.additionalPhotosLabel")}
         </label>
 
         <label
@@ -503,22 +521,21 @@ export default function AddAlbumForm({
             <div className="min-w-0 text-center">
               <div className="text-sm font-semibold text-gray-900">
                 {photoFiles.length > 0
-                  ? "Change selected photos"
-                  : "Choose additional photos"}
+                  ? t("form.changeSelectedPhotos")
+                  : t("form.chooseAdditionalPhotos")}
               </div>
 
               <div className="mt-1 text-sm text-gray-600">
-                Select one or many photos to upload into this album.
+                {t("form.additionalPhotosHint")}
               </div>
 
               <div className="mt-2 text-sm text-gray-500">
                 {photoFiles.length > 0 ? (
                   <span className="font-medium text-gray-800">
-                    {photoFiles.length} file{photoFiles.length > 1 ? "s" : ""}{" "}
-                    selected
+                    {t("form.filesSelected", { count: photoFiles.length })}
                   </span>
                 ) : (
-                  "You can select multiple image files at once."
+                  t("form.multipleFilesHint")
                 )}
               </div>
 
@@ -531,7 +548,7 @@ export default function AddAlbumForm({
                   ))}
                   {photoFiles.length > 5 ? (
                     <li className="text-gray-500">
-                      + {photoFiles.length - 5} more
+                      {t("form.moreFiles", { count: photoFiles.length - 5 })}
                     </li>
                   ) : null}
                 </ul>
@@ -569,10 +586,10 @@ export default function AddAlbumForm({
         className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
       >
         {saving
-          ? "Saving..."
+          ? t("common.saving")
           : failures.length > 0
-            ? `Retry ${failures.length} failed photo${failures.length > 1 ? "s" : ""}`
-            : "Create album"}
+            ? t("form.retryFailedPhotos", { count: failures.length })
+            : t("createButton.createAlbum")}
       </button>
     </form>
   );

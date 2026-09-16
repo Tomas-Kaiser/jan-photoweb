@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { useToast } from "@/app/components/Toast";
 
@@ -24,6 +25,7 @@ const DeleteAlbumButton = ({
   hasSubalbums = false,
   hasPhotos = false,
 }: Props) => {
+  const t = useTranslations("admin");
   const router = useRouter();
   const confirm = useConfirm();
   const { showError } = useToast();
@@ -31,8 +33,8 @@ const DeleteAlbumButton = ({
 
   const isBlocked = hasSubalbums || hasPhotos;
   const blockedReason = hasSubalbums
-    ? "Remove or move subalbums before deleting this album."
-    : "Remove or move photos before deleting this album.";
+    ? t("album.deleteBlockedSubalbums")
+    : t("album.deleteBlockedPhotos");
 
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -44,9 +46,11 @@ const DeleteAlbumButton = ({
     }
 
     const confirmed = await confirm({
-      title: "Delete album",
-      message: `Delete this album${albumName ? ` (${albumName})` : ""}? This can't be undone.`,
-      confirmLabel: "Delete",
+      title: t("album.deleteAlbum"),
+      message: t("album.deleteConfirmMessage", {
+        name: albumName ? ` (${albumName})` : "",
+      }),
+      confirmLabel: t("common.delete"),
       danger: true,
     });
 
@@ -62,7 +66,7 @@ const DeleteAlbumButton = ({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to delete album");
+        throw new Error(data?.error || t("album.deleteFailed"));
       }
 
       if (redirectTo) {
@@ -73,7 +77,7 @@ const DeleteAlbumButton = ({
     } catch (error) {
       console.error(error);
       showError(
-        error instanceof Error ? error.message : "Failed to delete album",
+        error instanceof Error ? error.message : t("album.deleteFailed"),
       );
     } finally {
       setIsDeleting(false);
@@ -88,17 +92,17 @@ const DeleteAlbumButton = ({
       aria-disabled={isBlocked}
       aria-label={
         hasSubalbums
-          ? "Delete album (remove subalbums first)"
+          ? t("album.deleteAriaSubalbums")
           : hasPhotos
-            ? "Delete album (remove photos first)"
-            : "Delete album"
+            ? t("album.deleteAriaPhotos")
+            : t("album.deleteAlbum")
       }
       title={
         hasSubalbums
-          ? "Remove or move subalbums before deleting this album"
+          ? t("album.deleteBlockedSubalbums")
           : hasPhotos
-            ? "Remove or move photos before deleting this album"
-            : "Delete album"
+            ? t("album.deleteBlockedPhotos")
+            : t("album.deleteAlbum")
       }
       className={
         className ??
@@ -132,9 +136,9 @@ const DeleteAlbumButton = ({
           </svg>
         )
       ) : isDeleting ? (
-        "Deleting..."
+        t("common.deleting")
       ) : (
-        "Delete album"
+        t("album.deleteAlbum")
       )}
     </button>
   );

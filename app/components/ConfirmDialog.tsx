@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type ConfirmOptions = {
   title?: string;
@@ -19,6 +20,7 @@ type ConfirmContextValue = (options: ConfirmOptions) => Promise<boolean>;
 const ConfirmContext = createContext<ConfirmContextValue | null>(null);
 
 export function ConfirmProvider({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("admin");
   const [state, setState] = useState<ConfirmState | null>(null);
 
   const confirm = useCallback((options: ConfirmOptions) => {
@@ -65,7 +67,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                 onClick={() => close(false)}
                 className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
               >
-                {state.cancelLabel ?? "Cancel"}
+                {state.cancelLabel ?? t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -76,7 +78,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                     : "bg-gray-900 hover:bg-gray-800"
                 }`}
               >
-                {state.confirmLabel ?? "Confirm"}
+                {state.confirmLabel ?? t("common.confirm")}
               </button>
             </div>
           </div>

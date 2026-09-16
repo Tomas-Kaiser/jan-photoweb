@@ -2,45 +2,47 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
     params: Promise<{ locale: string }>;
 };
 
-const adminLinks = [
-    {
-        title: "Albums",
-        description: "Create, edit, and organize albums.",
-        href: (locale: string) => `/${locale}/albums`,
-    },
-    {
-        title: "Portfolio highlights",
-        description: "Choose which photos appear in the homepage highlights slider.",
-        href: (locale: string) => `/${locale}/admin/portfolio-highlights`,
-    },
-];
-
 export default async function AdminPage({ params }: Props) {
     const { locale } = await params;
     const session = await auth();
+    const t = await getTranslations("admin");
 
     if (!session?.user) {
         redirect(`/${locale}/admin/login`);
     }
 
-    const userName = session.user.name || session.user.email || "Admin";
+    const userName = session.user.name || session.user.email || t("dashboard.defaultUserName");
+
+    const adminLinks = [
+        {
+            title: t("dashboard.albumsTitle"),
+            description: t("dashboard.albumsDescription"),
+            href: (locale: string) => `/${locale}/albums`,
+        },
+        {
+            title: t("dashboard.highlightsTitle"),
+            description: t("dashboard.highlightsDescription"),
+            href: (locale: string) => `/${locale}/admin/portfolio-highlights`,
+        },
+    ];
 
     return (
         <section className="px-6 py-12">
             <div className="mx-auto max-w-5xl">
                 <div className="mb-8">
                     <p className="text-sm font-medium uppercase tracking-wide text-green-700">
-                        Admin panel
+                        {t("dashboard.eyebrow")}
                     </p>
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Welcome back</h1>
+                    <h1 className="mt-2 text-3xl font-bold text-gray-900">{t("dashboard.welcome")}</h1>
                     <p className="mt-3 text-gray-600">
-                        Signed in as <span className="font-medium text-gray-900">{userName}</span>.
-                        Choose an area to manage below.
+                        {t("dashboard.signedInAs")} <span className="font-medium text-gray-900">{userName}</span>.{" "}
+                        {t("dashboard.chooseArea")}
                     </p>
                 </div>
 
@@ -66,7 +68,7 @@ export default async function AdminPage({ params }: Props) {
                                 </p>
 
                                 <div className="mt-5 text-sm font-medium text-green-700">
-                                    Open section
+                                    {t("dashboard.openSection")}
                                 </div>
                             </div>
                         </Link>
