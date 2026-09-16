@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { asc } from "drizzle-orm";
+import { asc, ne } from "drizzle-orm";
 
 import { routing } from "./i18n/routing";
 import { db } from "./db";
 import { albums } from "./db/schema";
+import { HIGHLIGHTS_ALBUM_PATH } from "./lib/highlights-album";
 
 const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"
@@ -15,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const allAlbums = await db
     .select({ path: albums.path })
     .from(albums)
+    .where(ne(albums.path, HIGHLIGHTS_ALBUM_PATH))
     .orderBy(asc(albums.path));
 
   const paths = [
@@ -28,9 +30,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       alternates: {
         languages: Object.fromEntries(
-          routing.locales.map((l) => [l, `${siteUrl}/${l}${path}`])
+          routing.locales.map((l) => [l, `${siteUrl}/${l}${path}`]),
         ),
       },
-    }))
+    })),
   );
 }

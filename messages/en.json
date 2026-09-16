@@ -196,7 +196,15 @@
       "working": "Working...",
       "moveLeft": "Move left",
       "moveRight": "Move right",
-      "remove": "Remove"
+      "remove": "Remove",
+      "chooseExistingPhoto": "Choose existing photo",
+      "uploadNewPhoto": "Upload new photo",
+      "uploadHint": "Upload a photo from your computer and add it straight to the highlights.",
+      "chooseFile": "Choose photo",
+      "changeFile": "Change photo",
+      "noFileHint": "PNG, JPG, WEBP and other image formats supported.",
+      "uploadAndAdd": "Upload and add to highlights",
+      "selectFileRequired": "Please choose a photo to upload."
     },
     "album": {
       "nameRequired": "Album name is required.",

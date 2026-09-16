@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { asc, eq, isNull, exists, notExists, and } from "drizzle-orm";
+import { asc, eq, isNull, exists, notExists, and, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { auth } from "@/auth";
@@ -13,6 +13,7 @@ import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
 import CreateAlbumButton from "@/app/components/CreateAlbumButton";
 import Breadcrumbs, { BreadcrumbItem } from "@/app/components/breadcrumbs";
 import { getTranslations } from "next-intl/server";
+import { HIGHLIGHTS_ALBUM_PATH } from "@/app/lib/highlights-album";
 
 export const metadata: Metadata = {
   title: "Photo Albums | Jan Hájek",
@@ -37,6 +38,12 @@ const AlbumsPage = async ({ params }: Props) => {
   const { locale, slug } = await params;
   const path = slug?.join("/") ?? null;
 
+  // The highlights-only container is a real album row (photos need some
+  // album to belong to) but must never be browsable directly.
+  if (path === HIGHLIGHTS_ALBUM_PATH) {
+    notFound();
+  }
+
   const session = await auth();
   const isAdmin =
     !!session?.user && (session.user as { role?: string }).role === "admin";
@@ -48,13 +55,16 @@ const AlbumsPage = async ({ params }: Props) => {
       path: albums.path,
     })
     .from(albums)
+    .where(ne(albums.path, HIGHLIGHTS_ALBUM_PATH))
     .orderBy(asc(albums.path));
 
   if (!path) {
     const rootAlbums = await db
       .select()
       .from(albums)
-      .where(isNull(albums.parentId))
+      .where(
+        and(isNull(albums.parentId), ne(albums.path, HIGHLIGHTS_ALBUM_PATH)),
+      )
       .orderBy(asc(albums.sortOrder), asc(albums.createdAt));
 
     const rootAlbumPhotos = rootAlbums.map((album) => ({
@@ -131,7 +141,12 @@ const AlbumsPage = async ({ params }: Props) => {
   const albumPhotos = await db
     .select()
     .from(photos)
-    .where(eq(photos.albumId, album.id))
+    .where(
+      and(
+        eq(photos.albumId, album.id),
+        ne(photos.visibility, "highlights_only"),
+      ),
+    )
     .orderBy(asc(photos.sortOrder), asc(photos.createdAt));
 
   const childAlbumCards = childAlbums.map((child) => ({
@@ -202,6 +217,7 @@ const AlbumsPage = async ({ params }: Props) => {
             .from(childAlbumsAlias)
             .where(eq(childAlbumsAlias.parentId, albums.id)),
         ),
+        ne(albums.path, HIGHLIGHTS_ALBUM_PATH),
       ),
     )
     .orderBy(asc(albums.path));

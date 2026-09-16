@@ -196,7 +196,15 @@
       "working": "Pracuji...",
       "moveLeft": "Posunout doleva",
       "moveRight": "Posunout doprava",
-      "remove": "Odebrat"
+      "remove": "Odebrat",
+      "chooseExistingPhoto": "Vybrat existující fotku",
+      "uploadNewPhoto": "Nahrát novou fotku",
+      "uploadHint": "Nahrajte fotku z počítače a přidejte ji rovnou do výběru.",
+      "chooseFile": "Vybrat fotku",
+      "changeFile": "Změnit fotku",
+      "noFileHint": "Podporovány jsou formáty PNG, JPG, WEBP a další.",
+      "uploadAndAdd": "Nahrát a přidat do výběru",
+      "selectFileRequired": "Vyberte prosím fotku k nahrání."
     },
     "album": {
       "nameRequired": "Název alba je povinný.",
