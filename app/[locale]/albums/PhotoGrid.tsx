@@ -123,6 +123,7 @@ const PhotoGrid = ({
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
   const [savingOrder, setSavingOrder] = useState(false);
 
+  const [selectionMode, setSelectionMode] = useState(false);
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(
     new Set(),
   );
@@ -137,6 +138,7 @@ const PhotoGrid = ({
 
   useEffect(() => {
     setItems(photos);
+    setSelectionMode(false);
     setSelectedPhotoIds(new Set());
     setDestinationAlbumId("");
   }, [photos]);
@@ -181,7 +183,7 @@ const PhotoGrid = ({
 
     const item = items[index];
     if (item.href) return;
-    if (selectedCount > 0) return;
+    if (selectionMode) return;
 
     const lightboxIndex = lightboxItems.findIndex(
       (photo) => photo.imgSrc === item.imgSrc && photo.name === item.name,
@@ -205,9 +207,24 @@ const PhotoGrid = ({
     });
   };
 
+  const handlePhotoClick = (index: number) => {
+    if (selectionMode) {
+      const item = items[index];
+      if (item.id) toggleSelectedPhoto(item.id);
+      return;
+    }
+
+    openLightboxForGridIndex(index);
+  };
+
   const clearSelection = () => {
     setSelectedPhotoIds(new Set());
     setDestinationAlbumId("");
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    clearSelection();
   };
 
   const handleMoveSelectedPhotos = async () => {
@@ -245,7 +262,7 @@ const PhotoGrid = ({
         throw new Error(data?.error || "Failed to move photos");
       }
 
-      clearSelection();
+      exitSelectionMode();
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -596,7 +613,7 @@ const PhotoGrid = ({
         </button>
       ) : null;
 
-    const adminMoveControls = sortable ? (
+    const adminMoveControls = selectionMode ? null : sortable ? (
       dragHandle
     ) : isAdmin && reorderType && photo.id ? (
       <div className="absolute left-3 top-3 z-20 flex gap-2">
@@ -678,7 +695,7 @@ const PhotoGrid = ({
       ) : null;
 
     const adminDeleteButton =
-      isAdmin && isPhotoMode && photo.id ? (
+      !selectionMode && isAdmin && isPhotoMode && photo.id ? (
         <button
           type="button"
           onClick={(e) => {
@@ -693,8 +710,12 @@ const PhotoGrid = ({
         </button>
       ) : null;
 
-    const selectButton =
-      canBulkMove && photo.id ? (
+    // Selection mode replaces the drag handle in the same corner (both are
+    // hidden from one another) with a plain checkmark badge — tapping
+    // anywhere on the photo also toggles selection, so this is mostly a
+    // status indicator rather than the only way to select.
+    const selectionBadge =
+      selectionMode && canBulkMove && photo.id ? (
         <button
           type="button"
           onClick={(e) => {
@@ -703,17 +724,24 @@ const PhotoGrid = ({
             toggleSelectedPhoto(photo.id!);
           }}
           disabled={movingPhotos}
-          className={`absolute bottom-3 right-3 z-20 inline-flex h-11 items-center gap-2 rounded-full border-2 px-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`absolute left-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border-2 shadow-md transition disabled:cursor-not-allowed disabled:opacity-50 ${
             isSelected
-              ? "border-white bg-emerald-800 text-white hover:bg-emerald-900"
-              : "border-white bg-black/80 text-white hover:bg-black"
+              ? "border-white bg-emerald-600 text-white"
+              : "border-white/90 bg-black/40 hover:bg-black/60"
           }`}
           aria-pressed={isSelected}
           aria-label={isSelected ? "Deselect photo" : "Select photo"}
           title={isSelected ? "Deselect photo" : "Select photo"}
         >
-          <span aria-hidden="true">{isSelected ? "✓" : "○"}</span>
-          <span>{isSelected ? "Selected" : "Select"}</span>
+          {isSelected ? (
+            <svg
+              viewBox="0 0 20 20"
+              className="h-4 w-4 fill-current"
+              aria-hidden="true"
+            >
+              <path d="M7.5 13.5 3.5 9.5l1.4-1.4 2.6 2.6 6.6-6.6 1.4 1.4z" />
+            </svg>
+          ) : null}
         </button>
       ) : null;
 
@@ -746,7 +774,7 @@ const PhotoGrid = ({
 
           {adminMoveControls}
           {positionControls}
-          {selectButton}
+          {selectionBadge}
           {caption}
         </div>
       );
@@ -761,7 +789,7 @@ const PhotoGrid = ({
       >
         <button
           type="button"
-          onClick={() => openLightboxForGridIndex(index)}
+          onClick={() => handlePhotoClick(index)}
           className="block w-full cursor-pointer overflow-hidden text-left"
         >
           {image}
@@ -769,7 +797,7 @@ const PhotoGrid = ({
 
         {adminMoveControls}
         {adminDeleteButton}
-        {selectButton}
+        {selectionBadge}
         {caption}
       </div>
     );
@@ -779,47 +807,78 @@ const PhotoGrid = ({
     <>
       <div className="lg:px-8 xl:px-16">
         {canBulkMove ? (
-          <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
-            <div className="text-sm text-gray-700">
-              {selectedCount > 0
-                ? `${selectedCount} photo${selectedCount > 1 ? "s" : ""} selected`
-                : "Select photos to move them to another album"}
+          selectionMode ? (
+            <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="text-sm text-gray-700">
+                {selectedCount > 0
+                  ? `${selectedCount} photo${selectedCount > 1 ? "s" : ""} selected`
+                  : "Tap photos below to select them"}
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative">
+                  <select
+                    value={destinationAlbumId}
+                    onChange={(e) => setDestinationAlbumId(e.target.value)}
+                    disabled={movingPhotos}
+                    className="appearance-none rounded-xl border border-gray-300 py-2 pl-3 pr-10 text-sm"
+                  >
+                    <option value="">Choose destination album</option>
+                    {movableAlbums.map((album) => (
+                      <option key={album.id} value={album.id}>
+                        {album.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m5 7.5 5 5 5-5"
+                    />
+                  </svg>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => void handleMoveSelectedPhotos()}
+                  disabled={
+                    !selectedCount || !destinationAlbumId || movingPhotos
+                  }
+                  className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                >
+                  {movingPhotos ? "Moving..." : "Move selected"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={exitSelectionMode}
+                  disabled={movingPhotos}
+                  className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 disabled:opacity-50"
+                >
+                  Done
+                </button>
+              </div>
             </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <select
-                value={destinationAlbumId}
-                onChange={(e) => setDestinationAlbumId(e.target.value)}
-                disabled={movingPhotos}
-                className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="">Choose destination album</option>
-                {movableAlbums.map((album) => (
-                  <option key={album.id} value={album.id}>
-                    {album.name}
-                  </option>
-                ))}
-              </select>
-
+          ) : (
+            <div className="mb-4 flex justify-end">
               <button
                 type="button"
-                onClick={() => void handleMoveSelectedPhotos()}
-                disabled={!selectedCount || !destinationAlbumId || movingPhotos}
-                className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                onClick={() => setSelectionMode(true)}
+                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500 hover:bg-gray-50"
               >
-                {movingPhotos ? "Moving..." : "Move selected"}
-              </button>
-
-              <button
-                type="button"
-                onClick={clearSelection}
-                disabled={!selectedCount || movingPhotos}
-                className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 disabled:opacity-50"
-              >
-                Clear
+                Select photos to move
               </button>
             </div>
-          </div>
+          )
         ) : null}
 
         {isAlbumGridLayout ? (
@@ -912,10 +971,7 @@ const PhotoGrid = ({
                     key={photo.id ?? `${photo.imgSrc}-${index}`}
                     id={photo.id ?? `${photo.imgSrc}-${index}`}
                     disabled={
-                      !photo.id ||
-                      savingOrder ||
-                      selectedCount > 0 ||
-                      movingPhotos
+                      !photo.id || savingOrder || selectionMode || movingPhotos
                     }
                   >
                     {(sortable) =>
