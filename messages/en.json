@@ -132,6 +132,11 @@
     "copyrightText": "Jan Hajek | created by Tomas Kaiser",
     "cookieSettings": "Cookie settings"
   },
+  "christmasBanner": {
+    "message": "Give the gift of a photoshoot this Christmas.",
+    "cta": "Request a Gift Voucher",
+    "close": "Dismiss"
+  },
   "cookieConsent": {
     "line1": "We use essential cookies for the website to work and optional external content for Google Reviews.",
     "line2": "You can accept or reject loading the reviews widget.",

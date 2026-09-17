@@ -132,6 +132,11 @@
     "copyrightText": "Jan Hájek | vytvořil Tomas Kaiser",
     "cookieSettings": "Nastavení souborů cookie"
   },
+  "christmasBanner": {
+    "message": "Darujte letos k Vánocům fotografování.",
+    "cta": "Požádat o dárkový poukaz",
+    "close": "Zavřít"
+  },
   "cookieConsent": {
     "line1": "Používáme nezbytné cookies, aby web správně fungoval, a volitelný externí obsah pro Google recenze.",
     "line2": "Načítání widgetu s recenzemi můžete přijmout nebo odmítnout.",

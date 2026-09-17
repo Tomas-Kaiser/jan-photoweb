@@ -9,6 +9,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { Link } from "../i18n/routing";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import ChristmasVoucherBanner from "../components/ChristmasVoucherBanner";
 
 const blur = () => {
   const el = document.activeElement as HTMLElement | null;
@@ -26,6 +27,8 @@ const NavBar = ({ isAdmin }: Props) => {
 
   return (
     <div className="sticky top-0 z-40">
+      <ChristmasVoucherBanner />
+
       {isAdmin ? (
         <div className="relative flex items-center justify-center gap-4 bg-green-900 py-1.5 text-xs font-semibold text-white">
           <span className="uppercase tracking-wide">
