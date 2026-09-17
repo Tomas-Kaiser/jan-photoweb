@@ -51,7 +51,8 @@
       "btn": "Zobrazit všechna alba"
     },
     "testimonials": {
-      "heading": "Reference klientů"
+      "heading": "Reference klientů",
+      "reviewBtn": "Napsat recenzi na Google"
     }
   },
   "albums": {

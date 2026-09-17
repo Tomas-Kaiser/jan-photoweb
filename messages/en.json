@@ -51,7 +51,8 @@
       "btn": "View All Albums"
     },
     "testimonials": {
-      "heading": "Client Testimonials"
+      "heading": "Client Testimonials",
+      "reviewBtn": "Leave a Google Review"
     }
   },
   "albums": {
