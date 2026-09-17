@@ -10,7 +10,7 @@ const SHOW_DELAY_MS = 4000;
 
 function isInSeason(now: Date) {
   const year = now.getFullYear();
-  const seasonStart = new Date(year, 8, 17); // Sep 17
+  const seasonStart = new Date(year, 9, 1); // Oct 1
   const seasonEnd = new Date(year, 11, 26, 23, 59, 59); // Dec 26
   return now >= seasonStart && now <= seasonEnd;
 }
@@ -71,7 +71,7 @@ export default function ChristmasVoucherBanner() {
         </span>
         <Link
           href={{ pathname: "/contact", query: { service: "voucher" } }}
-          className="font-semibold underline underline-offset-4 hover:text-emerald-100"
+          className="rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100"
         >
           {t("cta")}
         </Link>
