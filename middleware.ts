@@ -1,5 +1,6 @@
 import { NextRequest, NextFetchEvent } from "next/server";
 import createMiddleware from "next-intl/middleware";
+import type { NextAuthRequest } from "next-auth";
 import { routing } from "./app/i18n/routing";
 import { auth } from "@/auth";
 
@@ -7,7 +8,7 @@ const intlMiddleware = createMiddleware(routing);
 
 const publicPages = ["/", "/admin/login"];
 
-const authMiddleware = auth((req) => {
+const authMiddleware = auth((req: NextAuthRequest, _event: NextFetchEvent) => {
   return intlMiddleware(req);
 });
 
@@ -25,7 +26,7 @@ export default function middleware(req: NextRequest, ctx: NextFetchEvent) {
     return intlMiddleware(req);
   }
 
-  return (authMiddleware as any)(req, ctx);
+  return authMiddleware(req, ctx);
 }
 
 export const config = {
