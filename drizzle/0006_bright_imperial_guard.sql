@@ -1,0 +1,1 @@
+ALTER TABLE "proof_photos" ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL;

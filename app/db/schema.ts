@@ -4,6 +4,7 @@ import {
     uuid,
     text,
     integer,
+    boolean,
     timestamp,
     uniqueIndex,
     index,
@@ -14,6 +15,14 @@ import { relations } from "drizzle-orm";
 export const photoVisibilityEnum = pgEnum("photo_visibility", [
     "public",
     "highlights_only",
+]);
+
+export const proofGalleryStatusEnum = pgEnum("proof_gallery_status", [
+    "draft",
+    "active",
+    "submitted",
+    "paid",
+    "closed",
 ]);
 
 export const albums = pgTable(
@@ -90,6 +99,52 @@ export const portfolioHighlights = pgTable(
     ]
 );
 
+export const proofGalleries = pgTable(
+    "proof_galleries",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        token: text("token").notNull(),
+        clientName: text("client_name").notNull(),
+        freePhotoCount: integer("free_photo_count").default(10).notNull(),
+        extraPhotoPriceCents: integer("extra_photo_price_cents")
+            .default(0)
+            .notNull(),
+        currency: text("currency").default("CZK").notNull(),
+        status: proofGalleryStatusEnum("status").default("draft").notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        expiresAt: timestamp("expires_at"),
+    },
+    (table) => [uniqueIndex("proof_galleries_token_unique").on(table.token)]
+);
+
+export const proofPhotos = pgTable(
+    "proof_photos",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        galleryId: uuid("gallery_id").notNull(),
+        cloudflareId: text("cloudflare_id").notNull(),
+        fileName: text("file_name").notNull(),
+        sortOrder: integer("sort_order").default(0).notNull(),
+        selected: boolean("selected").default(false).notNull(),
+        selectedAt: timestamp("selected_at"),
+        comment: text("comment"),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.galleryId],
+            foreignColumns: [proofGalleries.id],
+            name: "proof_photos_gallery_id_fkey",
+        }).onDelete("cascade"),
+
+        index("proof_photos_gallery_id_idx").on(table.galleryId),
+        index("proof_photos_gallery_sort_order_idx").on(
+            table.galleryId,
+            table.sortOrder
+        ),
+    ]
+);
+
 export const albumsRelations = relations(albums, ({ one, many }) => ({
     parent: one(albums, {
         fields: [albums.parentId],
@@ -119,3 +174,17 @@ export const portfolioHighlightsRelations = relations(
         }),
     })
 );
+
+export const proofGalleriesRelations = relations(
+    proofGalleries,
+    ({ many }) => ({
+        photos: many(proofPhotos),
+    })
+);
+
+export const proofPhotosRelations = relations(proofPhotos, ({ one }) => ({
+    gallery: one(proofGalleries, {
+        fields: [proofPhotos.galleryId],
+        references: [proofGalleries.id],
+    }),
+}));
