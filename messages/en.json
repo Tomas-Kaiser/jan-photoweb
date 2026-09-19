@@ -184,7 +184,13 @@
       "albumsDescription": "Create, edit, and organize albums.",
       "highlightsTitle": "Portfolio highlights",
       "highlightsDescription": "Choose which photos appear in the homepage highlights slider.",
+      "proofGalleriesTitle": "Proof galleries",
+      "proofGalleriesDescription": "Create shareable galleries for clients to select and pay for photos.",
       "defaultUserName": "Admin"
+    },
+    "proofGalleries": {
+      "pageTitle": "Proof galleries",
+      "comingSoon": "Gallery creation and client selection are coming soon."
     },
     "highlights": {
       "pageTitle": "Portfolio highlights",

@@ -30,6 +30,11 @@ export default async function AdminPage({ params }: Props) {
             description: t("dashboard.highlightsDescription"),
             href: (locale: string) => `/${locale}/admin/portfolio-highlights`,
         },
+        {
+            title: t("dashboard.proofGalleriesTitle"),
+            description: t("dashboard.proofGalleriesDescription"),
+            href: (locale: string) => `/${locale}/admin/proof-galleries`,
+        },
     ];
 
     return (

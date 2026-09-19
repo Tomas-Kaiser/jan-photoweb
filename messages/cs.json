@@ -184,7 +184,13 @@
       "albumsDescription": "Vytvářejte, upravujte a organizujte alba.",
       "highlightsTitle": "Výběr na hlavní stránku",
       "highlightsDescription": "Vyberte, které fotky se zobrazí v karuselu na hlavní stránce.",
+      "proofGalleriesTitle": "Náhledovky",
+      "proofGalleriesDescription": "Vytvářejte sdílené galerie, ve kterých si klienti vyberou a zaplatí fotky.",
       "defaultUserName": "Administrátor"
+    },
+    "proofGalleries": {
+      "pageTitle": "Náhledovky",
+      "comingSoon": "Vytváření galerií a výběr fotek klienty budou brzy k dispozici."
     },
     "highlights": {
       "pageTitle": "Výběr na hlavní stránku",
