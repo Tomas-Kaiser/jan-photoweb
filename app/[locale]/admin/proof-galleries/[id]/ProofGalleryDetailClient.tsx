@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
+import { formatMoneyFromCents } from "@/app/lib/format-money";
 
 type Gallery = {
   id: string;
@@ -21,18 +22,31 @@ type Photo = {
   id: string;
   fileName: string;
   cardSrc: string;
+  selected: boolean;
+  comment: string | null;
 };
+
+type Order = {
+  includedCount: number;
+  extraCount: number;
+  totalCents: number;
+  submittedAtLabel: string;
+} | null;
 
 type Props = {
   locale: string;
+  origin: string;
   gallery: Gallery;
   initialPhotos: Photo[];
+  order: Order;
 };
 
 export default function ProofGalleryDetailClient({
   locale,
+  origin,
   gallery,
   initialPhotos,
+  order,
 }: Props) {
   const t = useTranslations("admin");
   const router = useRouter();
@@ -57,11 +71,13 @@ export default function ProofGalleryDetailClient({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingGallery, setDeletingGallery] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [filenamesCopied, setFilenamesCopied] = useState(false);
 
-  const shareUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/${locale}/proof/${gallery.token}`
-      : `/${locale}/proof/${gallery.token}`;
+  const selectedFileNames = photos
+    .filter((photo) => photo.selected)
+    .map((photo) => photo.fileName);
+
+  const shareUrl = `${origin}/${locale}/proof/${gallery.token}`;
 
   async function handleSaveSettings(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -161,6 +177,8 @@ export default function ProofGalleryDetailClient({
             id: data.photo.id as string,
             fileName: file.name,
             cardSrc: getCloudflareImageUrl(cloudflareId, "card"),
+            selected: false,
+            comment: null,
           },
         ]);
       } catch (err) {
@@ -254,6 +272,24 @@ export default function ProofGalleryDetailClient({
     setTimeout(() => setLinkCopied(false), 2000);
   }
 
+  async function handleCopyFilenames() {
+    await navigator.clipboard.writeText(selectedFileNames.join("\n"));
+    setFilenamesCopied(true);
+    setTimeout(() => setFilenamesCopied(false), 2000);
+  }
+
+  function handleDownloadFilenames() {
+    const blob = new Blob([selectedFileNames.join("\n")], {
+      type: "text/plain",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${gallery.clientName}-selected-photos.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-10">
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -273,6 +309,70 @@ export default function ProofGalleryDetailClient({
           </button>
         </div>
       </section>
+
+      {order ? (
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+            {t("proofGalleries.orderTitle")}
+          </h2>
+
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-gray-600">{t("proofGalleries.orderIncluded")}</dt>
+              <dd className="font-medium text-gray-900">{order.includedCount}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-gray-600">{t("proofGalleries.orderExtra")}</dt>
+              <dd className="font-medium text-gray-900">{order.extraCount}</dd>
+            </div>
+            <div className="flex justify-between border-t border-gray-100 pt-2">
+              <dt className="font-medium text-gray-900">
+                {t("proofGalleries.orderTotal")}
+              </dt>
+              <dd className="font-semibold text-gray-900">
+                {formatMoneyFromCents(order.totalCents, gallery.currency)}
+              </dd>
+            </div>
+          </dl>
+
+          <p className="mt-3 text-xs text-gray-500">
+            {t("proofGalleries.orderSubmittedAt", {
+              date: order.submittedAtLabel,
+            })}
+          </p>
+
+          {selectedFileNames.length > 0 ? (
+            <div className="mt-5 border-t border-gray-100 pt-4">
+              <p className="mb-2 text-sm font-medium text-gray-700">
+                {t("proofGalleries.selectedFileNamesTitle")}
+              </p>
+
+              <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-all rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-800">
+                {selectedFileNames.join("\n")}
+              </pre>
+
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleCopyFilenames}
+                  className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
+                >
+                  {filenamesCopied
+                    ? t("proofGalleries.filenamesCopied")
+                    : t("proofGalleries.copyFilenames")}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadFilenames}
+                  className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
+                >
+                  {t("proofGalleries.downloadFilenames")}
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="mb-4 text-xl font-semibold text-gray-900">
@@ -405,7 +505,11 @@ export default function ProofGalleryDetailClient({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {photos.map((photo) => (
               <div key={photo.id} className="group relative">
-                <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+                <div
+                  className={`relative aspect-square overflow-hidden rounded-xl bg-gray-100 ring-2 ${
+                    photo.selected ? "ring-black" : "ring-transparent"
+                  }`}
+                >
                   <Image
                     src={photo.cardSrc}
                     alt={photo.fileName}
@@ -413,10 +517,21 @@ export default function ProofGalleryDetailClient({
                     sizes="200px"
                     className="object-cover"
                   />
+
+                  {photo.selected ? (
+                    <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
+                      ✓
+                    </span>
+                  ) : null}
                 </div>
                 <p className="mt-1 truncate text-xs text-gray-500">
                   {photo.fileName}
                 </p>
+                {photo.comment ? (
+                  <p className="mt-0.5 text-xs text-gray-700">
+                    {photo.comment}
+                  </p>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => handleDeletePhoto(photo)}

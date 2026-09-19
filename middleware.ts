@@ -6,7 +6,10 @@ import { auth } from "@/auth";
 
 const intlMiddleware = createMiddleware(routing);
 
-const publicPages = ["/", "/admin/login"];
+// "/proof/[^/]+" is a regex fragment, not a literal path — it matches any
+// single path segment (the gallery token) after /proof/, since that route
+// has no session (see docs/photo-proofing-design.md §6, §7a).
+const publicPages = ["/", "/admin/login", "/proof/[^/]+"];
 
 const authMiddleware = auth((req: NextAuthRequest, _event: NextFetchEvent) => {
   return intlMiddleware(req);

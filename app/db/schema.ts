@@ -6,6 +6,7 @@ import {
     integer,
     boolean,
     timestamp,
+    jsonb,
     uniqueIndex,
     index,
     foreignKey,
@@ -23,6 +24,11 @@ export const proofGalleryStatusEnum = pgEnum("proof_gallery_status", [
     "submitted",
     "paid",
     "closed",
+]);
+
+export const proofOrderStatusEnum = pgEnum("proof_order_status", [
+    "pending_payment",
+    "paid",
 ]);
 
 export const albums = pgTable(
@@ -145,6 +151,30 @@ export const proofPhotos = pgTable(
     ]
 );
 
+export const proofOrders = pgTable(
+    "proof_orders",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        galleryId: uuid("gallery_id").notNull(),
+        selectedPhotoIds: jsonb("selected_photo_ids").notNull().$type<string[]>(),
+        includedCount: integer("included_count").notNull(),
+        extraCount: integer("extra_count").notNull(),
+        totalCents: integer("total_cents").notNull(),
+        status: proofOrderStatusEnum("status").default("pending_payment").notNull(),
+        submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+        confirmedAt: timestamp("confirmed_at"),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.galleryId],
+            foreignColumns: [proofGalleries.id],
+            name: "proof_orders_gallery_id_fkey",
+        }).onDelete("cascade"),
+
+        uniqueIndex("proof_orders_gallery_id_unique").on(table.galleryId),
+    ]
+);
+
 export const albumsRelations = relations(albums, ({ one, many }) => ({
     parent: one(albums, {
         fields: [albums.parentId],
@@ -177,14 +207,25 @@ export const portfolioHighlightsRelations = relations(
 
 export const proofGalleriesRelations = relations(
     proofGalleries,
-    ({ many }) => ({
+    ({ many, one }) => ({
         photos: many(proofPhotos),
+        order: one(proofOrders, {
+            fields: [proofGalleries.id],
+            references: [proofOrders.galleryId],
+        }),
     })
 );
 
 export const proofPhotosRelations = relations(proofPhotos, ({ one }) => ({
     gallery: one(proofGalleries, {
         fields: [proofPhotos.galleryId],
+        references: [proofGalleries.id],
+    }),
+}));
+
+export const proofOrdersRelations = relations(proofOrders, ({ one }) => ({
+    gallery: one(proofGalleries, {
+        fields: [proofOrders.galleryId],
         references: [proofGalleries.id],
     }),
 }));
