@@ -129,7 +129,13 @@ export default function ProofSelectionClient({
             <p className="mt-1 text-sm text-green-800">
               {t("freeRemainingCount", { count: freeRemaining })}
               {extraCount > 0 ? (
-                <> · {t("extraCount", { count: extraCount })}</>
+                <>
+                  {" · "}
+                  {t("extraBreakdown", {
+                    count: extraCount,
+                    price: formatMoneyFromCents(extraPhotoPriceCents, currency),
+                  })}
+                </>
               ) : null}
             </p>
           </div>

@@ -131,23 +131,73 @@ export default async function ProofGalleryPage({ params }: Props) {
     );
   }
 
-  return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <p className="text-sm font-medium uppercase tracking-wide text-green-700">
-        {gallery.clientName}
-      </p>
-      <h1 className="mt-2 text-3xl font-bold text-gray-900 sm:text-4xl">
-        {t("heading")}
-      </h1>
-      <p className="mt-2 text-gray-600">{t("instructions")}</p>
+  const steps = [t("step1"), t("step2"), t("step3")];
 
-      <ProofSelectionClient
-        token={token}
-        freePhotoCount={gallery.freePhotoCount}
-        extraPhotoPriceCents={gallery.extraPhotoPriceCents}
-        currency={gallery.currency}
-        photos={photos}
-      />
+  return (
+    <div className="bg-gradient-to-b from-green-50/60 to-white">
+      <div className="mx-auto max-w-5xl px-6 py-12 sm:py-16">
+        <header className="max-w-2xl">
+          <p className="text-sm font-semibold uppercase tracking-widest text-green-700">
+            {gallery.clientName}
+          </p>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+            {t("heading")}
+          </h1>
+          <p className="mt-4 text-lg leading-8 text-gray-600">
+            {t("instructions")}
+          </p>
+        </header>
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              {t("packageLabel")}
+            </p>
+            <p className="mt-1 text-2xl font-bold text-gray-900">
+              {t("packagePhotos", { count: gallery.freePhotoCount })}
+            </p>
+          </div>
+
+          {gallery.extraPhotoPriceCents > 0 ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                {t("extraPriceLabel")}
+              </p>
+              <p className="mt-1 text-2xl font-bold text-green-900">
+                {formatMoneyFromCents(
+                  gallery.extraPhotoPriceCents,
+                  gallery.currency,
+                )}
+                <span className="ml-1 text-sm font-medium text-gray-500">
+                  {t("perPhoto")}
+                </span>
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        <ol className="mt-6 grid gap-3 sm:grid-cols-3">
+          {steps.map((step, index) => (
+            <li
+              key={step}
+              className="flex items-center gap-3 text-sm text-gray-700"
+            >
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-800 text-xs font-bold text-white">
+                {index + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+
+        <ProofSelectionClient
+          token={token}
+          freePhotoCount={gallery.freePhotoCount}
+          extraPhotoPriceCents={gallery.extraPhotoPriceCents}
+          currency={gallery.currency}
+          photos={photos}
+        />
+      </div>
     </div>
   );
 }
