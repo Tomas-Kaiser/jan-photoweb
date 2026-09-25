@@ -3,11 +3,10 @@ import { NextIntlClientProvider } from "next-intl";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import { auth } from "@/auth";
 import { routing } from "../i18n/routing";
-import NavBar from "./NavBar";
-import Footer from "./Footer";
+import SiteChrome from "./SiteChrome";
 import CookieConsentBanner from "../components/consent/CookieConsentBanner";
 import { ToastProvider } from "../components/Toast";
 import { ConfirmProvider } from "../components/ConfirmDialog";
@@ -15,6 +14,12 @@ import { ConfirmProvider } from "../components/ConfirmDialog";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -64,7 +69,9 @@ export default async function LocaleLayout(props: {
     rawConsent === "accepted" || rawConsent === "rejected" ? rawConsent : null;
 
   return (
-    <div className={`${geistSans.variable} ${geistMono.variable}`}>
+    <div
+      className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable}`}
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -74,11 +81,7 @@ export default async function LocaleLayout(props: {
       <NextIntlClientProvider locale={locale} messages={messages}>
         <ToastProvider>
           <ConfirmProvider>
-            <div className="flex min-h-screen flex-col">
-              <NavBar isAdmin={isAdmin} />
-              <main className="flex-1">{props.children}</main>
-              <Footer />
-            </div>
+            <SiteChrome isAdmin={isAdmin}>{props.children}</SiteChrome>
             <CookieConsentBanner initialConsent={initialConsent} />
           </ConfirmProvider>
         </ToastProvider>

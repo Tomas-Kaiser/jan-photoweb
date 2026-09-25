@@ -8,11 +8,19 @@
   --foreground: #171717;
 }
 
+@theme {
+  --color-brand-green: #014421;
+  --color-brand-cream: #F0EDE4;
+  --color-brand-gold: #B08D57;
+  --color-brand-gold-dark: #8A6A30;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-cormorant);
 }
 
 /* @media (prefers-color-scheme: dark) {

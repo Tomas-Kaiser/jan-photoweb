@@ -90,6 +90,7 @@ export default function ProofSelectionClient({
       title: t("submitConfirmTitle"),
       message: t("submitConfirmMessage"),
       confirmLabel: t("submitButton"),
+      brand: true,
     });
 
     if (!confirmed) return;
@@ -125,13 +126,13 @@ export default function ProofSelectionClient({
 
   return (
     <div>
-      <div className="mt-8 rounded-3xl border border-green-100 bg-green-50/70 p-5 shadow-sm sm:p-6">
+      <div className="mt-8 rounded-3xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div>
-            <p className="text-base font-semibold text-green-900">
+            <p className="text-base font-semibold text-brand-green">
               {t("selectedCount", { count: selectedCount })}
             </p>
-            <p className="mt-1 text-sm text-green-800">
+            <p className="mt-1 text-sm text-brand-green/70">
               {t("freeRemainingCount", { count: freeRemaining })}
               {extraCount > 0 ? (
                 <>
@@ -148,10 +149,10 @@ export default function ProofSelectionClient({
           <div className="flex items-center gap-5">
             {extraCount > 0 ? (
               <div className="text-right">
-                <p className="text-xs font-medium uppercase tracking-wide text-green-700">
+                <p className="text-xs font-medium uppercase tracking-wide text-brand-gold-dark">
                   {t("totalLabel")}
                 </p>
-                <p className="text-2xl font-bold text-green-900">
+                <p className="text-2xl font-bold text-brand-green">
                   {formatMoneyFromCents(totalCents, currency)}
                 </p>
               </div>
@@ -161,7 +162,7 @@ export default function ProofSelectionClient({
               type="button"
               onClick={handleSubmit}
               disabled={submitting || selectedCount === 0}
-              className="rounded-full bg-green-800 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-900 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full bg-brand-green px-7 py-3 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? t("submitting") : t("submitButton")}
             </button>
@@ -178,10 +179,10 @@ export default function ProofSelectionClient({
           return (
             <div key={photo.id}>
               <div
-                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-4 transition duration-200 hover:shadow-md ${
+                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-2 ring-offset-2 ring-offset-brand-cream transition duration-200 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.3)] ${
                   selection.selected
-                    ? "ring-green-700"
-                    : "ring-transparent hover:ring-green-100"
+                    ? "ring-brand-green"
+                    : "ring-transparent hover:ring-brand-green/30"
                 }`}
               >
                 <button
@@ -200,7 +201,7 @@ export default function ProofSelectionClient({
                 </button>
 
                 {selection.selected ? (
-                  <span className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-green-800 text-sm font-bold text-white shadow">
+                  <span className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-brand-green text-sm font-bold text-white shadow">
                     ✓
                   </span>
                 ) : null}
@@ -209,10 +210,10 @@ export default function ProofSelectionClient({
               <button
                 type="button"
                 onClick={() => toggleSelected(photo.id)}
-                className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold transition ${
+                className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition ${
                   selection.selected
-                    ? "bg-green-800 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "border-transparent bg-brand-green text-white"
+                    : "border-transparent bg-white text-brand-green shadow-sm hover:bg-white/70"
                 }`}
               >
                 {selection.selected ? t("selected") : t("select")}
@@ -223,7 +224,7 @@ export default function ProofSelectionClient({
                 value={selection.comment}
                 onChange={(e) => setComment(photo.id, e.target.value)}
                 placeholder={t("commentPlaceholder")}
-                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-800 outline-none transition focus:border-green-700 focus:ring-1 focus:ring-green-700"
+                className="mt-2 w-full rounded-2xl border border-transparent bg-white/80 shadow-sm px-3.5 py-2 text-xs text-gray-800 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green"
               />
             </div>
           );
@@ -245,7 +246,7 @@ export default function ProofSelectionClient({
                   onClick={() => toggleSelected(lightboxPhoto.id)}
                   className={`pointer-events-auto rounded-full border px-8 py-3 text-sm font-semibold text-white shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl backdrop-saturate-150 transition ${
                     lightboxSelected
-                      ? "border-green-300/50 bg-green-700/60 hover:bg-green-700/75"
+                      ? "border-white/30 bg-brand-green/70 hover:bg-brand-green/85"
                       : "border-white/40 bg-white/20 hover:bg-white/30"
                   }`}
                 >

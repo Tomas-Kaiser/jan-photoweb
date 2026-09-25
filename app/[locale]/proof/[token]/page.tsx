@@ -27,8 +27,8 @@ export default async function ProofGalleryPage({ params }: Props) {
   if (!galleryRows.length) {
     return (
       <div className="mx-auto max-w-xl px-6 py-24 text-center">
-        <div className="rounded-3xl border border-gray-100 bg-white p-10 shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-900">
+        <div className="rounded-3xl bg-white p-10 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+          <h1 className="font-display text-3xl font-semibold text-brand-green">
             {t("notFoundTitle")}
           </h1>
           <p className="mt-3 text-gray-600">{t("notFoundMessage")}</p>
@@ -73,49 +73,51 @@ export default async function ProofGalleryPage({ params }: Props) {
     const selectedPhotos = photos.filter((p) => selectedIds.has(p.id));
 
     return (
-      <div className="mx-auto max-w-4xl px-6 py-12">
-        <p className="text-sm font-medium uppercase tracking-wide text-green-700">
-          {gallery.clientName}
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900 sm:text-4xl">
-          {t("thankYouTitle")}
-        </h1>
-        <p className="mt-3 text-gray-600">{t("thankYouMessage")}</p>
+      <div className="bg-brand-cream">
+        <div className="mx-auto max-w-4xl px-6 py-12">
+          <p className="text-sm font-medium uppercase tracking-wide text-brand-gold-dark">
+            {gallery.clientName}
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-semibold text-brand-green sm:text-5xl">
+            {t("thankYouTitle")}
+          </h1>
+          <p className="mt-3 text-gray-600">{t("thankYouMessage")}</p>
 
-        <div className="mt-8 rounded-3xl border border-green-100 bg-green-50/70 p-6 shadow-sm">
-          <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-green-800">{t("summaryTotalSelected")}</dt>
-              <dd className="font-medium text-green-900">
-                {order.includedCount + order.extraCount}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-green-800">{t("summaryIncluded")}</dt>
-              <dd className="font-medium text-green-900">
-                {order.includedCount}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-green-800">{t("summaryExtra")}</dt>
-              <dd className="font-medium text-green-900">
-                {order.extraCount}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between border-t border-green-200 pt-3">
-              <dt className="text-base font-semibold text-green-900">
-                {t("summaryTotal")}
-              </dt>
-              <dd className="text-2xl font-bold text-green-900">
-                {formatMoneyFromCents(order.totalCents, gallery.currency)}
-              </dd>
-            </div>
-          </dl>
+          <div className="mt-8 rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-gray-600">{t("summaryTotalSelected")}</dt>
+                <dd className="font-medium text-brand-green">
+                  {order.includedCount + order.extraCount}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-600">{t("summaryIncluded")}</dt>
+                <dd className="font-medium text-brand-green">
+                  {order.includedCount}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-600">{t("summaryExtra")}</dt>
+                <dd className="font-medium text-brand-green">
+                  {order.extraCount}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between border-t border-brand-gold/15 pt-3">
+                <dt className="text-base font-semibold text-brand-green">
+                  {t("summaryTotal")}
+                </dt>
+                <dd className="text-2xl font-bold text-brand-green">
+                  {formatMoneyFromCents(order.totalCents, gallery.currency)}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          {selectedPhotos.length > 0 ? (
+            <ProofOrderPhotosClient photos={selectedPhotos} />
+          ) : null}
         </div>
-
-        {selectedPhotos.length > 0 ? (
-          <ProofOrderPhotosClient photos={selectedPhotos} />
-        ) : null}
       </div>
     );
   }
@@ -123,8 +125,10 @@ export default async function ProofGalleryPage({ params }: Props) {
   if (!photos.length) {
     return (
       <div className="mx-auto max-w-xl px-6 py-24 text-center">
-        <div className="rounded-3xl border border-gray-100 bg-white p-10 shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-900">{t("heading")}</h1>
+        <div className="rounded-3xl bg-white p-10 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+          <h1 className="font-display text-3xl font-semibold text-brand-green">
+            {t("heading")}
+          </h1>
           <p className="mt-3 text-gray-600">{t("noPhotosYet")}</p>
         </div>
       </div>
@@ -134,36 +138,37 @@ export default async function ProofGalleryPage({ params }: Props) {
   const steps = [t("step1"), t("step2"), t("step3")];
 
   return (
-    <div className="bg-gradient-to-b from-green-50/60 to-white">
+    <div className="bg-brand-cream">
       <div className="mx-auto max-w-5xl px-6 py-12 sm:py-16">
         <header className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-widest text-green-700">
+          <p className="text-sm font-semibold uppercase tracking-widest text-brand-gold-dark">
             {gallery.clientName}
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-brand-green sm:text-6xl">
             {t("heading")}
           </h1>
+          <div className="mt-6 h-px w-20 bg-brand-gold" />
           <p className="mt-4 text-lg leading-8 text-gray-600">
             {t("instructions")}
           </p>
         </header>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
               {t("packageLabel")}
             </p>
-            <p className="mt-1 text-2xl font-bold text-gray-900">
+            <p className="mt-1 text-2xl font-bold text-brand-green">
               {t("packagePhotos", { count: gallery.freePhotoCount })}
             </p>
           </div>
 
           {gallery.extraPhotoPriceCents > 0 ? (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
                 {t("extraPriceLabel")}
               </p>
-              <p className="mt-1 text-2xl font-bold text-green-900">
+              <p className="mt-1 text-2xl font-bold text-brand-green">
                 {formatMoneyFromCents(
                   gallery.extraPhotoPriceCents,
                   gallery.currency,
@@ -182,7 +187,7 @@ export default async function ProofGalleryPage({ params }: Props) {
               key={step}
               className="flex items-center gap-3 text-sm text-gray-700"
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-800 text-xs font-bold text-white">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-green text-sm font-bold text-white">
                 {index + 1}
               </span>
               {step}

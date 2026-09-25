@@ -33,7 +33,7 @@ export default function ProofOrderPhotosClient({ photos }: Props) {
             <button
               type="button"
               onClick={() => setLightboxIndex(index)}
-              className="relative block aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-4 ring-green-700 transition hover:shadow-md"
+              className="relative block aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-2 ring-brand-green ring-offset-2 ring-offset-brand-cream transition"
             >
               <Image
                 src={photo.cardSrc}
