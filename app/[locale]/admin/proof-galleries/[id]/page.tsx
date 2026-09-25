@@ -71,6 +71,14 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
           dateStyle: "medium",
           timeStyle: "short",
         }),
+        status: orderRows[0].status,
+        paidAtLabel: orderRows[0].confirmedAt
+          ? orderRows[0].confirmedAt.toLocaleString(locale, {
+              timeZone: "Europe/Prague",
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : null,
       }
     : null;
 

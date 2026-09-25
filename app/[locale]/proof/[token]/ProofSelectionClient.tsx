@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 
@@ -11,6 +14,7 @@ type Photo = {
   id: string;
   fileName: string;
   cardSrc: string;
+  detailSrc: string;
   comment: string | null;
 };
 
@@ -49,13 +53,16 @@ export default function ProofSelectionClient({
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const slides = photos.map((photo) => ({ src: photo.detailSrc }));
 
   const selectedCount = useMemo(
     () => Object.values(selections).filter((s) => s.selected).length,
     [selections],
   );
 
-  const includedCount = Math.min(selectedCount, freePhotoCount);
+  const freeRemaining = Math.max(0, freePhotoCount - selectedCount);
   const extraCount = Math.max(0, selectedCount - freePhotoCount);
   const totalCents = extraCount * extraPhotoPriceCents;
 
@@ -112,39 +119,90 @@ export default function ProofSelectionClient({
   }
 
   return (
-    <div className="pb-28">
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {photos.map((photo) => {
+    <div>
+      <div className="mt-8 rounded-3xl border border-green-100 bg-green-50/70 p-5 shadow-sm sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div>
+            <p className="text-base font-semibold text-green-900">
+              {t("selectedCount", { count: selectedCount })}
+            </p>
+            <p className="mt-1 text-sm text-green-800">
+              {t("freeRemainingCount", { count: freeRemaining })}
+              {extraCount > 0 ? (
+                <> · {t("extraCount", { count: extraCount })}</>
+              ) : null}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-5">
+            {extraCount > 0 ? (
+              <div className="text-right">
+                <p className="text-xs font-medium uppercase tracking-wide text-green-700">
+                  {t("totalLabel")}
+                </p>
+                <p className="text-2xl font-bold text-green-900">
+                  {formatMoneyFromCents(totalCents, currency)}
+                </p>
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting || selectedCount === 0}
+              className="rounded-full bg-green-800 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-900 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? t("submitting") : t("submitButton")}
+            </button>
+          </div>
+        </div>
+
+        {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+      </div>
+
+      <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
+        {photos.map((photo, index) => {
           const selection = selections[photo.id];
 
           return (
             <div key={photo.id}>
-              <button
-                type="button"
-                onClick={() => toggleSelected(photo.id)}
-                className={`relative block aspect-square w-full overflow-hidden rounded-xl bg-gray-100 ring-2 transition ${
-                  selection.selected ? "ring-black" : "ring-transparent"
+              <div
+                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-4 transition duration-200 hover:shadow-md ${
+                  selection.selected
+                    ? "ring-green-700"
+                    : "ring-transparent hover:ring-green-100"
                 }`}
               >
-                <Image
-                  src={photo.cardSrc}
-                  alt={photo.fileName}
-                  fill
-                  sizes="200px"
-                  className="object-cover"
-                />
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex(index)}
+                  aria-label={t("expand")}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={photo.cardSrc}
+                    alt={photo.fileName}
+                    fill
+                    sizes="200px"
+                    className="object-cover"
+                  />
+                </button>
 
                 {selection.selected ? (
-                  <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
+                  <span className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-green-800 text-sm font-bold text-white shadow">
                     ✓
                   </span>
                 ) : null}
-              </button>
+              </div>
 
               <button
                 type="button"
                 onClick={() => toggleSelected(photo.id)}
-                className="mt-1 text-xs font-medium text-gray-700"
+                className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selection.selected
+                    ? "bg-green-800 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
                 {selection.selected ? t("selected") : t("select")}
               </button>
@@ -154,47 +212,27 @@ export default function ProofSelectionClient({
                 value={selection.comment}
                 onChange={(e) => setComment(photo.id, e.target.value)}
                 placeholder={t("commentPlaceholder")}
-                className="mt-1 w-full rounded-lg border border-gray-200 px-2 py-1 text-xs"
+                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-800 outline-none transition focus:border-green-700 focus:ring-1 focus:ring-green-700"
               />
             </div>
           );
         })}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-[200] border-t border-gray-200 bg-white/95 px-6 py-4 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4">
-          <div className="text-sm text-gray-700">
-            <p className="font-medium">{t("selectedCount", { count: selectedCount })}</p>
-            <p className="text-gray-500">
-              {t("includedCount", { count: includedCount })}
-              {extraCount > 0 ? (
-                <>
-                  {" · "}
-                  {t("extraCount", { count: extraCount })}
-                  {" · "}
-                  {t("totalLabel")}:{" "}
-                  <span className="font-medium text-gray-900">
-                    {formatMoneyFromCents(totalCents, currency)}
-                  </span>
-                </>
-              ) : null}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitting || selectedCount === 0}
-            className="rounded-xl bg-black px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
-          >
-            {submitting ? t("submitting") : t("submitButton")}
-          </button>
-        </div>
-
-        {error ? (
-          <p className="mx-auto mt-2 max-w-5xl text-sm text-red-700">{error}</p>
-        ) : null}
-      </div>
+      <Lightbox
+        open={lightboxIndex !== null}
+        close={() => setLightboxIndex(null)}
+        slides={slides}
+        index={lightboxIndex ?? 0}
+        plugins={[Zoom]}
+        zoom={{
+          maxZoomPixelRatio: 3,
+          zoomInMultiplier: 1.2,
+          doubleTapDelay: 300,
+          doubleClickDelay: 300,
+          keyboardMoveDistance: 50,
+        }}
+      />
     </div>
   );
 }

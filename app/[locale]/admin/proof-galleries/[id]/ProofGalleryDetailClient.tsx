@@ -31,6 +31,8 @@ type Order = {
   extraCount: number;
   totalCents: number;
   submittedAtLabel: string;
+  status: "pending_payment" | "paid";
+  paidAtLabel: string | null;
 } | null;
 
 type Props = {
@@ -72,6 +74,8 @@ export default function ProofGalleryDetailClient({
   const [deletingGallery, setDeletingGallery] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [filenamesCopied, setFilenamesCopied] = useState(false);
+  const [markingPaid, setMarkingPaid] = useState(false);
+  const [paidError, setPaidError] = useState<string | null>(null);
 
   const selectedFileNames = photos
     .filter((photo) => photo.selected)
@@ -272,6 +276,39 @@ export default function ProofGalleryDetailClient({
     setTimeout(() => setLinkCopied(false), 2000);
   }
 
+  async function handleMarkPaid() {
+    const confirmed = await confirm({
+      title: t("proofGalleries.markPaidConfirmTitle"),
+      message: t("proofGalleries.markPaidConfirmMessage"),
+      confirmLabel: t("proofGalleries.markPaid"),
+    });
+
+    if (!confirmed) return;
+
+    setMarkingPaid(true);
+    setPaidError(null);
+
+    try {
+      const res = await fetch(
+        `/api/admin/proof-galleries/${gallery.id}/mark-paid`,
+        { method: "POST" },
+      );
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(data?.error || t("proofGalleries.markPaidFailed"));
+      }
+
+      router.refresh();
+    } catch (err) {
+      setPaidError(
+        err instanceof Error ? err.message : t("proofGalleries.markPaidFailed"),
+      );
+    } finally {
+      setMarkingPaid(false);
+    }
+  }
+
   async function handleCopyFilenames() {
     await navigator.clipboard.writeText(selectedFileNames.join("\n"));
     setFilenamesCopied(true);
@@ -312,11 +349,32 @@ export default function ProofGalleryDetailClient({
 
       {order ? (
         <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
-            {t("proofGalleries.orderTitle")}
-          </h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold text-gray-900">
+              {t("proofGalleries.orderTitle")}
+            </h2>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                order.status === "paid"
+                  ? "bg-green-800 text-white"
+                  : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {order.status === "paid"
+                ? t("proofGalleries.statusPaid")
+                : t("proofGalleries.orderPendingPayment")}
+            </span>
+          </div>
 
           <dl className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-gray-600">
+                {t("proofGalleries.orderTotalSelected")}
+              </dt>
+              <dd className="font-medium text-gray-900">
+                {order.includedCount + order.extraCount}
+              </dd>
+            </div>
             <div className="flex justify-between">
               <dt className="text-gray-600">{t("proofGalleries.orderIncluded")}</dt>
               <dd className="font-medium text-gray-900">{order.includedCount}</dd>
@@ -340,6 +398,30 @@ export default function ProofGalleryDetailClient({
               date: order.submittedAtLabel,
             })}
           </p>
+
+          {order.status === "paid" ? (
+            <p className="mt-1 text-xs font-medium text-green-800">
+              {t("proofGalleries.orderPaidAt", {
+                date: order.paidAtLabel ?? "",
+              })}
+            </p>
+          ) : (
+            <div className="mt-4 flex flex-col items-end">
+              <button
+                type="button"
+                onClick={handleMarkPaid}
+                disabled={markingPaid}
+                className="rounded-full bg-green-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-900 disabled:opacity-60"
+              >
+                {markingPaid
+                  ? t("common.saving")
+                  : t("proofGalleries.markPaid")}
+              </button>
+              {paidError ? (
+                <p className="mt-2 text-sm text-red-700">{paidError}</p>
+              ) : null}
+            </div>
+          )}
 
           {selectedFileNames.length > 0 ? (
             <div className="mt-5 border-t border-gray-100 pt-4">
@@ -379,86 +461,125 @@ export default function ProofGalleryDetailClient({
           {t("proofGalleries.settingsTitle")}
         </h2>
 
-        <form onSubmit={handleSaveSettings} className="space-y-5">
+        {order ? (
           <div>
-            <label
-              htmlFor="clientName"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              {t("proofGalleries.clientNameLabel")}
-            </label>
-            <input
-              id="clientName"
-              type="text"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              disabled={savingSettings}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="freePhotoCount"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              {t("proofGalleries.freePhotoCountLabel")}
-            </label>
-            <input
-              id="freePhotoCount"
-              type="number"
-              min={0}
-              step={1}
-              value={freePhotoCount}
-              onChange={(e) => setFreePhotoCount(e.target.value)}
-              disabled={savingSettings}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="extraPhotoPrice"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              {t("proofGalleries.extraPhotoPriceLabel")}
-            </label>
-            <input
-              id="extraPhotoPrice"
-              type="number"
-              min={0}
-              step={1}
-              value={extraPhotoPrice}
-              onChange={(e) => setExtraPhotoPrice(e.target.value)}
-              disabled={savingSettings}
-              className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-              required
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              {t("proofGalleries.extraPhotoPriceHint", {
-                currency: gallery.currency,
-              })}
+            <p className="mb-4 text-sm text-gray-500">
+              {t("proofGalleries.settingsLockedNote")}
             </p>
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-gray-600">
+                  {t("proofGalleries.clientNameLabel")}
+                </dt>
+                <dd className="font-medium text-gray-900">
+                  {gallery.clientName}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-600">
+                  {t("proofGalleries.freePhotoCountLabel")}
+                </dt>
+                <dd className="font-medium text-gray-900">
+                  {gallery.freePhotoCount}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-600">
+                  {t("proofGalleries.extraPhotoPriceLabel")}
+                </dt>
+                <dd className="font-medium text-gray-900">
+                  {formatMoneyFromCents(
+                    gallery.extraPhotoPriceCents,
+                    gallery.currency,
+                  )}
+                </dd>
+              </div>
+            </dl>
           </div>
+        ) : (
+          <form onSubmit={handleSaveSettings} className="space-y-5">
+            <div>
+              <label
+                htmlFor="clientName"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                {t("proofGalleries.clientNameLabel")}
+              </label>
+              <input
+                id="clientName"
+                type="text"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                disabled={savingSettings}
+                className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+                required
+              />
+            </div>
 
-          {settingsMessage ? (
-            <p className="text-sm text-green-700">{settingsMessage}</p>
-          ) : null}
+            <div>
+              <label
+                htmlFor="freePhotoCount"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                {t("proofGalleries.freePhotoCountLabel")}
+              </label>
+              <input
+                id="freePhotoCount"
+                type="number"
+                min={0}
+                step={1}
+                value={freePhotoCount}
+                onChange={(e) => setFreePhotoCount(e.target.value)}
+                disabled={savingSettings}
+                className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+                required
+              />
+            </div>
 
-          {settingsError ? (
-            <p className="text-sm text-red-700">{settingsError}</p>
-          ) : null}
+            <div>
+              <label
+                htmlFor="extraPhotoPrice"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                {t("proofGalleries.extraPhotoPriceLabel")}
+              </label>
+              <input
+                id="extraPhotoPrice"
+                type="number"
+                min={0}
+                step={1}
+                value={extraPhotoPrice}
+                onChange={(e) => setExtraPhotoPrice(e.target.value)}
+                disabled={savingSettings}
+                className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+                required
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                {t("proofGalleries.extraPhotoPriceHint", {
+                  currency: gallery.currency,
+                })}
+              </p>
+            </div>
 
-          <button
-            type="submit"
-            disabled={savingSettings}
-            className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
-          >
-            {savingSettings ? t("common.saving") : t("proofGalleries.saveSettings")}
-          </button>
-        </form>
+            {settingsMessage ? (
+              <p className="text-sm text-green-700">{settingsMessage}</p>
+            ) : null}
+
+            {settingsError ? (
+              <p className="text-sm text-red-700">{settingsError}</p>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={savingSettings}
+              className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {savingSettings
+                ? t("common.saving")
+                : t("proofGalleries.saveSettings")}
+            </button>
+          </form>
+        )}
       </section>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -506,8 +627,8 @@ export default function ProofGalleryDetailClient({
             {photos.map((photo) => (
               <div key={photo.id} className="group relative">
                 <div
-                  className={`relative aspect-square overflow-hidden rounded-xl bg-gray-100 ring-2 ${
-                    photo.selected ? "ring-black" : "ring-transparent"
+                  className={`relative aspect-square overflow-hidden rounded-xl bg-gray-100 ring-4 ${
+                    photo.selected ? "ring-green-700" : "ring-transparent"
                   }`}
                 >
                   <Image
@@ -519,7 +640,7 @@ export default function ProofGalleryDetailClient({
                   />
 
                   {photo.selected ? (
-                    <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
+                    <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-green-800 text-xs font-bold text-white">
                       ✓
                     </span>
                   ) : null}

@@ -4,7 +4,8 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { proofGalleries, proofPhotos } from "@/app/db/schema";
+import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
+import { formatMoneyFromCents } from "@/app/lib/format-money";
 
 export default async function ProofGalleriesAdminPage({
   params,
@@ -27,12 +28,16 @@ export default async function ProofGalleriesAdminPage({
       id: proofGalleries.id,
       clientName: proofGalleries.clientName,
       status: proofGalleries.status,
+      currency: proofGalleries.currency,
       createdAt: proofGalleries.createdAt,
+      orderStatus: proofOrders.status,
+      orderTotalCents: proofOrders.totalCents,
       photoCount: sql<number>`count(${proofPhotos.id})`.mapWith(Number),
     })
     .from(proofGalleries)
     .leftJoin(proofPhotos, eq(proofPhotos.galleryId, proofGalleries.id))
-    .groupBy(proofGalleries.id)
+    .leftJoin(proofOrders, eq(proofOrders.galleryId, proofGalleries.id))
+    .groupBy(proofGalleries.id, proofOrders.id)
     .orderBy(desc(proofGalleries.createdAt));
 
   return (
@@ -61,13 +66,34 @@ export default async function ProofGalleriesAdminPage({
                 <h2 className="text-xl font-semibold text-gray-900">
                   {gallery.clientName}
                 </h2>
-                <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                  {t(`proofGalleries.status${capitalize(gallery.status)}`)}
-                </span>
+                {gallery.orderStatus === "paid" ? (
+                  <span className="shrink-0 rounded-full bg-green-800 px-3 py-1 text-xs font-semibold text-white">
+                    {t("proofGalleries.statusPaid")}
+                  </span>
+                ) : gallery.orderStatus === "pending_payment" ? (
+                  <span className="shrink-0 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                    {t("proofGalleries.orderPendingPayment")}
+                  </span>
+                ) : (
+                  <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                    {t(`proofGalleries.status${capitalize(gallery.status)}`)}
+                  </span>
+                )}
               </div>
 
               <p className="mt-3 text-sm text-gray-600">
                 {t("proofGalleries.photoCount", { count: gallery.photoCount })}
+                {gallery.orderTotalCents !== null ? (
+                  <>
+                    {" · "}
+                    <span className="font-medium text-gray-900">
+                      {formatMoneyFromCents(
+                        gallery.orderTotalCents,
+                        gallery.currency,
+                      )}
+                    </span>
+                  </>
+                ) : null}
               </p>
             </Link>
           ))}

@@ -74,9 +74,11 @@ export default async function LocaleLayout(props: {
       <NextIntlClientProvider locale={locale} messages={messages}>
         <ToastProvider>
           <ConfirmProvider>
-            <NavBar isAdmin={isAdmin} />
-            {props.children}
-            <Footer />
+            <div className="flex min-h-screen flex-col">
+              <NavBar isAdmin={isAdmin} />
+              <main className="flex-1">{props.children}</main>
+              <Footer />
+            </div>
             <CookieConsentBanner initialConsent={initialConsent} />
           </ConfirmProvider>
         </ToastProvider>
