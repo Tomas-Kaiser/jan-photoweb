@@ -9,6 +9,7 @@ import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
+import Reveal from "./Reveal";
 
 type Photo = {
   id: string;
@@ -42,14 +43,13 @@ export default function ProofSelectionClient({
   const router = useRouter();
   const confirm = useConfirm();
 
-  const [selections, setSelections] = useState<Record<string, Selection>>(
-    () =>
-      Object.fromEntries(
-        photos.map((photo) => [
-          photo.id,
-          { selected: false, comment: photo.comment ?? "" },
-        ]),
-      ),
+  const [selections, setSelections] = useState<Record<string, Selection>>(() =>
+    Object.fromEntries(
+      photos.map((photo) => [
+        photo.id,
+        { selected: false, comment: photo.comment ?? "" },
+      ]),
+    ),
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,7 +126,7 @@ export default function ProofSelectionClient({
 
   return (
     <div>
-      <div className="mt-8 rounded-3xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-6">
+      <Reveal className="mt-8 rounded-3xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div>
             <p className="text-base font-semibold text-brand-green">
@@ -152,7 +152,10 @@ export default function ProofSelectionClient({
                 <p className="text-xs font-medium uppercase tracking-wide text-brand-gold-dark">
                   {t("totalLabel")}
                 </p>
-                <p className="text-2xl font-bold text-brand-green">
+                <p
+                  key={totalCents}
+                  className="proof-tick text-2xl font-bold text-brand-green"
+                >
                   {formatMoneyFromCents(totalCents, currency)}
                 </p>
               </div>
@@ -162,7 +165,7 @@ export default function ProofSelectionClient({
               type="button"
               onClick={handleSubmit}
               disabled={submitting || selectedCount === 0}
-              className="rounded-full bg-brand-green px-7 py-3 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full bg-brand-green px-7 py-3 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? t("submitting") : t("submitButton")}
             </button>
@@ -170,16 +173,16 @@ export default function ProofSelectionClient({
         </div>
 
         {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
-      </div>
+      </Reveal>
 
       <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
         {photos.map((photo, index) => {
           const selection = selections[photo.id];
 
           return (
-            <div key={photo.id}>
+            <Reveal key={photo.id} delay={(index % 4) * 70}>
               <div
-                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-2 ring-offset-2 ring-offset-brand-cream transition duration-200 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.3)] ${
+                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-2 ring-offset-2 ring-offset-brand-cream transition duration-200 motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.3)] ${
                   selection.selected
                     ? "ring-brand-green"
                     : "ring-transparent hover:ring-brand-green/30"
@@ -201,7 +204,7 @@ export default function ProofSelectionClient({
                 </button>
 
                 {selection.selected ? (
-                  <span className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-brand-green text-sm font-bold text-white shadow">
+                  <span className="proof-pop pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-brand-green text-sm font-bold text-white shadow">
                     ✓
                   </span>
                 ) : null}
@@ -210,7 +213,7 @@ export default function ProofSelectionClient({
               <button
                 type="button"
                 onClick={() => toggleSelected(photo.id)}
-                className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition motion-safe:active:scale-95 ${
                   selection.selected
                     ? "border-transparent bg-brand-green text-white"
                     : "border-transparent bg-white text-brand-green shadow-sm hover:bg-white/70"
@@ -226,7 +229,7 @@ export default function ProofSelectionClient({
                 placeholder={t("commentPlaceholder")}
                 className="mt-2 w-full rounded-2xl border border-transparent bg-white/80 shadow-sm px-3.5 py-2 text-xs text-gray-800 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green"
               />
-            </div>
+            </Reveal>
           );
         })}
       </div>

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Reveal from "./Reveal";
 
 type Photo = {
   id: string;
@@ -29,7 +30,7 @@ export default function ProofOrderPhotosClient({ photos }: Props) {
     <>
       <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
         {photos.map((photo, index) => (
-          <div key={photo.id}>
+          <Reveal key={photo.id} delay={(index % 4) * 70}>
             <button
               type="button"
               onClick={() => setLightboxIndex(index)}
@@ -49,7 +50,7 @@ export default function ProofOrderPhotosClient({ photos }: Props) {
                 {photo.comment}
               </p>
             ) : null}
-          </div>
+          </Reveal>
         ))}
       </div>
 

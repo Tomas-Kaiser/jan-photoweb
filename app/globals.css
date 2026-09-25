@@ -58,3 +58,63 @@ body {
 .eapps-widget-toolbar {
   display: none !important;
 }
+
+/* === PROOF PAGE MOTION === */
+@keyframes proof-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes proof-tick {
+  from {
+    opacity: 0.3;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.proof-pop {
+  animation: proof-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.proof-tick {
+  animation: proof-tick 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proof-pop,
+  .proof-tick {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

@@ -9,6 +9,7 @@ import {
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
+import Reveal from "./Reveal";
 
 type Props = {
   params: Promise<{ locale: string; token: string }>;
@@ -75,15 +76,32 @@ export default async function ProofGalleryPage({ params }: Props) {
     return (
       <div className="bg-brand-cream">
         <div className="mx-auto max-w-4xl px-6 py-12">
-          <p className="text-sm font-medium uppercase tracking-wide text-brand-gold-dark">
+          <noscript>
+            <style>
+              {".reveal{opacity:1!important;transform:none!important}"}
+            </style>
+          </noscript>
+          <Reveal
+            as="p"
+            className="text-sm font-medium uppercase tracking-wide text-brand-gold-dark"
+          >
             {gallery.clientName}
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-semibold text-brand-green sm:text-5xl">
+          </Reveal>
+          <Reveal
+            as="h1"
+            className="mt-2 font-display text-4xl font-semibold text-brand-green sm:text-5xl"
+            delay={80}
+          >
             {t("thankYouTitle")}
-          </h1>
-          <p className="mt-3 text-gray-600">{t("thankYouMessage")}</p>
+          </Reveal>
+          <Reveal as="p" className="mt-3 text-gray-600" delay={160}>
+            {t("thankYouMessage")}
+          </Reveal>
 
-          <div className="mt-8 rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+          <Reveal
+            className="mt-8 rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]"
+            delay={240}
+          >
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-gray-600">{t("summaryTotalSelected")}</dt>
@@ -112,7 +130,7 @@ export default async function ProofGalleryPage({ params }: Props) {
                 </dd>
               </div>
             </dl>
-          </div>
+          </Reveal>
 
           {selectedPhotos.length > 0 ? (
             <ProofOrderPhotosClient photos={selectedPhotos} />
@@ -140,7 +158,12 @@ export default async function ProofGalleryPage({ params }: Props) {
   return (
     <div className="bg-brand-cream">
       <div className="mx-auto max-w-5xl px-6 py-12 sm:py-16">
-        <header className="max-w-2xl">
+        <noscript>
+          <style>
+            {".reveal{opacity:1!important;transform:none!important}"}
+          </style>
+        </noscript>
+        <Reveal as="header" className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-widest text-brand-gold-dark">
             {gallery.clientName}
           </p>
@@ -151,9 +174,9 @@ export default async function ProofGalleryPage({ params }: Props) {
           <p className="mt-4 text-lg leading-8 text-gray-600">
             {t("instructions")}
           </p>
-        </header>
+        </Reveal>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <Reveal className="mt-10 grid gap-4 sm:grid-cols-2" delay={100}>
           <div className="rounded-2xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
               {t("packageLabel")}
@@ -179,9 +202,9 @@ export default async function ProofGalleryPage({ params }: Props) {
               </p>
             </div>
           ) : null}
-        </div>
+        </Reveal>
 
-        <ol className="mt-6 grid gap-3 sm:grid-cols-3">
+        <Reveal as="ol" className="mt-6 grid gap-3 sm:grid-cols-3" delay={100}>
           {steps.map((step, index) => (
             <li
               key={step}
@@ -193,7 +216,7 @@ export default async function ProofGalleryPage({ params }: Props) {
               {step}
             </li>
           ))}
-        </ol>
+        </Reveal>
 
         <ProofSelectionClient
           token={token}
