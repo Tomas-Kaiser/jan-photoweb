@@ -56,6 +56,11 @@ export default function ProofSelectionClient({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const slides = photos.map((photo) => ({ src: photo.detailSrc }));
+  const lightboxPhoto =
+    lightboxIndex !== null ? photos[lightboxIndex] : undefined;
+  const lightboxSelected = lightboxPhoto
+    ? (selections[lightboxPhoto.id]?.selected ?? false)
+    : false;
 
   const selectedCount = useMemo(
     () => Object.values(selections).filter((s) => s.selected).length,
@@ -230,6 +235,25 @@ export default function ProofSelectionClient({
         close={() => setLightboxIndex(null)}
         slides={slides}
         index={lightboxIndex ?? 0}
+        on={{ view: ({ index }) => setLightboxIndex(index) }}
+        render={{
+          controls: () =>
+            lightboxPhoto ? (
+              <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => toggleSelected(lightboxPhoto.id)}
+                  className={`pointer-events-auto rounded-full border px-8 py-3 text-sm font-semibold text-white shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl backdrop-saturate-150 transition ${
+                    lightboxSelected
+                      ? "border-green-300/50 bg-green-700/60 hover:bg-green-700/75"
+                      : "border-white/40 bg-white/20 hover:bg-white/30"
+                  }`}
+                >
+                  {lightboxSelected ? `✓ ${t("selected")}` : t("select")}
+                </button>
+              </div>
+            ) : null,
+        }}
         plugins={[Zoom]}
         zoom={{
           maxZoomPixelRatio: 3,
