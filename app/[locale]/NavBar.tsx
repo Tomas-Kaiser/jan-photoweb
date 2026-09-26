@@ -25,19 +25,40 @@ const NavBar = ({ isAdmin }: Props) => {
   const tAdmin = useTranslations("admin");
   const locale = useLocale();
 
+  const adminLinks = [
+    { href: "/albums", label: tAdmin("dashboard.albumsTitle") },
+    {
+      href: "/admin/portfolio-highlights",
+      label: tAdmin("dashboard.highlightsTitle"),
+    },
+    {
+      href: "/admin/proof-galleries",
+      label: tAdmin("dashboard.proofGalleriesTitle"),
+    },
+  ];
+
   return (
     <div className="sticky top-0 z-40">
       <ChristmasVoucherBanner />
 
       {isAdmin ? (
-        <div className="relative flex items-center justify-center gap-4 bg-green-900 py-1.5 text-xs font-semibold text-white">
-          <span className="uppercase tracking-wide">
+        <div className="relative flex items-center justify-center gap-4 bg-green-900 py-3.5 text-sm font-semibold text-white">
+          <Link
+            href="/admin"
+            className="uppercase tracking-wide underline-offset-2 hover:underline"
+          >
             {tAdmin("nav.enabled")}
-          </span>
-          <div className="hidden items-center gap-4 lg:absolute lg:right-6 lg:top-1/2 lg:flex lg:-translate-y-1/2">
-            <Link href="/admin" className="underline-offset-2 hover:underline">
-              {tAdmin("nav.dashboard")}
-            </Link>
+          </Link>
+          <div className="hidden items-center gap-5 lg:absolute lg:right-6 lg:top-1/2 lg:flex lg:-translate-y-1/2">
+            {adminLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="underline-offset-2 hover:underline"
+              >
+                {item.label}
+              </Link>
+            ))}
             <button
               type="button"
               className="cursor-pointer underline-offset-2 hover:underline"
@@ -186,15 +207,17 @@ const NavBar = ({ isAdmin }: Props) => {
                   <li className="menu-title mt-2 border-t border-base-200 pt-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                     {tAdmin("nav.sectionLabel")}
                   </li>
-                  <li>
-                    <Link
-                      href="/admin"
-                      onClick={blur}
-                      className="font-semibold text-green-800"
-                    >
-                      {tAdmin("nav.dashboard")}
-                    </Link>
-                  </li>
+                  {adminLinks.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={blur}
+                        className="font-semibold text-green-800"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
                   <li>
                     <button
                       type="button"

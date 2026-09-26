@@ -1,13 +1,17 @@
 import { NextRequest, NextFetchEvent } from "next/server";
 import createMiddleware from "next-intl/middleware";
+import type { NextAuthRequest } from "next-auth";
 import { routing } from "./app/i18n/routing";
 import { auth } from "@/auth";
 
 const intlMiddleware = createMiddleware(routing);
 
-const publicPages = ["/", "/admin/login"];
+// "/proof/[^/]+" is a regex fragment, not a literal path — it matches any
+// single path segment (the gallery token) after /proof/, since that route
+// has no session (see docs/photo-proofing-design.md §6, §7a).
+const publicPages = ["/", "/admin/login", "/proof/[^/]+"];
 
-const authMiddleware = auth((req) => {
+const authMiddleware = auth((req: NextAuthRequest, _event: NextFetchEvent) => {
   return intlMiddleware(req);
 });
 
@@ -25,7 +29,7 @@ export default function middleware(req: NextRequest, ctx: NextFetchEvent) {
     return intlMiddleware(req);
   }
 
-  return (authMiddleware as any)(req, ctx);
+  return authMiddleware(req, ctx);
 }
 
 export const config = {

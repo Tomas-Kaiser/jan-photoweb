@@ -7,6 +7,19 @@ export function getCloudflareImageUrl(
   return `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${cloudflareId}/${variant}`;
 }
 
+// Uses Cloudflare Images' flexible variants (enabled on this account) to
+// hard-cap dimensions via on-the-fly resizing, rather than relying on a
+// named variant's configured size — guarantees the cap regardless of how
+// "detail"/"card"/etc. are set up. `fit=scale-down` only ever shrinks,
+// never upscales past the original.
+export function getCloudflareImageUrlCapped(
+  cloudflareId: string,
+  maxWidth: number,
+  maxHeight: number,
+) {
+  return `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${cloudflareId}/w=${maxWidth},h=${maxHeight},fit=scale-down`;
+}
+
 // Deletes an image from Cloudflare Images. Throws on any failure other than
 // "already gone" (404), which is treated as success since the end state —
 // no image left on Cloudflare — is the same either way.

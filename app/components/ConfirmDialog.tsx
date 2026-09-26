@@ -9,6 +9,7 @@ type ConfirmOptions = {
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
+  brand?: boolean;
 };
 
 type ConfirmState = ConfirmOptions & {
@@ -75,7 +76,9 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                 className={`rounded-full px-4 py-2 text-sm font-semibold text-white transition ${
                   state.danger
                     ? "bg-red-600 hover:bg-red-700"
-                    : "bg-gray-900 hover:bg-gray-800"
+                    : state.brand
+                      ? "bg-brand-green hover:bg-brand-green/90"
+                      : "bg-gray-900 hover:bg-gray-800"
                 }`}
               >
                 {state.confirmLabel ?? t("common.confirm")}
