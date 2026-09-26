@@ -67,6 +67,7 @@ export default async function ProofGalleryPage({ params }: Props) {
     cardSrc: getCloudflareImageUrl(photo.cloudflareId, "card"),
     detailSrc: getCloudflareImageUrlCapped(photo.cloudflareId, 3000, 2000),
     comment: photo.comment,
+    selected: photo.selected,
   }));
 
   if (order) {
@@ -133,7 +134,15 @@ export default async function ProofGalleryPage({ params }: Props) {
           </Reveal>
 
           {selectedPhotos.length > 0 ? (
-            <ProofOrderPhotosClient photos={selectedPhotos} />
+            <>
+              <Reveal
+                as="h2"
+                className="mt-12 font-display text-3xl font-semibold text-brand-green"
+              >
+                {t("selectedPhotosHeading")}
+              </Reveal>
+              <ProofOrderPhotosClient photos={selectedPhotos} />
+            </>
           ) : null}
         </div>
       </div>

@@ -76,6 +76,7 @@ export default function ProofGalleryDetailClient({
   const [filenamesCopied, setFilenamesCopied] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
   const [paidError, setPaidError] = useState<string | null>(null);
+  const [reopening, setReopening] = useState(false);
 
   const selectedFileNames = photos
     .filter((photo) => photo.selected)
@@ -230,7 +231,9 @@ export default function ProofGalleryDetailClient({
       router.refresh();
     } catch (err) {
       setUploadError(
-        err instanceof Error ? err.message : t("proofGalleries.deletePhotoFailed"),
+        err instanceof Error
+          ? err.message
+          : t("proofGalleries.deletePhotoFailed"),
       );
     }
   }
@@ -265,7 +268,9 @@ export default function ProofGalleryDetailClient({
     } catch (err) {
       setDeletingGallery(false);
       setUploadError(
-        err instanceof Error ? err.message : t("proofGalleries.deleteGalleryFailed"),
+        err instanceof Error
+          ? err.message
+          : t("proofGalleries.deleteGalleryFailed"),
       );
     }
   }
@@ -274,6 +279,41 @@ export default function ProofGalleryDetailClient({
     await navigator.clipboard.writeText(shareUrl);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  }
+
+  async function handleReopen() {
+    const confirmed = await confirm({
+      title: t("proofGalleries.reopenConfirmTitle"),
+      message: t("proofGalleries.reopenConfirmMessage"),
+      confirmLabel: t("proofGalleries.reopen"),
+    });
+
+    if (!confirmed) return;
+
+    setReopening(true);
+    setPaidError(null);
+
+    try {
+      const res = await fetch(
+        `/api/admin/proof-galleries/${gallery.id}/reopen`,
+        {
+          method: "POST",
+        },
+      );
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(data?.error || t("proofGalleries.reopenFailed"));
+      }
+
+      router.refresh();
+    } catch (err) {
+      setPaidError(
+        err instanceof Error ? err.message : t("proofGalleries.reopenFailed"),
+      );
+    } finally {
+      setReopening(false);
+    }
   }
 
   async function handleMarkPaid() {
@@ -342,7 +382,9 @@ export default function ProofGalleryDetailClient({
             onClick={handleCopyLink}
             className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
           >
-            {linkCopied ? t("proofGalleries.linkCopied") : t("proofGalleries.copyLink")}
+            {linkCopied
+              ? t("proofGalleries.linkCopied")
+              : t("proofGalleries.copyLink")}
           </button>
         </div>
       </section>
@@ -376,11 +418,17 @@ export default function ProofGalleryDetailClient({
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-600">{t("proofGalleries.orderIncluded")}</dt>
-              <dd className="font-medium text-gray-900">{order.includedCount}</dd>
+              <dt className="text-gray-600">
+                {t("proofGalleries.orderIncluded")}
+              </dt>
+              <dd className="font-medium text-gray-900">
+                {order.includedCount}
+              </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-600">{t("proofGalleries.orderExtra")}</dt>
+              <dt className="text-gray-600">
+                {t("proofGalleries.orderExtra")}
+              </dt>
               <dd className="font-medium text-gray-900">{order.extraCount}</dd>
             </div>
             <div className="flex justify-between border-t border-gray-100 pt-2">
@@ -407,16 +455,26 @@ export default function ProofGalleryDetailClient({
             </p>
           ) : (
             <div className="mt-4 flex flex-col items-end">
-              <button
-                type="button"
-                onClick={handleMarkPaid}
-                disabled={markingPaid}
-                className="rounded-full bg-green-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-900 disabled:opacity-60"
-              >
-                {markingPaid
-                  ? t("common.saving")
-                  : t("proofGalleries.markPaid")}
-              </button>
+              <div className="flex flex-wrap justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleReopen}
+                  disabled={reopening || markingPaid}
+                  className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-gray-500 disabled:opacity-60"
+                >
+                  {reopening ? t("common.saving") : t("proofGalleries.reopen")}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMarkPaid}
+                  disabled={markingPaid || reopening}
+                  className="rounded-full bg-green-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-900 disabled:opacity-60"
+                >
+                  {markingPaid
+                    ? t("common.saving")
+                    : t("proofGalleries.markPaid")}
+                </button>
+              </div>
               {paidError ? (
                 <p className="mt-2 text-sm text-red-700">{paidError}</p>
               ) : null}
@@ -675,7 +733,9 @@ export default function ProofGalleryDetailClient({
           disabled={deletingGallery}
           className="rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition hover:border-red-500 disabled:opacity-60"
         >
-          {deletingGallery ? t("common.deleting") : t("proofGalleries.deleteGallery")}
+          {deletingGallery
+            ? t("common.deleting")
+            : t("proofGalleries.deleteGallery")}
         </button>
       </section>
     </div>

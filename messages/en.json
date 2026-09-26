@@ -176,6 +176,7 @@
     "summaryIncluded": "Included photos",
     "summaryExtra": "Extra photos",
     "summaryTotal": "Total due",
+    "selectedPhotosHeading": "Your selected photos",
     "yourNote": "Your note"
   },
   "admin": {
@@ -241,6 +242,10 @@
       "orderSubmittedAt": "Submitted {date}",
       "orderPendingPayment": "Awaiting payment",
       "orderPaidAt": "Paid {date}",
+      "reopen": "Allow reselection",
+      "reopenConfirmTitle": "Let the client reselect?",
+      "reopenConfirmMessage": "This reopens the client's link so they can change their selection and submit again. Their current choices stay pre-selected. The submitted order will be replaced when they resubmit.",
+      "reopenFailed": "Failed to reopen the selection.",
       "markPaid": "Mark as paid",
       "markPaidConfirmTitle": "Mark as paid?",
       "markPaidConfirmMessage": "Confirm that the client has paid for this selection.",

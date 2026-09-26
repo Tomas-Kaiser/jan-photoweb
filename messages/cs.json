@@ -176,6 +176,7 @@
     "summaryIncluded": "Fotky zdarma",
     "summaryExtra": "Fotky navíc",
     "summaryTotal": "Celkem k úhradě",
+    "selectedPhotosHeading": "Vámi vybrané fotky",
     "yourNote": "Vaše poznámka"
   },
   "admin": {
@@ -241,6 +242,10 @@
       "orderSubmittedAt": "Odesláno {date}",
       "orderPendingPayment": "Čeká na platbu",
       "orderPaidAt": "Zaplaceno {date}",
+      "reopen": "Povolit nový výběr",
+      "reopenConfirmTitle": "Nechat klienta vybrat znovu?",
+      "reopenConfirmMessage": "Odkaz klienta se znovu otevře, aby mohl změnit svůj výběr a odeslat ho znovu. Jeho současný výběr zůstane předvybraný. Odeslaná objednávka bude po novém odeslání nahrazena.",
+      "reopenFailed": "Znovuotevření výběru se nezdařilo.",
       "markPaid": "Označit jako zaplaceno",
       "markPaidConfirmTitle": "Označit jako zaplaceno?",
       "markPaidConfirmMessage": "Potvrďte, že klient tento výběr zaplatil.",

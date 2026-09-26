@@ -17,6 +17,7 @@ type Photo = {
   cardSrc: string;
   detailSrc: string;
   comment: string | null;
+  selected: boolean;
 };
 
 type Props = {
@@ -47,7 +48,7 @@ export default function ProofSelectionClient({
     Object.fromEntries(
       photos.map((photo) => [
         photo.id,
-        { selected: false, comment: photo.comment ?? "" },
+        { selected: photo.selected, comment: photo.comment ?? "" },
       ]),
     ),
   );
