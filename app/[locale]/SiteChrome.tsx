@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "../i18n/routing";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 type Props = {
   isAdmin: boolean;
@@ -16,7 +17,7 @@ type Props = {
 // with no navigation away instead of the full site chrome.
 function ProofHeader() {
   return (
-    <header className="border-b border-brand-gold/15 bg-white/50 text-brand-green backdrop-blur">
+    <header className="relative z-30 border-b border-brand-gold/15 bg-white/50 text-brand-green backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-center px-6 py-4">
         <div className="flex flex-col items-center font-semibold leading-none">
           <span className="font-display text-2xl font-semibold">Jan Hájek</span>
@@ -24,6 +25,9 @@ function ProofHeader() {
             PHOTOGRAPHY
           </span>
         </div>
+      </div>
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 sm:right-6">
+        <LanguageSwitcher />
       </div>
     </header>
   );
