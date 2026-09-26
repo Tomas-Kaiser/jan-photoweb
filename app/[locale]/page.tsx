@@ -11,6 +11,7 @@ import SwiperWrapper from "../components/swiper/SwiperWrapper";
 import { portfolioHighlights, photos as photosTable } from "../db/schema";
 import { db } from "../db";
 import ConsentGate from "../components/consent/ConsentGate";
+import SocialPopup from "../components/SocialPopup";
 
 export const metadata: Metadata = {
   title: "Jan Hájek | Photography Portfolio & Workshops",
@@ -89,6 +90,7 @@ export default async function Home() {
 
   return (
     <>
+      <SocialPopup />
       {images.map(({ visibility, src }, index) => (
         <HeroImage key={index} visibility={visibility} src={src} />
       ))}
