@@ -195,7 +195,6 @@
     },
     "nav": {
       "enabled": "Admin enabled",
-      "dashboard": "Dashboard",
       "logout": "Logout",
       "sectionLabel": "Admin"
     },
