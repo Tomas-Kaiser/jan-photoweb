@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { asc, eq } from "drizzle-orm";
 
 import HeroImage from "../components/HeroImage";
+import Reveal from "../components/Reveal";
 import SwiperWrapper from "../components/swiper/SwiperWrapper";
 
 
@@ -95,7 +96,8 @@ export default async function Home() {
 
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="flex flex-col items-start gap-10 lg:flex-row">
-          <div className="order-1 w-full text-gray-800 lg:order-2 lg:w-1/2">
+          <Reveal delay={150} className="order-1 w-full text-gray-800 lg:order-2 lg:w-1/2">
+          <div>
             <h2 className="mb-4 text-center text-3xl font-bold">
               {t("intro.heading")}
             </h2>
@@ -131,6 +133,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
+          </Reveal>
 
           <div className="order-2 hidden w-full lg:order-1 lg:block lg:w-1/2">
             <Image
@@ -150,11 +153,13 @@ export default async function Home() {
           <h2 className="mb-8 text-center text-3xl font-bold">
             {t("portfolio.heading")}
           </h2>
-          <div className="flex justify-center">
-            <div className="w-full xl:w-[500px]">
-              <SwiperWrapper photos={photos} />
+          <Reveal>
+            <div className="flex justify-center">
+              <div className="w-full xl:w-[500px]">
+                <SwiperWrapper photos={photos} />
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -167,12 +172,12 @@ export default async function Home() {
             {t("services.text")}
           </p>
           <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {serviceCards.map(({ key, href, backgroundImage }) => (
+            {serviceCards.map(({ key, href, backgroundImage }, index) => (
+              <Reveal key={key} delay={index * 120} className="flex">
               <article
-                key={key}
-                className="relative flex min-h-72 flex-col overflow-hidden rounded-xl border border-gray-200 p-7 shadow-sm"
+                className="group relative flex min-h-72 w-full flex-col overflow-hidden rounded-xl border border-gray-200 p-7 shadow-sm transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
-                <Image src={backgroundImage} alt="" fill className="object-cover" />
+                <Image src={backgroundImage} alt="" fill className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" />
                 <div className="absolute inset-0 bg-black/50" />
                 <div className="relative flex h-full flex-col text-white">
                   <h3 className="text-2xl font-semibold">
@@ -189,6 +194,7 @@ export default async function Home() {
                   </Link>
                 </div>
               </article>
+              </Reveal>
             ))}
           </div>
           <div className="mt-8 text-center">
@@ -203,18 +209,20 @@ export default async function Home() {
       </section>
 
       <section className="bg-gray-50 px-4 py-8 text-center md:px-12 lg:px-24">
-        <h2 className="mb-4 text-3xl font-bold">
-          {t("albums.heading")}
-        </h2>
-        <p className="text-lg text-gray-600">
-          {t("albums.text")}
-        </p>
-        <Link
-          href="/albums"
-          className="mt-4 inline-block rounded bg-black px-6 py-2 text-white transition hover:bg-gray-800"
-        >
-          {t("albums.btn")}
-        </Link>
+        <Reveal>
+          <h2 className="mb-4 text-3xl font-bold">
+            {t("albums.heading")}
+          </h2>
+          <p className="text-lg text-gray-600">
+            {t("albums.text")}
+          </p>
+          <Link
+            href="/albums"
+            className="mt-4 inline-block rounded bg-black px-6 py-2 text-white transition hover:bg-gray-800"
+          >
+            {t("albums.btn")}
+          </Link>
+        </Reveal>
       </section>
 
       <section className="px-4 py-8 text-center md:px-12 lg:px-24">
