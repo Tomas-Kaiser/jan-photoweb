@@ -21,6 +21,11 @@ export default async function AdminPage({ params }: Props) {
 
     const adminLinks = [
         {
+            title: t("dashboard.proofGalleriesTitle"),
+            description: t("dashboard.proofGalleriesDescription"),
+            href: (locale: string) => `/${locale}/admin/proof-galleries`,
+        },
+        {
             title: t("dashboard.albumsTitle"),
             description: t("dashboard.albumsDescription"),
             href: (locale: string) => `/${locale}/albums`,
@@ -29,11 +34,6 @@ export default async function AdminPage({ params }: Props) {
             title: t("dashboard.highlightsTitle"),
             description: t("dashboard.highlightsDescription"),
             href: (locale: string) => `/${locale}/admin/portfolio-highlights`,
-        },
-        {
-            title: t("dashboard.proofGalleriesTitle"),
-            description: t("dashboard.proofGalleriesDescription"),
-            href: (locale: string) => `/${locale}/admin/proof-galleries`,
         },
     ];
 
