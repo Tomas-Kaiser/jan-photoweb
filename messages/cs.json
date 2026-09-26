@@ -127,9 +127,14 @@
   "footer": {
     "heading": "Jste připraveni zachytit své nejlepší okamžiky?",
     "text": "Ať už jde o portréty, akce nebo kreativní focení – jsem tu, abych se postaral o nezapomenutelný zážitek.",
-    "btn": "Rezervovat focení",
+    "btn": "Napište mi",
+    "tagline": "Fotografie, která zachycuje skutečné okamžiky.",
+    "navigate": "Navigace",
+    "getInTouch": "Kontakt",
+    "sendMessage": "Napište mi zprávu",
     "copyrightPrefix": "©",
-    "copyrightText": "Jan Hájek | vytvořil Tomas Kaiser",
+    "copyrightText": "Jan Hájek | vytvořil",
+    "creditName": "Kaiser Web Studio",
     "cookieSettings": "Nastavení souborů cookie"
   },
   "christmasBanner": {

@@ -41,7 +41,15 @@ function ProofFooter() {
     <footer className="border-t border-brand-gold/15 bg-brand-cream py-6">
       <div className="flex flex-col items-center space-y-2 px-6 text-center">
         <div className="text-sm text-brand-green/70">
-          {t("copyrightPrefix")} {currentYear} {t("copyrightText")}
+          {t("copyrightPrefix")} {currentYear} {t("copyrightText")}{" "}
+            <a
+              href="https://kaiserwebstudio.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4 transition hover:text-brand-green"
+            >
+              {t("creditName")}
+            </a>
         </div>
         <button
           type="button"
