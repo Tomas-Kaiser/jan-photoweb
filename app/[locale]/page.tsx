@@ -13,6 +13,7 @@ import { portfolioHighlights, photos as photosTable } from "../db/schema";
 import { db } from "../db";
 import ConsentGate from "../components/consent/ConsentGate";
 import { getFeaturedHomepageAlbums } from "../lib/homepage-albums";
+import SocialPopup from "../components/SocialPopup";
 
 export const metadata: Metadata = {
   title: "Jan Hájek | Photography Portfolio & Workshops",
@@ -94,6 +95,7 @@ export default async function Home() {
 
   return (
     <>
+      <SocialPopup />
       {images.map(({ visibility, src }, index) => (
         <HeroImage key={index} visibility={visibility} src={src} />
       ))}
@@ -101,42 +103,42 @@ export default async function Home() {
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="flex flex-col items-start gap-10 lg:flex-row">
           <Reveal delay={150} className="order-1 w-full text-gray-800 lg:order-2 lg:w-1/2">
-          <div>
-            <h2 className="mb-4 text-center text-3xl font-bold">
-              {t("intro.heading")}
-            </h2>
-            <p className="mb-4 text-lg text-gray-700">
-              {t("intro.text")}
-            </p>
-            <p className="mb-4 text-lg text-gray-700">
-              {t("intro.text-2")}
-            </p>
-            <p className="mb-6 text-lg font-medium text-gray-800">
-              {t("intro.text-3")}
-            </p>
+            <div>
+              <h2 className="mb-4 text-center text-3xl font-bold">
+                {t("intro.heading")}
+              </h2>
+              <p className="mb-4 text-lg text-gray-700">
+                {t("intro.text")}
+              </p>
+              <p className="mb-4 text-lg text-gray-700">
+                {t("intro.text-2")}
+              </p>
+              <p className="mb-6 text-lg font-medium text-gray-800">
+                {t("intro.text-3")}
+              </p>
 
-            <div className="flex justify-center">
-              <div className="mb-6 block md:w-1/2 lg:hidden">
-                <Image
-                  src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
-                  alt="Jan Hájek"
-                  width={600}
-                  height={800}
-                  className="h-auto w-full rounded-lg object-cover shadow-lg"
-                  priority
-                />
+              <div className="flex justify-center">
+                <div className="mb-6 block md:w-1/2 lg:hidden">
+                  <Image
+                    src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
+                    alt="Jan Hájek"
+                    width={600}
+                    height={800}
+                    className="h-auto w-full rounded-lg object-cover shadow-lg"
+                    priority
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <Link
+                  href="/contact"
+                  className="rounded bg-black px-6 py-3 text-white transition hover:bg-gray-800"
+                >
+                  {t("intro.btn")}
+                </Link>
               </div>
             </div>
-
-            <div className="flex justify-center">
-              <Link
-                href="/contact"
-                className="rounded bg-black px-6 py-3 text-white transition hover:bg-gray-800"
-              >
-                {t("intro.btn")}
-              </Link>
-            </div>
-          </div>
           </Reveal>
 
           <div className="order-2 hidden w-full lg:order-1 lg:block lg:w-1/2">
@@ -178,26 +180,26 @@ export default async function Home() {
           <div className="mt-8 grid gap-6 md:grid-cols-3">
             {serviceCards.map(({ key, href, backgroundImage }, index) => (
               <Reveal key={key} delay={index * 120} className="flex">
-              <article
-                className="group relative flex min-h-72 w-full flex-col overflow-hidden rounded-xl border border-gray-200 p-7 shadow-sm transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-              >
-                <Image src={backgroundImage} alt="" fill className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" />
-                <div className="absolute inset-0 bg-black/50" />
-                <div className="relative flex h-full flex-col text-white">
-                  <h3 className="text-2xl font-semibold">
-                    {t(`services.${key}.title`)}
-                  </h3>
-                  <p className="mt-3 text-gray-100">
-                    {t(`services.${key}.text`)}
-                  </p>
-                  <Link
-                    href={href}
-                    className="mt-auto pt-8 font-semibold text-white underline underline-offset-4 transition hover:text-gray-200"
-                  >
-                    {t(`services.${key}.btn`)}
-                  </Link>
-                </div>
-              </article>
+                <article
+                  className="group relative flex min-h-72 w-full flex-col overflow-hidden rounded-xl border border-gray-200 p-7 shadow-sm transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                >
+                  <Image src={backgroundImage} alt="" fill className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" />
+                  <div className="absolute inset-0 bg-black/50" />
+                  <div className="relative flex h-full flex-col text-white">
+                    <h3 className="text-2xl font-semibold">
+                      {t(`services.${key}.title`)}
+                    </h3>
+                    <p className="mt-3 text-gray-100">
+                      {t(`services.${key}.text`)}
+                    </p>
+                    <Link
+                      href={href}
+                      className="mt-auto pt-8 font-semibold text-white underline underline-offset-4 transition hover:text-gray-200"
+                    >
+                      {t(`services.${key}.btn`)}
+                    </Link>
+                  </div>
+                </article>
               </Reveal>
             ))}
           </div>
