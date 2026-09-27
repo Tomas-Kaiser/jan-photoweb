@@ -1,0 +1,1 @@
+ALTER TABLE "proof_galleries" ADD COLUMN "base_cost_cents" integer DEFAULT 0 NOT NULL;

@@ -21,6 +21,7 @@ export default function NewProofGalleryForm({ locale }: Props) {
   const photosInputRef = useRef<HTMLInputElement | null>(null);
 
   const [clientName, setClientName] = useState("");
+  const [baseCost, setBaseCost] = useState("");
   const [freePhotoCount, setFreePhotoCount] = useState("10");
   const [extraPhotoPrice, setExtraPhotoPrice] = useState("");
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
@@ -64,11 +65,17 @@ export default function NewProofGalleryForm({ locale }: Props) {
 
     if (!galleryId) {
       const name = clientName.trim();
+      const baseCostUnits = Number(baseCost || 0);
       const freeCount = Number(freePhotoCount);
       const priceUnits = Number(extraPhotoPrice);
 
       if (!name) {
         setError(t("proofGalleries.clientNameLabel"));
+        return;
+      }
+
+      if (!Number.isFinite(baseCostUnits) || baseCostUnits < 0) {
+        setError(t("proofGalleries.baseCostLabel"));
         return;
       }
 
@@ -91,6 +98,7 @@ export default function NewProofGalleryForm({ locale }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             clientName: name,
+            baseCostCents: Math.round(baseCostUnits * 100),
             freePhotoCount: Math.round(freeCount),
             extraPhotoPriceCents: Math.round(priceUnits * 100),
           }),
@@ -178,6 +186,29 @@ export default function NewProofGalleryForm({ locale }: Props) {
           placeholder={t("proofGalleries.clientNamePlaceholder")}
           required
         />
+      </div>
+
+      <div>
+        <label
+          htmlFor="baseCost"
+          className="mb-2 block text-sm font-medium text-gray-700"
+        >
+          {t("proofGalleries.baseCostLabel")}
+        </label>
+        <input
+          id="baseCost"
+          type="number"
+          min={0}
+          step={1}
+          value={baseCost}
+          onChange={(e) => setBaseCost(e.target.value)}
+          disabled={saving || !!createdGalleryId}
+          className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+          placeholder="0"
+        />
+        <p className="mt-1 text-sm text-gray-500">
+          {t("proofGalleries.baseCostHint", { currency: "CZK" })}
+        </p>
       </div>
 
       <div>

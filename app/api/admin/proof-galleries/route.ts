@@ -17,12 +17,20 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const clientName = String(body?.clientName || "").trim();
+    const baseCostCents = Number(body?.baseCostCents ?? 0);
     const freePhotoCount = Number(body?.freePhotoCount);
     const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
 
     if (!clientName) {
       return NextResponse.json(
         { error: "Client name is required." },
+        { status: 400 },
+      );
+    }
+
+    if (!Number.isInteger(baseCostCents) || baseCostCents < 0) {
+      return NextResponse.json(
+        { error: "Base cost must be a non-negative whole number." },
         { status: 400 },
       );
     }
@@ -46,6 +54,7 @@ export async function POST(req: Request) {
       .values({
         token: generateProofToken(),
         clientName,
+        baseCostCents,
         freePhotoCount,
         extraPhotoPriceCents,
       })

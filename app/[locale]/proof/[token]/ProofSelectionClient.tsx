@@ -22,6 +22,7 @@ type Photo = {
 
 type Props = {
   token: string;
+  baseCostCents: number;
   freePhotoCount: number;
   extraPhotoPriceCents: number;
   currency: string;
@@ -35,6 +36,7 @@ type Selection = {
 
 export default function ProofSelectionClient({
   token,
+  baseCostCents,
   freePhotoCount,
   extraPhotoPriceCents,
   currency,
@@ -70,7 +72,7 @@ export default function ProofSelectionClient({
 
   const freeRemaining = Math.max(0, freePhotoCount - selectedCount);
   const extraCount = Math.max(0, selectedCount - freePhotoCount);
-  const totalCents = extraCount * extraPhotoPriceCents;
+  const totalCents = baseCostCents + extraCount * extraPhotoPriceCents;
 
   function toggleSelected(photoId: string) {
     setSelections((prev) => ({
@@ -127,7 +129,7 @@ export default function ProofSelectionClient({
 
   return (
     <div>
-      <Reveal className="mt-8 rounded-3xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-6">
+      <Reveal className="mt-10 rounded-3xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div>
             <p className="text-base font-semibold text-brand-green">
@@ -148,7 +150,7 @@ export default function ProofSelectionClient({
           </div>
 
           <div className="flex items-center gap-5">
-            {extraCount > 0 ? (
+            {totalCents > 0 ? (
               <div className="text-right">
                 <p className="text-xs font-medium uppercase tracking-wide text-brand-gold-dark">
                   {t("totalLabel")}
@@ -176,7 +178,7 @@ export default function ProofSelectionClient({
         {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
       </Reveal>
 
-      <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
+      <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-7 md:grid-cols-4">
         {photos.map((photo, index) => {
           const selection = selections[photo.id];
 
@@ -214,7 +216,7 @@ export default function ProofSelectionClient({
               <button
                 type="button"
                 onClick={() => toggleSelected(photo.id)}
-                className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition motion-safe:active:scale-95 ${
+                className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition motion-safe:active:scale-95 ${
                   selection.selected
                     ? "border-transparent bg-brand-green text-white"
                     : "border-transparent bg-white text-brand-green shadow-sm hover:bg-white/70"
@@ -228,7 +230,7 @@ export default function ProofSelectionClient({
                 value={selection.comment}
                 onChange={(e) => setComment(photo.id, e.target.value)}
                 placeholder={t("commentPlaceholder")}
-                className="mt-2 w-full rounded-2xl border border-transparent bg-white/80 shadow-sm px-3.5 py-2 text-xs text-gray-800 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green"
+                className="mt-3 w-full rounded-2xl border border-transparent bg-white/80 shadow-sm px-3.5 py-2 text-xs text-gray-800 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green"
               />
             </Reveal>
           );

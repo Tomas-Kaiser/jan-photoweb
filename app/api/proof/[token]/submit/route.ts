@@ -103,7 +103,8 @@ export async function POST(req: Request, { params }: Params) {
 
     const includedCount = Math.min(selectedIds.length, gallery.freePhotoCount);
     const extraCount = Math.max(0, selectedIds.length - gallery.freePhotoCount);
-    const totalCents = extraCount * gallery.extraPhotoPriceCents;
+    const totalCents =
+      gallery.baseCostCents + extraCount * gallery.extraPhotoPriceCents;
 
     await db.transaction(async (tx) => {
       const now = new Date();

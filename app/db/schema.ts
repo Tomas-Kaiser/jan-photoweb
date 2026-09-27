@@ -111,6 +111,7 @@ export const proofGalleries = pgTable(
         id: uuid("id").defaultRandom().primaryKey(),
         token: text("token").notNull(),
         clientName: text("client_name").notNull(),
+        baseCostCents: integer("base_cost_cents").default(0).notNull(),
         freePhotoCount: integer("free_photo_count").default(10).notNull(),
         extraPhotoPriceCents: integer("extra_photo_price_cents")
             .default(0)

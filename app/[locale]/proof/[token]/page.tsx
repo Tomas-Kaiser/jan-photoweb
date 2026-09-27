@@ -76,7 +76,7 @@ export default async function ProofGalleryPage({ params }: Props) {
 
     return (
       <div className="bg-brand-cream">
-        <div className="mx-auto max-w-4xl px-6 py-12">
+        <div className="mx-auto max-w-4xl px-6 py-14 sm:px-8 sm:py-20">
           <noscript>
             <style>
               {".reveal{opacity:1!important;transform:none!important}"}
@@ -90,20 +90,20 @@ export default async function ProofGalleryPage({ params }: Props) {
           </Reveal>
           <Reveal
             as="h1"
-            className="mt-2 font-display text-4xl font-semibold text-brand-green sm:text-5xl"
+            className="mt-3 font-display text-4xl font-semibold text-brand-green sm:text-5xl"
             delay={80}
           >
             {t("thankYouTitle")}
           </Reveal>
-          <Reveal as="p" className="mt-3 text-gray-600" delay={160}>
+          <Reveal as="p" className="mt-4 text-gray-600" delay={160}>
             {t("thankYouMessage")}
           </Reveal>
 
           <Reveal
-            className="mt-8 rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]"
+            className="mt-10 rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-7"
             delay={240}
           >
-            <dl className="space-y-2 text-sm">
+            <dl className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <dt className="text-gray-600">{t("summaryTotalSelected")}</dt>
                 <dd className="font-medium text-brand-green">
@@ -122,6 +122,12 @@ export default async function ProofGalleryPage({ params }: Props) {
                   {order.extraCount}
                 </dd>
               </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-600">{t("summaryBaseCost")}</dt>
+                <dd className="font-medium text-brand-green">
+                  {formatMoneyFromCents(gallery.baseCostCents, gallery.currency)}
+                </dd>
+              </div>
               <div className="flex items-center justify-between border-t border-brand-gold/15 pt-3">
                 <dt className="text-base font-semibold text-brand-green">
                   {t("summaryTotal")}
@@ -137,7 +143,7 @@ export default async function ProofGalleryPage({ params }: Props) {
             <>
               <Reveal
                 as="h2"
-                className="mt-12 font-display text-3xl font-semibold text-brand-green"
+                className="mt-14 font-display text-3xl font-semibold text-brand-green"
               >
                 {t("selectedPhotosHeading")}
               </Reveal>
@@ -166,7 +172,7 @@ export default async function ProofGalleryPage({ params }: Props) {
 
   return (
     <div className="bg-brand-cream">
-      <div className="mx-auto max-w-5xl px-6 py-12 sm:py-16">
+      <div className="mx-auto max-w-5xl px-6 py-14 sm:px-10 sm:py-20">
         <noscript>
           <style>
             {".reveal{opacity:1!important;transform:none!important}"}
@@ -176,31 +182,42 @@ export default async function ProofGalleryPage({ params }: Props) {
           <p className="text-sm font-semibold uppercase tracking-widest text-brand-gold-dark">
             {gallery.clientName}
           </p>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-brand-green sm:text-6xl">
+          <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight text-brand-green sm:text-6xl">
             {t("heading")}
           </h1>
-          <div className="mt-6 h-px w-20 bg-brand-gold" />
-          <p className="mt-4 text-lg leading-8 text-gray-600">
+          <div className="mt-7 h-px w-20 bg-brand-gold" />
+          <p className="mt-5 text-lg leading-8 text-gray-600">
             {t("instructions")}
           </p>
         </Reveal>
 
-        <Reveal className="mt-10 grid gap-4 sm:grid-cols-2" delay={100}>
-          <div className="rounded-2xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+        <Reveal className="mt-12 grid gap-5 sm:grid-cols-2" delay={100}>
+          {gallery.baseCostCents > 0 ? (
+            <div className="rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
+                {t("baseCostLabel")}
+              </p>
+              <p className="mt-2 text-2xl font-bold text-brand-green">
+                {formatMoneyFromCents(gallery.baseCostCents, gallery.currency)}
+              </p>
+            </div>
+          ) : null}
+
+          <div className="rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
               {t("packageLabel")}
             </p>
-            <p className="mt-1 text-2xl font-bold text-brand-green">
+            <p className="mt-2 text-2xl font-bold text-brand-green">
               {t("packagePhotos", { count: gallery.freePhotoCount })}
             </p>
           </div>
 
           {gallery.extraPhotoPriceCents > 0 ? (
-            <div className="rounded-2xl bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+            <div className="rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
               <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
                 {t("extraPriceLabel")}
               </p>
-              <p className="mt-1 text-2xl font-bold text-brand-green">
+              <p className="mt-2 text-2xl font-bold text-brand-green">
                 {formatMoneyFromCents(
                   gallery.extraPhotoPriceCents,
                   gallery.currency,
@@ -213,7 +230,7 @@ export default async function ProofGalleryPage({ params }: Props) {
           ) : null}
         </Reveal>
 
-        <Reveal as="ol" className="mt-6 grid gap-3 sm:grid-cols-3" delay={100}>
+        <Reveal as="ol" className="mt-8 grid gap-3 sm:grid-cols-3" delay={100}>
           {steps.map((step, index) => (
             <li
               key={step}
@@ -229,6 +246,7 @@ export default async function ProofGalleryPage({ params }: Props) {
 
         <ProofSelectionClient
           token={token}
+          baseCostCents={gallery.baseCostCents}
           freePhotoCount={gallery.freePhotoCount}
           extraPhotoPriceCents={gallery.extraPhotoPriceCents}
           currency={gallery.currency}

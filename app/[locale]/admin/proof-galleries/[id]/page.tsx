@@ -105,6 +105,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
           id: gallery.id,
           token: gallery.token,
           clientName: gallery.clientName,
+          baseCostCents: gallery.baseCostCents,
           freePhotoCount: gallery.freePhotoCount,
           extraPhotoPriceCents: gallery.extraPhotoPriceCents,
           currency: gallery.currency,

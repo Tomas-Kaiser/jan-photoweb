@@ -13,6 +13,7 @@ type Gallery = {
   id: string;
   token: string;
   clientName: string;
+  baseCostCents: number;
   freePhotoCount: number;
   extraPhotoPriceCents: number;
   currency: string;
@@ -57,6 +58,9 @@ export default function ProofGalleryDetailClient({
   const photosInputRef = useRef<HTMLInputElement | null>(null);
 
   const [clientName, setClientName] = useState(gallery.clientName);
+  const [baseCost, setBaseCost] = useState(
+    String(gallery.baseCostCents / 100),
+  );
   const [freePhotoCount, setFreePhotoCount] = useState(
     String(gallery.freePhotoCount),
   );
@@ -91,11 +95,17 @@ export default function ProofGalleryDetailClient({
     setSettingsMessage(null);
 
     const name = clientName.trim();
+    const baseCostUnits = Number(baseCost || 0);
     const freeCount = Number(freePhotoCount);
     const priceUnits = Number(extraPhotoPrice);
 
     if (!name) {
       setSettingsError(t("proofGalleries.clientNameLabel"));
+      return;
+    }
+
+    if (!Number.isFinite(baseCostUnits) || baseCostUnits < 0) {
+      setSettingsError(t("proofGalleries.baseCostLabel"));
       return;
     }
 
@@ -117,6 +127,7 @@ export default function ProofGalleryDetailClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientName: name,
+          baseCostCents: Math.round(baseCostUnits * 100),
           freePhotoCount: Math.round(freeCount),
           extraPhotoPriceCents: Math.round(priceUnits * 100),
         }),
@@ -431,6 +442,14 @@ export default function ProofGalleryDetailClient({
               </dt>
               <dd className="font-medium text-gray-900">{order.extraCount}</dd>
             </div>
+            <div className="flex justify-between">
+              <dt className="text-gray-600">
+                {t("proofGalleries.orderBaseCost")}
+              </dt>
+              <dd className="font-medium text-gray-900">
+                {formatMoneyFromCents(gallery.baseCostCents, gallery.currency)}
+              </dd>
+            </div>
             <div className="flex justify-between border-t border-gray-100 pt-2">
               <dt className="font-medium text-gray-900">
                 {t("proofGalleries.orderTotal")}
@@ -535,6 +554,17 @@ export default function ProofGalleryDetailClient({
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-600">
+                  {t("proofGalleries.baseCostLabel")}
+                </dt>
+                <dd className="font-medium text-gray-900">
+                  {formatMoneyFromCents(
+                    gallery.baseCostCents,
+                    gallery.currency,
+                  )}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-gray-600">
                   {t("proofGalleries.freePhotoCountLabel")}
                 </dt>
                 <dd className="font-medium text-gray-900">
@@ -572,6 +602,30 @@ export default function ProofGalleryDetailClient({
                 className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
                 required
               />
+            </div>
+
+            <div>
+              <label
+                htmlFor="baseCost"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                {t("proofGalleries.baseCostLabel")}
+              </label>
+              <input
+                id="baseCost"
+                type="number"
+                min={0}
+                step={1}
+                value={baseCost}
+                onChange={(e) => setBaseCost(e.target.value)}
+                disabled={savingSettings}
+                className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                {t("proofGalleries.baseCostHint", {
+                  currency: gallery.currency,
+                })}
+              </p>
             </div>
 
             <div>
@@ -715,7 +769,7 @@ export default function ProofGalleryDetailClient({
                   <button
                     type="button"
                     onClick={() => handleDeletePhoto(photo)}
-                    className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100"
+                    className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100 pointer-coarse:opacity-100"
                   >
                     {t("common.delete")}
                   </button>
