@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { asc, eq } from "drizzle-orm";
 
 import HeroImage from "../components/HeroImage";
@@ -12,6 +12,7 @@ import SwiperWrapper from "../components/swiper/SwiperWrapper";
 import { portfolioHighlights, photos as photosTable } from "../db/schema";
 import { db } from "../db";
 import ConsentGate from "../components/consent/ConsentGate";
+import { getFeaturedHomepageAlbums } from "../lib/homepage-albums";
 
 export const metadata: Metadata = {
   title: "Jan Hájek | Photography Portfolio & Workshops",
@@ -53,6 +54,7 @@ const serviceCards = [
 
 export default async function Home() {
   const t = await getTranslations("landingPage");
+  const locale = await getLocale();
 
   const images = [
     {
@@ -87,6 +89,8 @@ export default async function Home() {
     alt: row.name ?? "Portfolio highlight",
     objectPosition: row.photoObjectPosition ?? "center",
   }));
+
+  const featuredAlbums = await getFeaturedHomepageAlbums(locale);
 
   return (
     <>
@@ -208,17 +212,54 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="bg-gray-50 px-4 py-8 text-center md:px-12 lg:px-24">
+      <section className="bg-stone-50 px-4 py-20 text-center md:px-12 lg:px-24">
         <Reveal>
-          <h2 className="mb-4 text-3xl font-bold">
+          <h2 className="mb-4 text-3xl font-bold text-gray-900">
             {t("albums.heading")}
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="mx-auto max-w-2xl text-lg text-gray-600">
             {t("albums.text")}
           </p>
+        </Reveal>
+
+        {featuredAlbums.length > 0 ? (
+          <div className="mx-auto mt-12 grid max-w-4xl gap-4 text-left md:h-[420px] md:grid-cols-2">
+            {featuredAlbums.map((album, index) => (
+              <Reveal key={album.id} delay={120 + index * 120} className="h-full">
+                <Link
+                  href={album.href}
+                  className="group relative block h-full min-h-80 overflow-hidden rounded-2xl"
+                >
+                  <Image
+                    src={album.imgSrc}
+                    alt={album.name}
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    style={{ objectPosition: album.objectPosition }}
+                    className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                  <div className="relative flex h-full flex-col justify-end p-6">
+                    <h3 className="text-2xl font-semibold text-white">
+                      {album.name}
+                    </h3>
+                    <span className="mt-2 inline-flex items-center gap-1 font-semibold text-white transition group-hover:text-gray-200">
+                      <span className="underline underline-offset-4">{t("albums.explore")}</span>
+                      <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                        →
+                      </span>
+                    </span>
+                  </div>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        ) : null}
+
+        <Reveal delay={480}>
           <Link
             href="/albums"
-            className="mt-4 inline-block rounded bg-black px-6 py-2 text-white transition hover:bg-gray-800"
+            className="mt-12 inline-block rounded bg-black px-6 py-3 text-white transition hover:bg-gray-800"
           >
             {t("albums.btn")}
           </Link>
