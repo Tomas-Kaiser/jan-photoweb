@@ -6,6 +6,7 @@ import { faInstagram, faFacebook } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import { IoLogOutOutline } from "react-icons/io5";
 
 import { Link } from "../i18n/routing";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -42,14 +43,14 @@ const NavBar = ({ isAdmin }: Props) => {
       <ChristmasVoucherBanner />
 
       {isAdmin ? (
-        <div className="relative flex items-center justify-center gap-4 bg-green-900 py-3.5 text-sm font-semibold text-white">
+        <div className="relative flex items-center justify-center gap-4 bg-green-900 px-8 py-3.5 lg:justify-between xl:justify-center text-sm font-semibold text-white">
           <Link
             href="/admin"
             className="uppercase tracking-wide underline-offset-2 hover:underline"
           >
             {tAdmin("nav.enabled")}
           </Link>
-          <div className="hidden items-center gap-5 lg:absolute lg:right-6 lg:top-1/2 lg:flex lg:-translate-y-1/2">
+          <div className="hidden items-center gap-8 lg:flex xl:absolute xl:right-8 xl:top-1/2 xl:-translate-y-1/2">
             {adminLinks.map((item) => (
               <Link
                 key={item.href}
@@ -61,10 +62,12 @@ const NavBar = ({ isAdmin }: Props) => {
             ))}
             <button
               type="button"
-              className="cursor-pointer underline-offset-2 hover:underline"
+              aria-label={tAdmin("nav.logout")}
+              title={tAdmin("nav.logout")}
+              className="cursor-pointer rounded-full p-1 transition hover:bg-white/15"
               onClick={() => signOut({ callbackUrl: `/${locale}` })}
             >
-              {tAdmin("nav.logout")}
+              <IoLogOutOutline className="h-5 w-5" />
             </button>
           </div>
         </div>

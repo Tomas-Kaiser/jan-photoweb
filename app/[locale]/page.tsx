@@ -277,7 +277,7 @@ export default async function Home() {
           href="https://www.google.com/maps/place/Fotograf+Jan+H%C3%A1jek/@51.011085,-6.2617611,5z/data=!4m10!1m2!2m1!1shajek+jan+fotograf!3m6!1s0xa2490db466896cd3:0x9724b51fa6006b7d!8m2!3d50.4621918!4d13.7458963!15sChJoYWplayBqYW4gZm90b2dyYWaSAQxwaG90b2dyYXBoZXLgAQA!16s%2Fg%2F11x8z_y162?entry=ttu&g_ep=EgoyMDI2MDkxNC4wIKXMDSoASAFQAw%3D%3D"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-block rounded bg-black px-6 py-2 text-white transition hover:bg-gray-800"
+          className="mt-4 inline-block rounded border border-gray-400 px-6 py-2 text-gray-800 transition hover:border-black hover:bg-black hover:text-white"
         >
           {t("testimonials.reviewBtn")}
         </a>
