@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -57,6 +57,25 @@ export default function ProofSelectionClient({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const summaryBarRef = useRef<HTMLDivElement>(null);
+  const [showFloatingSummary, setShowFloatingSummary] = useState(false);
+  const [floatingSummaryCollapsed, setFloatingSummaryCollapsed] =
+    useState(false);
+
+  useEffect(() => {
+    const node = summaryBarRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) =>
+        setShowFloatingSummary(
+          !entry.isIntersecting && entry.boundingClientRect.top < 0,
+        ),
+      { threshold: 0 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const slides = photos.map((photo) => ({ src: photo.detailSrc }));
   const lightboxPhoto =
@@ -129,35 +148,129 @@ export default function ProofSelectionClient({
 
   return (
     <div>
-      <Reveal className="mt-10 rounded-3xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div>
-            <p className="text-base font-semibold text-brand-green">
-              {t("selectedCount", { count: selectedCount })}
-            </p>
-            <p className="mt-1 text-sm text-brand-green/70">
-              {t("freeRemainingCount", { count: freeRemaining })}
-              {extraCount > 0 ? (
-                <>
-                  {" · "}
-                  {t("extraBreakdown", {
-                    count: extraCount,
-                    price: formatMoneyFromCents(extraPhotoPriceCents, currency),
-                  })}
-                </>
+      <div ref={summaryBarRef}>
+        <Reveal className="mt-10 rounded-3xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-7">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div>
+              <p className="text-base font-semibold text-brand-green">
+                {t("selectedCount", { count: selectedCount })}
+              </p>
+              {freeRemaining > 0 || extraCount > 0 ? (
+                <p className="mt-1 text-sm text-brand-green/70">
+                  {freeRemaining > 0
+                    ? t("freeRemainingCount", { count: freeRemaining })
+                    : null}
+                  {freeRemaining > 0 && extraCount > 0 ? " · " : null}
+                  {extraCount > 0
+                    ? t("extraBreakdown", {
+                        count: extraCount,
+                        price: formatMoneyFromCents(
+                          extraPhotoPriceCents,
+                          currency,
+                        ),
+                      })
+                    : null}
+                </p>
               ) : null}
-            </p>
+            </div>
+
+            <div className="flex items-center gap-5">
+              {totalCents > 0 ? (
+                <div className="text-right">
+                  <p className="text-xs font-medium uppercase tracking-wide text-brand-gold-dark">
+                    {t("totalLabel")}
+                  </p>
+                  <p
+                    key={totalCents}
+                    className="proof-tick text-2xl font-bold text-brand-green"
+                  >
+                    {formatMoneyFromCents(totalCents, currency)}
+                  </p>
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting || selectedCount === 0}
+                className="rounded-full bg-brand-green px-7 py-3 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {submitting ? t("submitting") : t("submitButton")}
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-5">
+          {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+        </Reveal>
+      </div>
+
+      <div
+        aria-hidden={!showFloatingSummary}
+        className={`fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 items-stretch overflow-hidden rounded-l-3xl bg-white shadow-[0_10px_40px_-12px_rgba(1,68,33,0.25)] transition-all duration-300 lg:flex ${
+          showFloatingSummary
+            ? "translate-x-0 opacity-100"
+            : "pointer-events-none translate-x-[120%] opacity-0"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setFloatingSummaryCollapsed((collapsed) => !collapsed)}
+          aria-label={
+            floatingSummaryCollapsed
+              ? t("expandSummary")
+              : t("collapseSummary")
+          }
+          aria-expanded={!floatingSummaryCollapsed}
+          className="flex w-7 shrink-0 items-center justify-center self-stretch transition hover:bg-brand-cream"
+        >
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            className={`h-4 w-4 text-brand-green/60 transition-transform duration-300 ${
+              floatingSummaryCollapsed ? "rotate-180" : ""
+            }`}
+          >
+            <path
+              d="M8.5 4l6 6-6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        <div
+          className={`overflow-hidden transition-all duration-300 ${
+            floatingSummaryCollapsed ? "w-0" : "w-60"
+          }`}
+        >
+          <div className="flex w-60 flex-col gap-4 p-5">
+            <div>
+              <p className="text-sm font-semibold text-brand-green">
+                {t("selectedCount", { count: selectedCount })}
+              </p>
+              {extraCount > 0 ? (
+                <p className="mt-1 text-xs text-brand-green/70">
+                  {t("extraBreakdown", {
+                    count: extraCount,
+                    price: formatMoneyFromCents(
+                      extraPhotoPriceCents,
+                      currency,
+                    ),
+                  })}
+                </p>
+              ) : null}
+            </div>
+
             {totalCents > 0 ? (
-              <div className="text-right">
+              <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-brand-gold-dark">
                   {t("totalLabel")}
                 </p>
                 <p
                   key={totalCents}
-                  className="proof-tick text-2xl font-bold text-brand-green"
+                  className="proof-tick text-xl font-bold text-brand-green"
                 >
                   {formatMoneyFromCents(totalCents, currency)}
                 </p>
@@ -168,15 +281,63 @@ export default function ProofSelectionClient({
               type="button"
               onClick={handleSubmit}
               disabled={submitting || selectedCount === 0}
-              className="rounded-full bg-brand-green px-7 py-3 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-full bg-brand-green px-5 py-2.5 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? t("submitting") : t("submitButton")}
             </button>
           </div>
         </div>
+      </div>
 
-        {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
-      </Reveal>
+      <div
+        aria-hidden={!showFloatingSummary}
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+        className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-4 border-t border-brand-gold/15 bg-white px-4 pt-3 shadow-[0_-10px_30px_-15px_rgba(1,68,33,0.25)] transition-transform duration-300 lg:hidden ${
+          showFloatingSummary
+            ? "translate-y-0"
+            : "pointer-events-none translate-y-full"
+        }`}
+      >
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-brand-green">
+            {t("selectedCount", { count: selectedCount })}
+          </p>
+          {freeRemaining > 0 || extraCount > 0 ? (
+            <p className="text-xs text-brand-green/70">
+              {freeRemaining > 0
+                ? t("freeRemainingCount", { count: freeRemaining })
+                : null}
+              {freeRemaining > 0 && extraCount > 0 ? " · " : null}
+              {extraCount > 0
+                ? t("extraBreakdown", {
+                    count: extraCount,
+                    price: formatMoneyFromCents(
+                      extraPhotoPriceCents,
+                      currency,
+                    ),
+                  })
+                : null}
+            </p>
+          ) : null}
+          {totalCents > 0 ? (
+            <p
+              key={totalCents}
+              className="proof-tick mt-0.5 text-base font-bold text-brand-green"
+            >
+              {formatMoneyFromCents(totalCents, currency)}
+            </p>
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting || selectedCount === 0}
+          className="shrink-0 rounded-full bg-brand-green px-5 py-2.5 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {submitting ? t("submitting") : t("submitButton")}
+        </button>
+      </div>
 
       <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-7 md:grid-cols-4">
         {photos.map((photo, index) => {

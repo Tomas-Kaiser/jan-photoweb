@@ -186,7 +186,9 @@
     "summaryTotal": "Total due",
     "selectedPhotosHeading": "Your selected photos",
     "yourNote": "Your note",
-    "photographerMessage": "A message from your photographer"
+    "photographerMessage": "A message from your photographer",
+    "collapseSummary": "Hide selection summary",
+    "expandSummary": "Show selection summary"
   },
   "admin": {
     "common": {

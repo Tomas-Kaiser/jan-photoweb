@@ -186,7 +186,9 @@
     "summaryTotal": "Celkem k úhradě",
     "selectedPhotosHeading": "Vámi vybrané fotky",
     "yourNote": "Vaše poznámka",
-    "photographerMessage": "Zpráva od vašeho fotografa"
+    "photographerMessage": "Zpráva od vašeho fotografa",
+    "collapseSummary": "Skrýt souhrn výběru",
+    "expandSummary": "Zobrazit souhrn výběru"
   },
   "admin": {
     "common": {
