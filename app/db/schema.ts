@@ -118,6 +118,7 @@ export const proofGalleries = pgTable(
             .notNull(),
         currency: text("currency").default("CZK").notNull(),
         status: proofGalleryStatusEnum("status").default("draft").notNull(),
+        message: text("message"),
         createdAt: timestamp("created_at").defaultNow().notNull(),
         expiresAt: timestamp("expires_at"),
     },

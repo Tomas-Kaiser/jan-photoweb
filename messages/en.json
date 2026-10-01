@@ -185,7 +185,8 @@
     "summaryBaseCost": "Photoshoot fee",
     "summaryTotal": "Total due",
     "selectedPhotosHeading": "Your selected photos",
-    "yourNote": "Your note"
+    "yourNote": "Your note",
+    "photographerMessage": "A message from your photographer"
   },
   "admin": {
     "common": {
@@ -273,6 +274,11 @@
       "shareableLink": "Shareable client link",
       "copyLink": "Copy link",
       "linkCopied": "Link copied.",
+      "clientMessageTitle": "Message to client",
+      "clientMessagePlaceholder": "Add a short note for the client (optional)",
+      "saveClientMessage": "Save message",
+      "clientMessageSaved": "Message saved.",
+      "clientMessageSaveFailed": "Failed to save the message.",
       "deleteGallery": "Delete gallery",
       "deleteGalleryConfirmTitle": "Delete this proof gallery?",
       "deleteGalleryConfirmMessage": "This deletes \"{name}\" and all its photos. This can't be undone.",

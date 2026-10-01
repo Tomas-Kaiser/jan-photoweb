@@ -17,6 +17,7 @@ type Gallery = {
   freePhotoCount: number;
   extraPhotoPriceCents: number;
   currency: string;
+  message: string | null;
 };
 
 type Photo = {
@@ -70,6 +71,15 @@ export default function ProofGalleryDetailClient({
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
   const [settingsError, setSettingsError] = useState<string | null>(null);
+
+  const [clientMessage, setClientMessage] = useState(gallery.message ?? "");
+  const [savingClientMessage, setSavingClientMessage] = useState(false);
+  const [clientMessageSaved, setClientMessageSaved] = useState<string | null>(
+    null,
+  );
+  const [clientMessageError, setClientMessageError] = useState<string | null>(
+    null,
+  );
 
   const [photos, setPhotos] = useState(initialPhotos);
   const [uploading, setUploading] = useState(false);
@@ -147,6 +157,39 @@ export default function ProofGalleryDetailClient({
       );
     } finally {
       setSavingSettings(false);
+    }
+  }
+
+  async function handleSaveClientMessage(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    setClientMessageError(null);
+    setClientMessageSaved(null);
+    setSavingClientMessage(true);
+
+    try {
+      const res = await fetch(`/api/admin/proof-galleries/${gallery.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: clientMessage }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(
+          data?.error || t("proofGalleries.clientMessageSaveFailed"),
+        );
+      }
+
+      setClientMessageSaved(t("proofGalleries.clientMessageSaved"));
+      router.refresh();
+    } catch (err) {
+      setClientMessageError(
+        err instanceof Error ? err.message : t("common.genericError"),
+      );
+    } finally {
+      setSavingClientMessage(false);
     }
   }
 
@@ -398,6 +441,45 @@ export default function ProofGalleryDetailClient({
               : t("proofGalleries.copyLink")}
           </button>
         </div>
+      </section>
+
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          {t("proofGalleries.clientMessageTitle")}
+        </h2>
+
+        <form onSubmit={handleSaveClientMessage} className="space-y-3">
+          <label htmlFor="clientMessage" className="sr-only">
+            {t("proofGalleries.clientMessageTitle")}
+          </label>
+          <textarea
+            id="clientMessage"
+            value={clientMessage}
+            onChange={(e) => setClientMessage(e.target.value)}
+            disabled={savingClientMessage}
+            rows={4}
+            placeholder={t("proofGalleries.clientMessagePlaceholder")}
+            className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+          />
+
+          {clientMessageSaved ? (
+            <p className="text-sm text-green-700">{clientMessageSaved}</p>
+          ) : null}
+
+          {clientMessageError ? (
+            <p className="text-sm text-red-700">{clientMessageError}</p>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={savingClientMessage}
+            className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          >
+            {savingClientMessage
+              ? t("common.saving")
+              : t("proofGalleries.saveClientMessage")}
+          </button>
+        </form>
       </section>
 
       {order ? (

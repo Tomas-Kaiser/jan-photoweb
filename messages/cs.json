@@ -185,7 +185,8 @@
     "summaryBaseCost": "Cena fotografování",
     "summaryTotal": "Celkem k úhradě",
     "selectedPhotosHeading": "Vámi vybrané fotky",
-    "yourNote": "Vaše poznámka"
+    "yourNote": "Vaše poznámka",
+    "photographerMessage": "Zpráva od vašeho fotografa"
   },
   "admin": {
     "common": {
@@ -273,6 +274,11 @@
       "shareableLink": "Odkaz pro klienta",
       "copyLink": "Kopírovat odkaz",
       "linkCopied": "Odkaz zkopírován.",
+      "clientMessageTitle": "Zpráva pro klienta",
+      "clientMessagePlaceholder": "Přidejte krátkou poznámku pro klienta (nepovinné)",
+      "saveClientMessage": "Uložit zprávu",
+      "clientMessageSaved": "Zpráva uložena.",
+      "clientMessageSaveFailed": "Uložení zprávy se nezdařilo.",
       "deleteGallery": "Smazat náhledovku",
       "deleteGalleryConfirmTitle": "Smazat tuto náhledovku?",
       "deleteGalleryConfirmMessage": "Tímto smažete „{name}“ a všechny její fotky. Nelze vrátit zpět.",

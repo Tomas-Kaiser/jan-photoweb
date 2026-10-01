@@ -99,6 +99,20 @@ export default async function ProofGalleryPage({ params }: Props) {
             {t("thankYouMessage")}
           </Reveal>
 
+          {gallery.message ? (
+            <Reveal
+              className="mt-6 rounded-2xl border border-brand-gold/20 bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]"
+              delay={200}
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
+                {t("photographerMessage")}
+              </p>
+              <p className="mt-2 whitespace-pre-wrap text-gray-700">
+                {gallery.message}
+              </p>
+            </Reveal>
+          ) : null}
+
           <Reveal
             className="mt-10 rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-7"
             delay={240}
@@ -163,6 +177,16 @@ export default async function ProofGalleryPage({ params }: Props) {
             {t("heading")}
           </h1>
           <p className="mt-3 text-gray-600">{t("noPhotosYet")}</p>
+          {gallery.message ? (
+            <div className="mt-6 rounded-2xl border border-brand-gold/20 bg-brand-cream p-5 text-left">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
+                {t("photographerMessage")}
+              </p>
+              <p className="mt-2 whitespace-pre-wrap text-gray-700">
+                {gallery.message}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     );
@@ -190,6 +214,20 @@ export default async function ProofGalleryPage({ params }: Props) {
             {t("instructions")}
           </p>
         </Reveal>
+
+        {gallery.message ? (
+          <Reveal
+            className="mt-8 max-w-2xl rounded-2xl border border-brand-gold/20 bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]"
+            delay={60}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
+              {t("photographerMessage")}
+            </p>
+            <p className="mt-2 whitespace-pre-wrap text-gray-700">
+              {gallery.message}
+            </p>
+          </Reveal>
+        ) : null}
 
         <Reveal className="mt-12 grid gap-5 sm:grid-cols-2" delay={100}>
           {gallery.baseCostCents > 0 ? (

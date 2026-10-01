@@ -25,42 +25,69 @@ export async function PATCH(req: Request, { params }: Params) {
     const { id } = await params;
     const body = await req.json();
 
-    const clientName = String(body?.clientName || "").trim();
-    const baseCostCents = Number(body?.baseCostCents ?? 0);
-    const freePhotoCount = Number(body?.freePhotoCount);
-    const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
+    const updates: Partial<typeof proofGalleries.$inferInsert> = {};
 
-    if (!clientName) {
-      return NextResponse.json(
-        { error: "Client name is required." },
-        { status: 400 },
-      );
+    if ("message" in body) {
+      const message = typeof body.message === "string" ? body.message.trim() : "";
+      updates.message = message || null;
     }
 
-    if (!Number.isInteger(baseCostCents) || baseCostCents < 0) {
-      return NextResponse.json(
-        { error: "Base cost must be a non-negative whole number." },
-        { status: 400 },
-      );
+    const hasSettingsFields =
+      "clientName" in body ||
+      "baseCostCents" in body ||
+      "freePhotoCount" in body ||
+      "extraPhotoPriceCents" in body;
+
+    if (hasSettingsFields) {
+      const clientName = String(body?.clientName || "").trim();
+      const baseCostCents = Number(body?.baseCostCents ?? 0);
+      const freePhotoCount = Number(body?.freePhotoCount);
+      const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
+
+      if (!clientName) {
+        return NextResponse.json(
+          { error: "Client name is required." },
+          { status: 400 },
+        );
+      }
+
+      if (!Number.isInteger(baseCostCents) || baseCostCents < 0) {
+        return NextResponse.json(
+          { error: "Base cost must be a non-negative whole number." },
+          { status: 400 },
+        );
+      }
+
+      if (!Number.isInteger(freePhotoCount) || freePhotoCount < 0) {
+        return NextResponse.json(
+          { error: "Free photo count must be a non-negative whole number." },
+          { status: 400 },
+        );
+      }
+
+      if (!Number.isInteger(extraPhotoPriceCents) || extraPhotoPriceCents < 0) {
+        return NextResponse.json(
+          { error: "Extra photo price must be a non-negative whole number." },
+          { status: 400 },
+        );
+      }
+
+      updates.clientName = clientName;
+      updates.baseCostCents = baseCostCents;
+      updates.freePhotoCount = freePhotoCount;
+      updates.extraPhotoPriceCents = extraPhotoPriceCents;
     }
 
-    if (!Number.isInteger(freePhotoCount) || freePhotoCount < 0) {
+    if (!Object.keys(updates).length) {
       return NextResponse.json(
-        { error: "Free photo count must be a non-negative whole number." },
-        { status: 400 },
-      );
-    }
-
-    if (!Number.isInteger(extraPhotoPriceCents) || extraPhotoPriceCents < 0) {
-      return NextResponse.json(
-        { error: "Extra photo price must be a non-negative whole number." },
+        { error: "No fields to update." },
         { status: 400 },
       );
     }
 
     const updated = await db
       .update(proofGalleries)
-      .set({ clientName, baseCostCents, freePhotoCount, extraPhotoPriceCents })
+      .set(updates)
       .where(eq(proofGalleries.id, id))
       .returning({ id: proofGalleries.id });
 

@@ -1,0 +1,1 @@
+ALTER TABLE "proof_galleries" ADD COLUMN "message" text;
