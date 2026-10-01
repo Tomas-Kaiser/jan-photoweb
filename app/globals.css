@@ -85,6 +85,16 @@ body {
   }
 }
 
+@keyframes proof-heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(18px);
@@ -106,9 +116,14 @@ body {
   animation: proof-tick 0.35s ease-out;
 }
 
+.proof-heartbeat {
+  animation: proof-heartbeat 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .proof-pop,
-  .proof-tick {
+  .proof-tick,
+  .proof-heartbeat {
     animation: none;
   }
 

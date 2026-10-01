@@ -195,7 +195,12 @@
     "filterSelected": "Selected",
     "filterRatherYes": "Rather yes",
     "filterRatherNo": "Rather no",
-    "filterNoMatches": "No photos in this category yet."
+    "filterNoMatches": "No photos in this category yet.",
+    "socialCtaTitle": "Loved your photos?",
+    "socialCtaMessage": "If you enjoyed our session together, a follow or a quick review means the world — it helps me grow and find other amazing people like you.",
+    "followInstagram": "Follow on Instagram",
+    "followFacebook": "Follow on Facebook",
+    "leaveReview": "Leave a Google review"
   },
   "admin": {
     "common": {

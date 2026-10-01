@@ -1,6 +1,12 @@
 import { asc, eq } from "drizzle-orm";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faInstagram,
+  faFacebook,
+  faGoogle,
+} from "@fortawesome/free-brands-svg-icons";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import {
@@ -11,6 +17,12 @@ import { formatMoneyFromCents } from "@/app/lib/format-money";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
 import Reveal from "./Reveal";
+
+const INSTAGRAM_URL =
+  "https://www.instagram.com/yenhighjack/?igsh=Yzl0eW1wMGkxN3po&utm_source=qr";
+const FACEBOOK_URL = "https://www.facebook.com/share/jpVp8s9n6sw2aGfd";
+const GOOGLE_REVIEW_URL =
+  "https://www.google.com/maps/place/Fotograf+Jan+H%C3%A1jek/@51.011085,-6.2617611,5z/data=!4m10!1m2!2m1!1shajek+jan+fotograf!3m6!1s0xa2490db466896cd3:0x9724b51fa6006b7d!8m2!3d50.4621918!4d13.7458963!15sChJoYWplayBqYW4gZm90b2dyYWaSAQxwaG90b2dyYXBoZXLgAQA!16s%2Fg%2F11x8z_y162?entry=ttu&g_ep=EgoyMDI2MDkxNC4wIKXMDSoASAFQAw%3D%3D";
 
 type Props = {
   params: Promise<{ locale: string; token: string }>;
@@ -172,6 +184,59 @@ export default async function ProofGalleryPage({ params }: Props) {
               <ProofOrderPhotosClient photos={selectedPhotos} />
             </>
           ) : null}
+
+          <Reveal className="relative mt-14 overflow-hidden rounded-[2rem] border border-brand-gold/25 bg-gradient-to-br from-brand-cream via-white to-brand-gold/10 p-8 text-center shadow-[0_15px_50px_-15px_rgba(1,68,33,0.25)] sm:p-10">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl leading-none shadow-sm">
+              <span className="proof-heartbeat inline-flex items-center justify-center">
+                🤍
+              </span>
+            </span>
+            <h2 className="mt-4 font-display text-2xl font-semibold text-brand-green">
+              {t("socialCtaTitle")}
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-gray-600">
+              {t("socialCtaMessage")}
+            </p>
+
+            <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-gold/20 bg-white px-5 py-2.5 text-sm font-semibold text-brand-green shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:w-60"
+              >
+                <FontAwesomeIcon
+                  icon={faInstagram}
+                  className="h-4 w-4 text-[#E4405F]"
+                />
+                {t("followInstagram")}
+              </a>
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-gold/20 bg-white px-5 py-2.5 text-sm font-semibold text-brand-green shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:w-60"
+              >
+                <FontAwesomeIcon
+                  icon={faFacebook}
+                  className="h-4 w-4 text-[#1877F2]"
+                />
+                {t("followFacebook")}
+              </a>
+              <a
+                href={GOOGLE_REVIEW_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-gold/20 bg-white px-5 py-2.5 text-sm font-semibold text-brand-green shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:w-60"
+              >
+                <FontAwesomeIcon
+                  icon={faGoogle}
+                  className="h-4 w-4 text-[#4285F4]"
+                />
+                {t("leaveReview")}
+              </a>
+            </div>
+          </Reveal>
         </div>
       </div>
     );

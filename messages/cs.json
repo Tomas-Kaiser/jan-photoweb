@@ -195,7 +195,12 @@
     "filterSelected": "Vybráno",
     "filterRatherYes": "Spíše ano",
     "filterRatherNo": "Spíše ne",
-    "filterNoMatches": "V této kategorii zatím nejsou žádné fotky."
+    "filterNoMatches": "V této kategorii zatím nejsou žádné fotky.",
+    "socialCtaTitle": "Líbily se vám fotky?",
+    "socialCtaMessage": "Pokud se vám naše společné focení líbilo, sledování nebo krátká recenze pro mě hodně znamená — pomáhá mi to růst a najít další skvělé lidi, jako jste vy.",
+    "followInstagram": "Sledovat na Instagramu",
+    "followFacebook": "Sledovat na Facebooku",
+    "leaveReview": "Napsat recenzi na Googlu"
   },
   "admin": {
     "common": {
