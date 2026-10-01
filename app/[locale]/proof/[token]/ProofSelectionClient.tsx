@@ -367,11 +367,20 @@ export default function ProofSelectionClient({
                   />
                 </button>
 
-                {selection.selected ? (
-                  <span className="proof-pop pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-brand-green text-sm font-bold text-white shadow">
-                    ✓
-                  </span>
-                ) : null}
+                <button
+                  type="button"
+                  key={selection.selected ? "selected" : "unselected"}
+                  onClick={() => toggleSelected(photo.id)}
+                  aria-label={selection.selected ? t("selected") : t("select")}
+                  aria-pressed={selection.selected}
+                  className={`proof-pop absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold shadow transition motion-safe:active:scale-95 ${
+                    selection.selected
+                      ? "bg-brand-green text-white"
+                      : "bg-white/70 text-transparent ring-1 ring-inset ring-white hover:bg-white"
+                  }`}
+                >
+                  {selection.selected ? "✓" : ""}
+                </button>
               </div>
 
               <button
