@@ -420,10 +420,10 @@ export default function ProofSelectionClient({
                 <button
                   type="button"
                   onClick={() => toggleSelected(lightboxPhoto.id)}
-                  className={`pointer-events-auto rounded-full border px-8 py-3 text-sm font-semibold text-white shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl backdrop-saturate-150 transition ${
+                  className={`pointer-events-auto rounded-full border px-8 py-3 text-sm font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl backdrop-saturate-150 transition ${
                     lightboxSelected
-                      ? "border-white/30 bg-brand-green/70 hover:bg-brand-green/85"
-                      : "border-white/40 bg-white/20 hover:bg-white/30"
+                      ? "border-white/30 bg-brand-green/70 text-white hover:bg-brand-green/85"
+                      : "border-white/40 bg-white/80 text-brand-green hover:bg-white"
                   }`}
                 >
                   {lightboxSelected ? `✓ ${t("selected")}` : t("select")}
