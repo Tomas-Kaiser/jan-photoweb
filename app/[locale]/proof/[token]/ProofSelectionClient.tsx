@@ -339,7 +339,7 @@ export default function ProofSelectionClient({
         </button>
       </div>
 
-      <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-7 md:grid-cols-4">
+      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-7 md:grid-cols-4">
         {photos.map((photo, index) => {
           const selection = selections[photo.id];
 
