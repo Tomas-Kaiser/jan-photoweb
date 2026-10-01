@@ -1,4 +1,5 @@
 import { asc, eq } from "drizzle-orm";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
@@ -100,16 +101,22 @@ export default async function ProofGalleryPage({ params }: Props) {
           </Reveal>
 
           {gallery.message ? (
-            <Reveal
-              className="mt-6 rounded-2xl border border-brand-gold/20 bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]"
-              delay={200}
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
-                {t("photographerMessage")}
-              </p>
-              <p className="mt-2 whitespace-pre-wrap text-gray-700">
-                {gallery.message}
-              </p>
+            <Reveal className="mt-6 flex items-end gap-3" delay={200}>
+              <Image
+                src="/jan-avatar.jpg"
+                alt="Jan Hájek"
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-brand-gold/20"
+              />
+              <div className="relative max-w-md rounded-2xl rounded-bl-sm bg-white p-4 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
+                  {t("photographerMessage")}
+                </p>
+                <p className="mt-1.5 whitespace-pre-wrap text-gray-700">
+                  {gallery.message}
+                </p>
+              </div>
             </Reveal>
           ) : null}
 
@@ -216,16 +223,22 @@ export default async function ProofGalleryPage({ params }: Props) {
         </Reveal>
 
         {gallery.message ? (
-          <Reveal
-            className="mt-8 max-w-2xl rounded-2xl border border-brand-gold/20 bg-white p-5 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]"
-            delay={60}
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
-              {t("photographerMessage")}
-            </p>
-            <p className="mt-2 whitespace-pre-wrap text-gray-700">
-              {gallery.message}
-            </p>
+          <Reveal className="mt-8 flex items-end gap-3" delay={60}>
+            <Image
+              src="/jan-avatar.jpg"
+              alt="Jan Hájek"
+              width={40}
+              height={40}
+              className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-brand-gold/20"
+            />
+            <div className="relative max-w-md rounded-2xl rounded-bl-sm bg-white p-4 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
+                {t("photographerMessage")}
+              </p>
+              <p className="mt-1.5 whitespace-pre-wrap text-gray-700">
+                {gallery.message}
+              </p>
+            </div>
           </Reveal>
         ) : null}
 
