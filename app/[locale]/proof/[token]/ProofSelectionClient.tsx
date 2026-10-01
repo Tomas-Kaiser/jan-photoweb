@@ -11,6 +11,8 @@ import { useConfirm } from "@/app/components/ConfirmDialog";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import Reveal from "./Reveal";
 
+type Rating = "rather_no" | "rather_yes" | null;
+
 type Photo = {
   id: string;
   fileName: string;
@@ -18,6 +20,7 @@ type Photo = {
   detailSrc: string;
   comment: string | null;
   selected: boolean;
+  rating: Rating;
 };
 
 type Props = {
@@ -32,7 +35,10 @@ type Props = {
 type Selection = {
   selected: boolean;
   comment: string;
+  rating: Rating;
 };
+
+type Filter = "all" | "selected" | "rather_yes" | "rather_no";
 
 export default function ProofSelectionClient({
   token,
@@ -50,13 +56,18 @@ export default function ProofSelectionClient({
     Object.fromEntries(
       photos.map((photo) => [
         photo.id,
-        { selected: photo.selected, comment: photo.comment ?? "" },
+        {
+          selected: photo.selected,
+          comment: photo.comment ?? "",
+          rating: photo.rating,
+        },
       ]),
     ),
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
   const summaryBarRef = useRef<HTMLDivElement>(null);
   const [showFloatingSummary, setShowFloatingSummary] = useState(false);
   const [floatingSummaryCollapsed, setFloatingSummaryCollapsed] =
@@ -83,10 +94,36 @@ export default function ProofSelectionClient({
   const lightboxSelected = lightboxPhoto
     ? (selections[lightboxPhoto.id]?.selected ?? false)
     : false;
+  const lightboxRating = lightboxPhoto
+    ? (selections[lightboxPhoto.id]?.rating ?? null)
+    : null;
 
   const selectedCount = useMemo(
     () => Object.values(selections).filter((s) => s.selected).length,
     [selections],
+  );
+
+  const ratherYesCount = useMemo(
+    () => Object.values(selections).filter((s) => s.rating === "rather_yes").length,
+    [selections],
+  );
+
+  const ratherNoCount = useMemo(
+    () => Object.values(selections).filter((s) => s.rating === "rather_no").length,
+    [selections],
+  );
+
+  const visiblePhotos = useMemo(
+    () =>
+      photos
+        .map((photo, index) => ({ photo, index }))
+        .filter(({ photo }) => {
+          if (filter === "all") return true;
+          const selection = selections[photo.id];
+          if (filter === "selected") return selection?.selected ?? false;
+          return selection?.rating === filter;
+        }),
+    [photos, selections, filter],
   );
 
   const freeRemaining = Math.max(0, freePhotoCount - selectedCount);
@@ -94,10 +131,33 @@ export default function ProofSelectionClient({
   const totalCents = baseCostCents + extraCount * extraPhotoPriceCents;
 
   function toggleSelected(photoId: string) {
-    setSelections((prev) => ({
-      ...prev,
-      [photoId]: { ...prev[photoId], selected: !prev[photoId].selected },
-    }));
+    setSelections((prev) => {
+      const current = prev[photoId];
+      const nextSelected = !current.selected;
+      return {
+        ...prev,
+        [photoId]: {
+          ...current,
+          selected: nextSelected,
+          rating: nextSelected ? null : current.rating,
+        },
+      };
+    });
+  }
+
+  function setRating(photoId: string, rating: "rather_no" | "rather_yes") {
+    setSelections((prev) => {
+      const current = prev[photoId];
+      const nextRating = current.rating === rating ? null : rating;
+      return {
+        ...prev,
+        [photoId]: {
+          ...current,
+          rating: nextRating,
+          selected: nextRating ? false : current.selected,
+        },
+      };
+    });
   }
 
   function setComment(photoId: string, comment: string) {
@@ -129,6 +189,7 @@ export default function ProofSelectionClient({
             photoId: photo.id,
             selected: selections[photo.id]?.selected ?? false,
             comment: selections[photo.id]?.comment || null,
+            rating: selections[photo.id]?.rating ?? null,
           })),
         }),
       });
@@ -339,8 +400,49 @@ export default function ProofSelectionClient({
         </button>
       </div>
 
-      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-7 md:grid-cols-4">
-        {photos.map((photo, index) => {
+      <div className="mt-8 flex flex-wrap gap-2">
+        {(
+          [
+            { key: "all", label: t("filterAll"), count: photos.length },
+            {
+              key: "selected",
+              label: t("filterSelected"),
+              count: selectedCount,
+            },
+            {
+              key: "rather_yes",
+              label: t("filterRatherYes"),
+              count: ratherYesCount,
+            },
+            {
+              key: "rather_no",
+              label: t("filterRatherNo"),
+              count: ratherNoCount,
+            },
+          ] as const
+        ).map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => setFilter(option.key)}
+            aria-pressed={filter === option.key}
+            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+              filter === option.key
+                ? "border-transparent bg-brand-green text-white"
+                : "border-brand-gold/20 bg-white text-brand-green hover:bg-brand-cream"
+            }`}
+          >
+            {option.label} ({option.count})
+          </button>
+        ))}
+      </div>
+
+      {visiblePhotos.length === 0 ? (
+        <p className="mt-8 text-sm text-gray-500">{t("filterNoMatches")}</p>
+      ) : null}
+
+      <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-7 md:grid-cols-4">
+        {visiblePhotos.map(({ photo, index }) => {
           const selection = selections[photo.id];
 
           return (
@@ -383,17 +485,44 @@ export default function ProofSelectionClient({
                 </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => toggleSelected(photo.id)}
-                className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition motion-safe:active:scale-95 ${
-                  selection.selected
-                    ? "border-transparent bg-brand-green text-white"
-                    : "border-transparent bg-white text-brand-green shadow-sm hover:bg-white/70"
-                }`}
-              >
-                {selection.selected ? t("selected") : t("select")}
-              </button>
+              <div className="mt-3 grid grid-cols-3 overflow-hidden rounded-full border border-brand-gold/20 bg-white shadow-sm sm:inline-flex sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setRating(photo.id, "rather_no")}
+                  aria-pressed={selection.rating === "rather_no"}
+                  className={`min-w-0 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                    selection.rating === "rather_no"
+                      ? "bg-gray-500 text-white"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }`}
+                >
+                  {t("ratherNo")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRating(photo.id, "rather_yes")}
+                  aria-pressed={selection.rating === "rather_yes"}
+                  className={`min-w-0 border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                    selection.rating === "rather_yes"
+                      ? "bg-brand-gold text-white"
+                      : "text-brand-gold-dark hover:bg-brand-cream"
+                  }`}
+                >
+                  {t("ratherYes")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleSelected(photo.id)}
+                  aria-pressed={selection.selected}
+                  className={`min-w-0 border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                    selection.selected
+                      ? "bg-brand-green text-white"
+                      : "text-brand-green hover:bg-brand-cream"
+                  }`}
+                >
+                  {selection.selected ? t("selected") : t("select")}
+                </button>
+              </div>
 
               <input
                 type="text"
@@ -417,17 +546,41 @@ export default function ProofSelectionClient({
           controls: () =>
             lightboxPhoto ? (
               <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => toggleSelected(lightboxPhoto.id)}
-                  className={`pointer-events-auto rounded-full border px-8 py-3 text-sm font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl backdrop-saturate-150 transition ${
-                    lightboxSelected
-                      ? "border-white/30 bg-brand-green/70 text-white hover:bg-brand-green/85"
-                      : "border-white/40 bg-white/80 text-brand-green hover:bg-white"
-                  }`}
-                >
-                  {lightboxSelected ? `✓ ${t("selected")}` : t("select")}
-                </button>
+                <div className="pointer-events-auto inline-flex overflow-hidden rounded-full border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl backdrop-saturate-150">
+                  <button
+                    type="button"
+                    onClick={() => setRating(lightboxPhoto.id, "rather_no")}
+                    className={`px-5 py-3 text-sm font-semibold transition ${
+                      lightboxRating === "rather_no"
+                        ? "bg-gray-500 text-white"
+                        : "bg-white/80 text-gray-600 hover:bg-white"
+                    }`}
+                  >
+                    {t("ratherNo")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRating(lightboxPhoto.id, "rather_yes")}
+                    className={`border-l border-white/40 px-5 py-3 text-sm font-semibold transition ${
+                      lightboxRating === "rather_yes"
+                        ? "bg-brand-gold text-white"
+                        : "bg-white/80 text-brand-gold-dark hover:bg-white"
+                    }`}
+                  >
+                    {t("ratherYes")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleSelected(lightboxPhoto.id)}
+                    className={`border-l border-white/40 px-5 py-3 text-sm font-semibold transition ${
+                      lightboxSelected
+                        ? "bg-brand-green/70 text-white hover:bg-brand-green/85"
+                        : "bg-white/80 text-brand-green hover:bg-white"
+                    }`}
+                  >
+                    {lightboxSelected ? `✓ ${t("selected")}` : t("select")}
+                  </button>
+                </div>
               </div>
             ) : null,
         }}

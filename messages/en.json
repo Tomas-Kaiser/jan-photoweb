@@ -188,7 +188,14 @@
     "yourNote": "Your note",
     "photographerMessage": "A message from your photographer",
     "collapseSummary": "Hide selection summary",
-    "expandSummary": "Show selection summary"
+    "expandSummary": "Show selection summary",
+    "ratherYes": "Rather yes",
+    "ratherNo": "Rather no",
+    "filterAll": "All",
+    "filterSelected": "Selected",
+    "filterRatherYes": "Rather yes",
+    "filterRatherNo": "Rather no",
+    "filterNoMatches": "No photos in this category yet."
   },
   "admin": {
     "common": {
@@ -287,6 +294,8 @@
       "deleteGalleryFailed": "Failed to delete proof gallery.",
       "photosTitle": "Photos",
       "noPhotosYet": "No photos uploaded yet.",
+      "ratingRatherYes": "Client: rather yes",
+      "ratingRatherNo": "Client: rather no",
       "deletePhotoConfirmMessage": "Delete this photo? This can't be undone.",
       "deletePhotoFailed": "Failed to delete photo.",
       "statusDraft": "Draft",

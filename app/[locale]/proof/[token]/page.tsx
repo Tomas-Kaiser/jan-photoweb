@@ -69,6 +69,7 @@ export default async function ProofGalleryPage({ params }: Props) {
     detailSrc: getCloudflareImageUrlCapped(photo.cloudflareId, 3000, 2000),
     comment: photo.comment,
     selected: photo.selected,
+    rating: photo.rating,
   }));
 
   if (order) {

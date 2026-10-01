@@ -31,6 +31,11 @@ export const proofOrderStatusEnum = pgEnum("proof_order_status", [
     "paid",
 ]);
 
+export const proofPhotoRatingEnum = pgEnum("proof_photo_rating", [
+    "rather_no",
+    "rather_yes",
+]);
+
 export const albums = pgTable(
     "albums",
     {
@@ -135,6 +140,7 @@ export const proofPhotos = pgTable(
         sortOrder: integer("sort_order").default(0).notNull(),
         selected: boolean("selected").default(false).notNull(),
         selectedAt: timestamp("selected_at"),
+        rating: proofPhotoRatingEnum("rating"),
         comment: text("comment"),
         createdAt: timestamp("created_at").defaultNow().notNull(),
     },

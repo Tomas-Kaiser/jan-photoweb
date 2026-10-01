@@ -25,6 +25,7 @@ type Photo = {
   fileName: string;
   cardSrc: string;
   selected: boolean;
+  rating: "rather_no" | "rather_yes" | null;
   comment: string | null;
 };
 
@@ -237,6 +238,7 @@ export default function ProofGalleryDetailClient({
             fileName: file.name,
             cardSrc: getCloudflareImageUrl(cloudflareId, "card"),
             selected: false,
+            rating: null,
             comment: null,
           },
         ]);
@@ -842,6 +844,19 @@ export default function ProofGalleryDetailClient({
                 <p className="mt-1 truncate text-xs text-gray-500">
                   {photo.fileName}
                 </p>
+                {!photo.selected && photo.rating ? (
+                  <p
+                    className={`mt-0.5 text-xs font-medium ${
+                      photo.rating === "rather_yes"
+                        ? "text-amber-700"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {photo.rating === "rather_yes"
+                      ? t("proofGalleries.ratingRatherYes")
+                      : t("proofGalleries.ratingRatherNo")}
+                  </p>
+                ) : null}
                 {photo.comment ? (
                   <p className="mt-0.5 text-xs text-gray-700">
                     {photo.comment}

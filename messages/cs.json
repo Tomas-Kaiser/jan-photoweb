@@ -188,7 +188,14 @@
     "yourNote": "Vaše poznámka",
     "photographerMessage": "Zpráva od vašeho fotografa",
     "collapseSummary": "Skrýt souhrn výběru",
-    "expandSummary": "Zobrazit souhrn výběru"
+    "expandSummary": "Zobrazit souhrn výběru",
+    "ratherYes": "Spíše ano",
+    "ratherNo": "Spíše ne",
+    "filterAll": "Vše",
+    "filterSelected": "Vybráno",
+    "filterRatherYes": "Spíše ano",
+    "filterRatherNo": "Spíše ne",
+    "filterNoMatches": "V této kategorii zatím nejsou žádné fotky."
   },
   "admin": {
     "common": {
@@ -287,6 +294,8 @@
       "deleteGalleryFailed": "Smazání náhledovky se nezdařilo.",
       "photosTitle": "Fotky",
       "noPhotosYet": "Zatím žádné nahrané fotky.",
+      "ratingRatherYes": "Klient: spíše ano",
+      "ratingRatherNo": "Klient: spíše ne",
       "deletePhotoConfirmMessage": "Smazat tuto fotku? Nelze vrátit zpět.",
       "deletePhotoFailed": "Smazání fotky se nezdařilo.",
       "statusDraft": "Koncept",

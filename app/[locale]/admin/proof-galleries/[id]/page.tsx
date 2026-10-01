@@ -48,6 +48,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
     fileName: photo.fileName,
     cardSrc: getCloudflareImageUrl(photo.cloudflareId, "card"),
     selected: photo.selected,
+    rating: photo.rating,
     comment: photo.comment,
   }));
 

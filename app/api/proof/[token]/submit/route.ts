@@ -7,13 +7,17 @@ type Params = {
   params: Promise<{ token: string }>;
 };
 
+type PhotoRating = "rather_no" | "rather_yes" | null;
+
 type PhotoSelection = {
   photoId: string;
   selected: boolean;
   comment: string | null;
+  rating: PhotoRating;
 };
 
 const MAX_COMMENT_LENGTH = 500;
+const VALID_RATINGS = new Set(["rather_no", "rather_yes"]);
 
 function normalizeSelections(body: unknown): PhotoSelection[] | null {
   if (!body || typeof body !== "object" || !Array.isArray((body as { photos?: unknown }).photos)) {
@@ -33,10 +37,16 @@ function normalizeSelections(body: unknown): PhotoSelection[] | null {
       typeof rawComment === "string" && rawComment.trim()
         ? rawComment.trim().slice(0, MAX_COMMENT_LENGTH)
         : null;
+    const rawRating = (entry as { rating?: unknown }).rating;
+    // A photo marked selected takes precedence over any rather-yes/no tag.
+    const rating: PhotoRating =
+      !selected && typeof rawRating === "string" && VALID_RATINGS.has(rawRating)
+        ? (rawRating as PhotoRating)
+        : null;
 
     if (!photoId) return null;
 
-    selections.push({ photoId, selected, comment });
+    selections.push({ photoId, selected, comment, rating });
   }
 
   return selections;
@@ -115,6 +125,7 @@ export async function POST(req: Request, { params }: Params) {
           .set({
             selected: selection.selected,
             selectedAt: selection.selected ? now : null,
+            rating: selection.rating,
             comment: selection.comment,
           })
           .where(eq(proofPhotos.id, selection.photoId));
