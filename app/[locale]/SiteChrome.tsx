@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { usePathname } from "../i18n/routing";
+import { Link, usePathname } from "../i18n/routing";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -19,12 +19,17 @@ function ProofHeader() {
   return (
     <header className="relative z-30 border-b border-brand-gold/15 bg-white/50 text-brand-green backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-center px-6 py-4">
-        <div className="flex flex-col items-center font-semibold leading-none">
+        <Link
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center font-semibold leading-none"
+        >
           <span className="font-display text-2xl font-semibold">Jan Hájek</span>
           <span className="mt-1 text-[0.65rem] font-medium tracking-[0.2em]">
             PHOTOGRAPHY
           </span>
-        </div>
+        </Link>
       </div>
       <div className="absolute right-3 top-1/2 -translate-y-1/2 sm:right-6">
         <LanguageSwitcher />
