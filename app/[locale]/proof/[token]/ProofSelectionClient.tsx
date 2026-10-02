@@ -403,7 +403,7 @@ export default function ProofSelectionClient({
         </button>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-2">
+      <div className="mt-8 flex gap-2 overflow-x-auto pb-1">
         {(
           [
             { key: "all", label: t("filterAll"), count: photos.length },
@@ -429,7 +429,7 @@ export default function ProofSelectionClient({
             type="button"
             onClick={() => setFilter(option.key)}
             aria-pressed={filter === option.key}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+            className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
               filter === option.key
                 ? "border-transparent bg-brand-green text-white"
                 : "border-brand-gold/20 bg-white text-brand-green hover:bg-brand-cream"
