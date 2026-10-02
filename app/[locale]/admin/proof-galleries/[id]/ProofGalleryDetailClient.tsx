@@ -18,6 +18,7 @@ type Gallery = {
   extraPhotoPriceCents: number;
   currency: string;
   message: string | null;
+  status: "draft" | "active" | "submitted" | "paid" | "closed";
 };
 
 type Photo = {
@@ -93,6 +94,8 @@ export default function ProofGalleryDetailClient({
   const [markingPaid, setMarkingPaid] = useState(false);
   const [paidError, setPaidError] = useState<string | null>(null);
   const [reopening, setReopening] = useState(false);
+
+  const isDraft = gallery.status === "draft";
 
   const selectedFileNames = photos
     .filter((photo) => photo.selected)
@@ -447,42 +450,60 @@ export default function ProofGalleryDetailClient({
       </section>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">
+        <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900">
           {t("proofGalleries.clientMessageTitle")}
+          {!isDraft ? (
+            <LockIcon className="h-4 w-4 shrink-0 text-gray-400" />
+          ) : null}
         </h2>
 
-        <form onSubmit={handleSaveClientMessage} className="space-y-3">
-          <label htmlFor="clientMessage" className="sr-only">
-            {t("proofGalleries.clientMessageTitle")}
-          </label>
-          <textarea
-            id="clientMessage"
-            value={clientMessage}
-            onChange={(e) => setClientMessage(e.target.value)}
-            disabled={savingClientMessage}
-            rows={4}
-            placeholder={t("proofGalleries.clientMessagePlaceholder")}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-          />
+        {isDraft ? (
+          <form onSubmit={handleSaveClientMessage} className="space-y-3">
+            <label htmlFor="clientMessage" className="sr-only">
+              {t("proofGalleries.clientMessageTitle")}
+            </label>
+            <textarea
+              id="clientMessage"
+              value={clientMessage}
+              onChange={(e) => setClientMessage(e.target.value)}
+              disabled={savingClientMessage}
+              rows={4}
+              placeholder={t("proofGalleries.clientMessagePlaceholder")}
+              className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+            />
 
-          {clientMessageSaved ? (
-            <p className="text-sm text-green-700">{clientMessageSaved}</p>
-          ) : null}
+            {clientMessageSaved ? (
+              <p className="text-sm text-green-700">{clientMessageSaved}</p>
+            ) : null}
 
-          {clientMessageError ? (
-            <p className="text-sm text-red-700">{clientMessageError}</p>
-          ) : null}
+            {clientMessageError ? (
+              <p className="text-sm text-red-700">{clientMessageError}</p>
+            ) : null}
 
-          <button
-            type="submit"
-            disabled={savingClientMessage}
-            className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
-          >
-            {savingClientMessage
-              ? t("common.saving")
-              : t("proofGalleries.saveClientMessage")}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={savingClientMessage}
+              className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {savingClientMessage
+                ? t("common.saving")
+                : t("proofGalleries.saveClientMessage")}
+            </button>
+          </form>
+        ) : (
+          <div className="space-y-3">
+            {clientMessage ? (
+              <p className="whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
+                {clientMessage}
+              </p>
+            ) : null}
+
+            <p className="flex items-center gap-1.5 text-xs text-gray-500">
+              <LockIcon className="h-3.5 w-3.5 shrink-0" />
+              {t("proofGalleries.clientMessageLocked")}
+            </p>
+          </div>
+        )}
       </section>
 
       {order ? (
@@ -900,5 +921,17 @@ export default function ProofGalleryDetailClient({
         </button>
       </section>
     </div>
+  );
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} fill="currentColor" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        d="M5 8V6a5 5 0 0 1 10 0v2h.5A1.5 1.5 0 0 1 17 9.5v7A1.5 1.5 0 0 1 15.5 18h-11A1.5 1.5 0 0 1 3 16.5v-7A1.5 1.5 0 0 1 4.5 8H5Zm2 0h6V6a3 3 0 0 0-6 0v2Z"
+        clipRule="evenodd"
+      />
+    </svg>
   );
 }

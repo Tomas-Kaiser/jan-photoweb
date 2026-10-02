@@ -294,6 +294,7 @@
       "saveClientMessage": "Uložit zprávu",
       "clientMessageSaved": "Zpráva uložena.",
       "clientMessageSaveFailed": "Uložení zprávy se nezdařilo.",
+      "clientMessageLocked": "Lze upravovat jen dokud je náhledovka ve stavu koncept.",
       "deleteGallery": "Smazat náhledovku",
       "deleteGalleryConfirmTitle": "Smazat tuto náhledovku?",
       "deleteGalleryConfirmMessage": "Tímto smažete „{name}“ a všechny její fotky. Nelze vrátit zpět.",
