@@ -25,6 +25,7 @@ type Photo = {
 
 type Props = {
   token: string;
+  locale: string;
   baseCostCents: number;
   freePhotoCount: number;
   extraPhotoPriceCents: number;
@@ -42,6 +43,7 @@ type Filter = "all" | "selected" | "rather_yes" | "rather_no";
 
 export default function ProofSelectionClient({
   token,
+  locale,
   baseCostCents,
   freePhotoCount,
   extraPhotoPriceCents,
@@ -185,6 +187,7 @@ export default function ProofSelectionClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          locale,
           photos: photos.map((photo) => ({
             photoId: photo.id,
             selected: selections[photo.id]?.selected ?? false,

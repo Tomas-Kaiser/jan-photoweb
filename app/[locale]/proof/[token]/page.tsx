@@ -29,7 +29,7 @@ type Props = {
 };
 
 export default async function ProofGalleryPage({ params }: Props) {
-  const { token } = await params;
+  const { locale, token } = await params;
   const t = await getTranslations("proof");
 
   const galleryRows = await db
@@ -363,6 +363,7 @@ export default async function ProofGalleryPage({ params }: Props) {
 
         <ProofSelectionClient
           token={token}
+          locale={locale}
           baseCostCents={gallery.baseCostCents}
           freePhotoCount={gallery.freePhotoCount}
           extraPhotoPriceCents={gallery.extraPhotoPriceCents}
