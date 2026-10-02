@@ -54,6 +54,8 @@ export default function ProofSelectionClient({
   const router = useRouter();
   const confirm = useConfirm();
 
+  const storageKey = `proof-draft:${token}`;
+
   const [selections, setSelections] = useState<Record<string, Selection>>(() =>
     Object.fromEntries(
       photos.map((photo) => [
@@ -66,6 +68,39 @@ export default function ProofSelectionClient({
       ]),
     ),
   );
+
+  // Restores any unsaved picks/notes left in the browser from before a
+  // refresh or accidental tab close. Runs after mount (not in the lazy
+  // state initializer above) so the server-rendered markup matches what
+  // hydrates, then overlays the draft on top.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return;
+
+      const saved = JSON.parse(raw) as Record<string, Selection>;
+      setSelections((prev) => {
+        const next = { ...prev };
+        for (const photo of photos) {
+          if (saved[photo.id]) {
+            next[photo.id] = saved[photo.id];
+          }
+        }
+        return next;
+      });
+    } catch {
+      // Storage unavailable (private browsing, quota) or draft corrupted —
+      // fall back to the server-provided selections.
+    }
+  }, [photos, storageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(selections));
+    } catch {
+      // Storage unavailable — the draft just won't persist across a refresh.
+    }
+  }, [selections, storageKey]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -201,6 +236,12 @@ export default function ProofSelectionClient({
 
       if (!res.ok) {
         throw new Error(data?.error || t("submitFailed"));
+      }
+
+      try {
+        localStorage.removeItem(storageKey);
+      } catch {
+        // Storage unavailable — nothing to clean up.
       }
 
       router.refresh();
