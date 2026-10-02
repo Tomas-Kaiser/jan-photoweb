@@ -108,29 +108,9 @@ export default async function ProofGalleryPage({ params }: Props) {
             {t("thankYouMessage")}
           </Reveal>
 
-          {gallery.message ? (
-            <Reveal className="mt-6 flex items-end gap-3" delay={200}>
-              <Image
-                src="/jan-avatar.jpg"
-                alt="Jan Hájek"
-                width={40}
-                height={40}
-                className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-brand-gold/20"
-              />
-              <div className="relative max-w-md rounded-2xl rounded-bl-sm bg-white p-4 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand-gold-dark">
-                  {t("photographerMessage")}
-                </p>
-                <p className="mt-1.5 whitespace-pre-wrap text-gray-700">
-                  {gallery.message}
-                </p>
-              </div>
-            </Reveal>
-          ) : null}
-
           <Reveal
             className="mt-10 rounded-2xl bg-white p-6 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)] sm:p-7"
-            delay={240}
+            delay={200}
           >
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between">
