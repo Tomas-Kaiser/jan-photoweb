@@ -96,6 +96,19 @@ through `app/api/admin/photos/upload-url` (direct-creator-upload flow) and
 `app/utils/optimize-image-for-upload.ts` handles client-side image
 preprocessing before upload.
 
+### Proof gallery retention
+
+Once a proof order is marked paid (`proofOrders.confirmedAt` set), the
+gallery is auto-deleted 15 days later —
+[app/lib/proof-retention.ts](app/lib/proof-retention.ts) defines
+`PROOF_RETENTION_DAYS`/`getDaysUntilProofDeletion`, a daily Vercel cron
+([vercel.json](vercel.json)) hits
+[app/api/cron/delete-expired-proofs](app/api/cron/delete-expired-proofs/route.ts)
+(auth'd via `CRON_SECRET`, not the admin session) to delete expired
+galleries and their Cloudflare images, and the admin proof-gallery list and
+detail pages show a countdown once a gallery is paid. Keep the retention
+window in sync across these if it changes.
+
 ### Admin API routes (`app/api/admin/`)
 
 REST-ish route handlers for album/photo CRUD, reordering, and moving photos
@@ -108,8 +121,9 @@ locale-prefixed like pages are.
 
 `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` / `POSTGRES_URL`,
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_IMAGES_API_TOKEN`, `GMAIL_USER`,
-`GMAIL_PASS` (contact form email delivery via nodemailer). Keep these in
-`.env.local`; never commit them.
+`GMAIL_PASS` (contact form email delivery via nodemailer), `CRON_SECRET`
+(bearer token checked by `app/api/cron/delete-expired-proofs`). Keep these
+in `.env.local`; never commit them.
 
 ## Conventions
 

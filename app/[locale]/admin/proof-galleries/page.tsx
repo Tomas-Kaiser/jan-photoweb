@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
+import { getDaysUntilProofDeletion } from "@/app/lib/proof-retention";
 
 export default async function ProofGalleriesAdminPage({
   params,
@@ -32,6 +33,7 @@ export default async function ProofGalleriesAdminPage({
       createdAt: proofGalleries.createdAt,
       orderStatus: proofOrders.status,
       orderTotalCents: proofOrders.totalCents,
+      orderConfirmedAt: proofOrders.confirmedAt,
       photoCount: sql<number>`count(${proofPhotos.id})`.mapWith(Number),
     })
     .from(proofGalleries)
@@ -95,6 +97,14 @@ export default async function ProofGalleriesAdminPage({
                   </>
                 ) : null}
               </p>
+
+              {gallery.orderStatus === "paid" && gallery.orderConfirmedAt ? (
+                <p className="mt-2 text-xs font-semibold text-red-900">
+                  {t("proofGalleries.willBeDeletedIn", {
+                    days: getDaysUntilProofDeletion(gallery.orderConfirmedAt),
+                  })}
+                </p>
+              ) : null}
             </Link>
           ))}
         </div>

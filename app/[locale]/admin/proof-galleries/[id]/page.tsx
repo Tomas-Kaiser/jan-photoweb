@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
+import { getDaysUntilProofDeletion } from "@/app/lib/proof-retention";
 import ProofGalleryDetailClient from "./ProofGalleryDetailClient";
 
 type Props = {
@@ -79,6 +80,9 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
               dateStyle: "medium",
               timeStyle: "short",
             })
+          : null,
+        deletionDaysLeft: orderRows[0].confirmedAt
+          ? getDaysUntilProofDeletion(orderRows[0].confirmedAt)
           : null,
       }
     : null;

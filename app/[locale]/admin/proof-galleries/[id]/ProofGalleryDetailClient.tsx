@@ -36,6 +36,7 @@ type Order = {
   submittedAtLabel: string;
   status: "pending_payment" | "paid";
   paidAtLabel: string | null;
+  deletionDaysLeft: number | null;
 } | null;
 
 type Props = {
@@ -551,11 +552,20 @@ export default function ProofGalleryDetailClient({
           </p>
 
           {order.status === "paid" ? (
-            <p className="mt-1 text-xs font-medium text-green-800">
-              {t("proofGalleries.orderPaidAt", {
-                date: order.paidAtLabel ?? "",
-              })}
-            </p>
+            <>
+              <p className="mt-1 text-xs font-medium text-green-800">
+                {t("proofGalleries.orderPaidAt", {
+                  date: order.paidAtLabel ?? "",
+                })}
+              </p>
+              {order.deletionDaysLeft !== null ? (
+                <p className="mt-1 text-xs font-semibold text-red-900">
+                  {t("proofGalleries.willBeDeletedIn", {
+                    days: order.deletionDaysLeft,
+                  })}
+                </p>
+              ) : null}
+            </>
           ) : (
             <div className="mt-4 flex flex-col items-end">
               <div className="flex flex-wrap justify-end gap-3">

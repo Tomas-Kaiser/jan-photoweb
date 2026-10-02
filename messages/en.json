@@ -268,6 +268,7 @@
       "orderSubmittedAt": "Submitted {date}",
       "orderPendingPayment": "Awaiting payment",
       "orderPaidAt": "Paid {date}",
+      "willBeDeletedIn": "Will be deleted in {days, plural, one {# day} other {# days}}",
       "reopen": "Allow reselection",
       "reopenConfirmTitle": "Let the client reselect?",
       "reopenConfirmMessage": "This reopens the client's link so they can change their selection and submit again. Their current choices stay pre-selected. The submitted order will be replaced when they resubmit.",
