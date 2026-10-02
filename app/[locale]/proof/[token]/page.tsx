@@ -9,10 +9,7 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
-import {
-  getCloudflareImageUrl,
-  getCloudflareImageUrlCapped,
-} from "@/app/lib/cloudflare-images";
+import { getWatermarkedProofImageUrl } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
@@ -67,18 +64,16 @@ export default async function ProofGalleryPage({ params }: Props) {
 
   const order = orderRows[0];
 
-  // Rendered with the "card" variant for thumbnails and a hard-capped
-  // (max 3000x2000, never upscaled) flexible-variant resize for the
-  // expanded/lightbox view — a dedicated watermarked Cloudflare Images
-  // variant still needs to be set up (docs/photo-proofing-design.md §7)
-  // before this goes live with real clients. Deliberately never requesting
-  // "full" here even for the expanded view, per §7 — that's reserved for
-  // admin-authenticated routes post-payment.
+  // Watermarked via our own proxy (app/api/proof-image/[cloudflareId]) rather
+  // than Cloudflare's variants directly — see docs/photo-proofing-design.md
+  // §7. Deliberately never requesting "full" here even for the expanded
+  // view, per §7 — that's reserved for admin-authenticated routes
+  // post-payment.
   const photos = photoRows.map((photo) => ({
     id: photo.id,
     fileName: photo.fileName,
-    cardSrc: getCloudflareImageUrl(photo.cloudflareId, "card"),
-    detailSrc: getCloudflareImageUrlCapped(photo.cloudflareId, 3000, 2000),
+    cardSrc: getWatermarkedProofImageUrl(photo.cloudflareId, 800, 800),
+    detailSrc: getWatermarkedProofImageUrl(photo.cloudflareId, 3000, 2000),
     comment: photo.comment,
     selected: photo.selected,
     rating: photo.rating,

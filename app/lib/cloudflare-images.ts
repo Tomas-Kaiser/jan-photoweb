@@ -20,6 +20,20 @@ export function getCloudflareImageUrlCapped(
   return `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${cloudflareId}/w=${maxWidth},h=${maxHeight},fit=scale-down`;
 }
 
+// Points at our own watermarking proxy (app/api/proof-image/[cloudflareId])
+// rather than imagedelivery.net directly — Cloudflare Images' variant system
+// has no watermark/overlay option, so the watermark is composited server-side
+// with sharp. Only ever used for the client-facing, pre-submission proof
+// selection UI (see docs/photo-proofing-design.md §7); admin and
+// already-submitted views keep using the plain Cloudflare URLs above.
+export function getWatermarkedProofImageUrl(
+  cloudflareId: string,
+  maxWidth: number,
+  maxHeight: number,
+) {
+  return `/api/proof-image/${cloudflareId}?w=${maxWidth}&h=${maxHeight}`;
+}
+
 // Deletes an image from Cloudflare Images. Throws on any failure other than
 // "already gone" (404), which is treated as success since the end state —
 // no image left on Cloudflare — is the same either way.
