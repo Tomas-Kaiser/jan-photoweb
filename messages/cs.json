@@ -162,7 +162,7 @@
     "extraPriceLabel": "Každá další fotka",
     "perPhoto": "/ fotka",
     "step1": "Klepnutím na fotku ji zobrazíte v plné velikosti",
-    "step2": "Tlačítkem Vybrat označte své oblíbené",
+    "step2": "Tlačítkem Vybrat označte své oblíbené, u ostatních zvolte Spíše ano / Spíše ne, ať se později snáz rozhodnete",
     "step3": "Odešlete svůj výběr",
     "selectedCount": "{count, plural, one {# fotka vybrána} few {# fotky vybrány} other {# fotek vybráno}}",
     "freeRemainingCount": "{count, plural, one {zbývá # fotka zdarma} few {zbývají # fotky zdarma} other {zbývá # fotek zdarma}}",

@@ -162,7 +162,7 @@
     "extraPriceLabel": "Each additional photo",
     "perPhoto": "/ photo",
     "step1": "Tap a photo to view it full size",
-    "step2": "Press Select on your favourites",
+    "step2": "Press Select on your favourites, or mark the rest Rather yes / Rather no to help you decide later",
     "step3": "Submit your selection",
     "selectedCount": "{count, plural, one {# photo selected} other {# photos selected}}",
     "freeRemainingCount": "{count, plural, one {# free photo left} other {# free photos left}}",
