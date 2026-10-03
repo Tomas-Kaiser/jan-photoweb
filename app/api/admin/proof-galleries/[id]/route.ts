@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { proofGalleries, proofPhotos } from "@/app/db/schema";
+import { finalPhotos, proofGalleries, proofPhotos } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
+import { deleteR2Object } from "@/app/lib/r2-client";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -144,6 +145,27 @@ export async function DELETE(_req: Request, { params }: Params) {
         });
         return NextResponse.json(
           { error: "Failed to delete one or more photos from Cloudflare." },
+          { status: 502 },
+        );
+      }
+    }
+
+    const galleryFinalPhotos = await db
+      .select({ r2Key: finalPhotos.r2Key, previewCloudflareId: finalPhotos.previewCloudflareId })
+      .from(finalPhotos)
+      .where(eq(finalPhotos.galleryId, id));
+
+    for (const photo of galleryFinalPhotos) {
+      try {
+        await deleteR2Object(photo.r2Key);
+        await deleteCloudflareImage(photo.previewCloudflareId);
+      } catch (error) {
+        console.error("Failed to delete final photo assets:", {
+          r2Key: photo.r2Key,
+          error,
+        });
+        return NextResponse.json(
+          { error: "Failed to delete one or more final photos." },
           { status: 502 },
         );
       }

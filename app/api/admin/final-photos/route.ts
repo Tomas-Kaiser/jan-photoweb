@@ -107,6 +107,19 @@ export async function DELETE(req: Request) {
 
   const photo = rows[0];
 
+  const galleryRows = await db
+    .select({ finalsPublishedAt: proofGalleries.finalsPublishedAt })
+    .from(proofGalleries)
+    .where(eq(proofGalleries.id, photo.galleryId))
+    .limit(1);
+
+  if (galleryRows[0]?.finalsPublishedAt) {
+    return NextResponse.json(
+      { error: "Final photos can't be deleted after publishing." },
+      { status: 409 },
+    );
+  }
+
   try {
     await deleteR2Object(photo.r2Key);
     await deleteCloudflareImage(photo.previewCloudflareId);

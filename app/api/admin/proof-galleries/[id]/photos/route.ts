@@ -48,6 +48,23 @@ export async function POST(req: Request, { params }: Params) {
       );
     }
 
+    const submittedOrder = await db
+      .select({ id: proofOrders.id, status: proofOrders.status })
+      .from(proofOrders)
+      .where(eq(proofOrders.galleryId, galleryId))
+      .limit(1);
+
+    // Blocked only while the client's submission is awaiting payment — their
+    // decision was based on the current photo set. Once paid, the order
+    // (total, paid-at) is a closed record that adding more photos doesn't
+    // touch, so it's fine to keep extending the gallery's photo library.
+    if (submittedOrder.length && submittedOrder[0].status === "pending_payment") {
+      return NextResponse.json(
+        { error: "Photos can't be added while awaiting payment." },
+        { status: 409 },
+      );
+    }
+
     const [inserted] = await db
       .insert(proofPhotos)
       .values({

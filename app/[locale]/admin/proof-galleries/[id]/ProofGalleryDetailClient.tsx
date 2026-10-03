@@ -829,22 +829,29 @@ export default function ProofGalleryDetailClient({
             {t("proofGalleries.photosTitle")}
           </h2>
 
-          <label
-            htmlFor="addPhotos"
-            className="inline-flex cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
-          >
-            {t("form.chooseAdditionalPhotos")}
-            <input
-              ref={photosInputRef}
-              id="addPhotos"
-              type="file"
-              accept="image/*"
-              multiple
-              disabled={uploading}
-              onChange={handleAddPhotos}
-              className="sr-only"
-            />
-          </label>
+          {order && order.status === "pending_payment" ? (
+            <p className="flex items-center gap-1.5 text-xs text-gray-500">
+              <LockIcon className="h-3.5 w-3.5 shrink-0" />
+              {t("proofGalleries.photosLocked")}
+            </p>
+          ) : (
+            <label
+              htmlFor="addPhotos"
+              className="inline-flex cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
+            >
+              {t("form.chooseAdditionalPhotos")}
+              <input
+                ref={photosInputRef}
+                id="addPhotos"
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={uploading}
+                onChange={handleAddPhotos}
+                className="sr-only"
+              />
+            </label>
+          )}
         </div>
 
         {uploadStatus ? (

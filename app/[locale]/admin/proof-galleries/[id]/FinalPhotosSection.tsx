@@ -141,9 +141,8 @@ export default function FinalPhotosSection({
     };
   }
 
-  async function handleUpload(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!files.length) return;
+  async function handleUpload(filesToUpload: File[]) {
+    if (!filesToUpload.length) return;
 
     setSaving(true);
     setError(null);
@@ -154,7 +153,7 @@ export default function FinalPhotosSection({
     const succeeded: FinalPhoto[] = [];
     const failed: UploadFailure[] = [];
 
-    for (const [index, file] of files.entries()) {
+    for (const [index, file] of filesToUpload.entries()) {
       setCurrentIndex(index);
       setCurrentFileName(file.name);
 
@@ -190,7 +189,7 @@ export default function FinalPhotosSection({
       succeeded.length
         ? t("form.photosPartialFailure", {
             succeeded: succeeded.length,
-            total: files.length,
+            total: filesToUpload.length,
             failed: failed.length,
           })
         : t("form.photosAllFailed", { failed: failed.length }),
@@ -267,28 +266,28 @@ export default function FinalPhotosSection({
           {t("finalDelivery.sectionTitle")}
         </h2>
 
-        {!isPublished ? (
-          <label
-            htmlFor="finalPhotos"
-            className="inline-flex cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
-          >
-            {t("finalDelivery.choosePhotos")}
-            <input
-              ref={inputRef}
-              id="finalPhotos"
-              type="file"
-              accept="image/*"
-              multiple
-              disabled={saving}
-              onChange={(e) => {
-                setFiles(Array.from(e.target.files ?? []));
-                setError(null);
-                setFailures([]);
-              }}
-              className="sr-only"
-            />
-          </label>
-        ) : null}
+        <label
+          htmlFor="finalPhotos"
+          className="inline-flex cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
+        >
+          {t("finalDelivery.choosePhotos")}
+          <input
+            ref={inputRef}
+            id="finalPhotos"
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={saving}
+            onChange={(e) => {
+              const selected = Array.from(e.target.files ?? []);
+              setError(null);
+              setFailures([]);
+              setFiles(selected);
+              if (selected.length) handleUpload(selected);
+            }}
+            className="sr-only"
+          />
+        </label>
       </div>
 
       <p className="mb-4 text-sm text-gray-500">{t("finalDelivery.uploadHint")}</p>
@@ -301,26 +300,25 @@ export default function FinalPhotosSection({
               {t("proofGalleries.willBeDeletedIn", { days: deletionDaysLeft })}
             </span>
           ) : null}
+          <span className="ml-2 text-green-700">
+            {t("finalDelivery.addMoreHint")}
+          </span>
         </p>
       ) : null}
 
-      {!isPublished && files.length > 0 ? (
-        <form onSubmit={handleUpload} className="mb-4 flex items-center gap-3">
-          <span className="text-sm text-gray-600">
-            {t("form.filesSelected", { count: files.length })}
-          </span>
+      {failures.length > 0 ? (
+        <div className="mb-4 flex items-center gap-3">
           <button
-            type="submit"
+            type="button"
+            onClick={() => handleUpload(files)}
             disabled={saving}
             className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
           >
             {saving
               ? t("common.uploading")
-              : failures.length > 0
-                ? t("form.retryFailedPhotos", { count: failures.length })
-                : t("common.add")}
+              : t("form.retryFailedPhotos", { count: failures.length })}
           </button>
-        </form>
+        </div>
       ) : null}
 
       {statusText ? (
