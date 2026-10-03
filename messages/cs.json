@@ -321,6 +321,7 @@
       "statusPaid": "Zaplaceno",
       "statusClosed": "Uzavřeno",
       "sectionPublished": "Zveřejněno",
+      "noneInSection": "Zatím žádné.",
       "photoCount": "{count, plural, one {# fotka} few {# fotky} other {# fotek}}"
     },
     "highlights": {

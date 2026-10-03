@@ -96,25 +96,6 @@ through `app/api/admin/photos/upload-url` (direct-creator-upload flow) and
 `app/utils/optimize-image-for-upload.ts` handles client-side image
 preprocessing before upload.
 
-### Proof gallery retention
-
-Once a proof order is marked paid (`proofOrders.confirmedAt` set), the
-gallery is auto-deleted 15 days later —
-[app/lib/proof-retention.ts](app/lib/proof-retention.ts) defines
-`PROOF_RETENTION_DAYS`/`getDaysUntilProofDeletion`, a daily Vercel cron
-([vercel.json](vercel.json)) hits
-[app/api/cron/delete-expired-proofs](app/api/cron/delete-expired-proofs/route.ts)
-(auth'd via `CRON_SECRET`, not the admin session) to delete expired
-galleries and their Cloudflare images, and the admin proof-gallery list and
-detail pages show a countdown once a gallery is paid. Keep the retention
-window in sync across these if it changes.
-
-This cron skips any gallery whose final photos have been published —
-ownership of that gallery's deletion passes entirely to the 180-day finals
-window instead (see Final photo delivery below), so each gallery has
-exactly one deletion countdown, never two. If either retention window
-changes, re-check this interaction.
-
 ### Final photo delivery
 
 After a proof order is paid, the photographer uploads full-quality edited
@@ -135,16 +116,24 @@ by a standalone Cloudflare Worker ([workers/delivery-zip](workers/delivery-zip))
 that has its own R2 bucket binding — kept out of the Next.js app to avoid
 Vercel's function duration/memory limits for bulk zips of large files; it's
 deployed independently via `wrangler deploy`, not part of `pnpm build`.
-Retention mirrors the proof-gallery cron in shape:
+**Retention**: a proof gallery is never auto-deleted while paid but
+undelivered — the photographer may need an unbounded amount of time to
+edit and upload finals, so there's no deletion countdown at all until
+finals are actually published. Once published,
 [app/lib/final-delivery-retention.ts](app/lib/final-delivery-retention.ts)
-(180 days from `finalsPublishedAt`) and a second daily cron,
-[app/api/cron/delete-expired-final-deliveries](app/api/cron/delete-expired-final-deliveries/route.ts).
-Once finals are published, this cron owns the gallery's entire lifecycle —
-it deletes the final photos' R2/Cloudflare assets, the proof photos'
+(`FINAL_DELIVERY_RETENTION_DAYS` = 180 days from `finalsPublishedAt`) and a
+daily Vercel cron ([vercel.json](vercel.json) →
+[app/api/cron/delete-expired-final-deliveries](app/api/cron/delete-expired-final-deliveries/route.ts),
+auth'd via `CRON_SECRET`) take over the gallery's entire lifecycle — it
+deletes the final photos' R2/Cloudflare assets, the proof photos'
 Cloudflare images, and then the `proofGalleries` row itself (cascading
-`proofPhotos`/`proofOrders`/`finalPhotos`). Admin UI shows a single
-deletion countdown per gallery: the 15-day one before finals are published,
-the 180-day one after — never both at once.
+`proofPhotos`/`proofOrders`/`finalPhotos`). This is the *only* automatic
+deletion path in the app — manual deletion via the admin UI's "Delete
+gallery" button (which also cleans up R2 + both Cloudflare Images sets) is
+always available regardless of state. There used to be a separate 15-day
+post-payment cron for proof-only galleries; it was retired because it
+could delete a paid gallery's proof photos before the photographer had a
+chance to deliver finals through this same system.
 
 ### Admin API routes (`app/api/admin/`)
 
@@ -159,7 +148,7 @@ locale-prefixed like pages are.
 `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` / `POSTGRES_URL`,
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_IMAGES_API_TOKEN`, `GMAIL_USER`,
 `GMAIL_PASS` (contact form email delivery via nodemailer), `CRON_SECRET`
-(bearer token checked by `app/api/cron/delete-expired-proofs` and
+(bearer token checked by
 `app/api/cron/delete-expired-final-deliveries`). Final photo delivery
 (`app/lib/r2-client.ts`) additionally needs `R2_ACCOUNT_ID`,
 `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_ENDPOINT`

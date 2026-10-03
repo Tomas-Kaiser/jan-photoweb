@@ -6,7 +6,6 @@ import { auth } from "@/auth";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
-import { getDaysUntilProofDeletion } from "@/app/lib/proof-retention";
 import { getDaysUntilFinalDeliveryDeletion } from "@/app/lib/final-delivery-retention";
 
 type Gallery = {
@@ -17,7 +16,6 @@ type Gallery = {
   createdAt: Date;
   orderStatus: "pending_payment" | "paid" | null;
   orderTotalCents: number | null;
-  orderConfirmedAt: Date | null;
   finalsPublishedAt: Date | null;
   photoCount: number;
 };
@@ -47,7 +45,6 @@ export default async function ProofGalleriesAdminPage({
       createdAt: proofGalleries.createdAt,
       orderStatus: proofOrders.status,
       orderTotalCents: proofOrders.totalCents,
-      orderConfirmedAt: proofOrders.confirmedAt,
       finalsPublishedAt: proofGalleries.finalsPublishedAt,
       photoCount: sql<number>`count(${proofPhotos.id})`.mapWith(Number),
     })
@@ -99,20 +96,22 @@ export default async function ProofGalleriesAdminPage({
         <p className="text-gray-600">{t("proofGalleries.noGalleriesYet")}</p>
       ) : (
         <div className="space-y-10">
-          {sections.map((section) =>
-            section.items.length ? (
-              <section key={section.key}>
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
-                  {section.title} ({section.items.length})
-                </h2>
+          {sections.map((section) => (
+            <section key={section.key}>
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+                {section.title} ({section.items.length})
+              </h2>
+              {section.items.length ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {section.items.map((gallery) => (
                     <GalleryCard key={gallery.id} locale={locale} gallery={gallery} t={t} />
                   ))}
                 </div>
-              </section>
-            ) : null,
-          )}
+              ) : (
+                <p className="text-sm text-gray-400">{t("proofGalleries.noneInSection")}</p>
+              )}
+            </section>
+          ))}
         </div>
       )}
     </div>
@@ -161,16 +160,6 @@ function GalleryCard({
           </>
         ) : null}
       </p>
-
-      {gallery.orderStatus === "paid" &&
-      gallery.orderConfirmedAt &&
-      !gallery.finalsPublishedAt ? (
-        <p className="mt-2 text-xs font-semibold text-red-900">
-          {t("proofGalleries.willBeDeletedIn", {
-            days: getDaysUntilProofDeletion(gallery.orderConfirmedAt),
-          })}
-        </p>
-      ) : null}
 
       {gallery.finalsPublishedAt ? (
         <p className="mt-2 text-xs font-semibold text-green-800">

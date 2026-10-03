@@ -321,6 +321,7 @@
       "statusPaid": "Paid",
       "statusClosed": "Closed",
       "sectionPublished": "Published",
+      "noneInSection": "None yet.",
       "photoCount": "{count, plural, one {# photo} other {# photos}}"
     },
     "highlights": {

@@ -6,12 +6,15 @@ import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
 import { deleteR2Object } from "@/app/lib/r2-client";
 import { FINAL_DELIVERY_RETENTION_DAYS } from "@/app/lib/final-delivery-retention";
 
-// Once a gallery has published finals, this cron owns its entire lifecycle
-// (delete-expired-proofs skips any gallery with finalsPublishedAt set) — a
-// single 180-day countdown per gallery rather than two independent ones.
-// Deletes both the proof photos' and final photos' Cloudflare Images, the
-// final photos' R2 originals, then the proofGalleries row itself, which
-// cascades proofPhotos/proofOrders/finalPhotos.
+// This is now the only automatic deletion path for a proof gallery — a
+// gallery is never auto-deleted while paid but undelivered (finals not yet
+// published), since the photographer may still need time to edit and
+// upload them. Deletion only starts counting down once finals are
+// published, 180 days later. Deletes both the proof photos' and final
+// photos' Cloudflare Images, the final photos' R2 originals, then the
+// proofGalleries row itself, which cascades
+// proofPhotos/proofOrders/finalPhotos. (Manual deletion via the admin UI's
+// "Delete gallery" button remains available at any time regardless.)
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
