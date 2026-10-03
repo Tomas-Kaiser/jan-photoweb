@@ -7,6 +7,7 @@ import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import { getDaysUntilProofDeletion } from "@/app/lib/proof-retention";
+import { getDaysUntilFinalDeliveryDeletion } from "@/app/lib/final-delivery-retention";
 
 export default async function ProofGalleriesAdminPage({
   params,
@@ -34,6 +35,7 @@ export default async function ProofGalleriesAdminPage({
       orderStatus: proofOrders.status,
       orderTotalCents: proofOrders.totalCents,
       orderConfirmedAt: proofOrders.confirmedAt,
+      finalsPublishedAt: proofGalleries.finalsPublishedAt,
       photoCount: sql<number>`count(${proofPhotos.id})`.mapWith(Number),
     })
     .from(proofGalleries)
@@ -98,10 +100,22 @@ export default async function ProofGalleriesAdminPage({
                 ) : null}
               </p>
 
-              {gallery.orderStatus === "paid" && gallery.orderConfirmedAt ? (
+              {gallery.orderStatus === "paid" &&
+              gallery.orderConfirmedAt &&
+              !gallery.finalsPublishedAt ? (
                 <p className="mt-2 text-xs font-semibold text-red-900">
                   {t("proofGalleries.willBeDeletedIn", {
                     days: getDaysUntilProofDeletion(gallery.orderConfirmedAt),
+                  })}
+                </p>
+              ) : null}
+
+              {gallery.finalsPublishedAt ? (
+                <p className="mt-2 text-xs font-semibold text-green-800">
+                  {t("finalDelivery.publishedBadge", {
+                    days: getDaysUntilFinalDeliveryDeletion(
+                      gallery.finalsPublishedAt,
+                    ),
                   })}
                 </p>
               ) : null}

@@ -126,6 +126,7 @@ export const proofGalleries = pgTable(
         message: text("message"),
         createdAt: timestamp("created_at").defaultNow().notNull(),
         expiresAt: timestamp("expires_at"),
+        finalsPublishedAt: timestamp("finals_published_at"),
     },
     (table) => [uniqueIndex("proof_galleries_token_unique").on(table.token)]
 );
@@ -183,6 +184,33 @@ export const proofOrders = pgTable(
     ]
 );
 
+export const finalPhotos = pgTable(
+    "final_photos",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+        galleryId: uuid("gallery_id").notNull(),
+        r2Key: text("r2_key").notNull(),
+        fileName: text("file_name").notNull(),
+        sizeBytes: integer("size_bytes").notNull(),
+        previewCloudflareId: text("preview_cloudflare_id").notNull(),
+        sortOrder: integer("sort_order").default(0).notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [
+        foreignKey({
+            columns: [table.galleryId],
+            foreignColumns: [proofGalleries.id],
+            name: "final_photos_gallery_id_fkey",
+        }).onDelete("cascade"),
+
+        index("final_photos_gallery_id_idx").on(table.galleryId),
+        index("final_photos_gallery_sort_order_idx").on(
+            table.galleryId,
+            table.sortOrder
+        ),
+    ]
+);
+
 export const albumsRelations = relations(albums, ({ one, many }) => ({
     parent: one(albums, {
         fields: [albums.parentId],
@@ -221,8 +249,16 @@ export const proofGalleriesRelations = relations(
             fields: [proofGalleries.id],
             references: [proofOrders.galleryId],
         }),
+        finalPhotos: many(finalPhotos),
     })
 );
+
+export const finalPhotosRelations = relations(finalPhotos, ({ one }) => ({
+    gallery: one(proofGalleries, {
+        fields: [finalPhotos.galleryId],
+        references: [proofGalleries.id],
+    }),
+}));
 
 export const proofPhotosRelations = relations(proofPhotos, ({ one }) => ({
     gallery: one(proofGalleries, {

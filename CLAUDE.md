@@ -109,6 +109,43 @@ galleries and their Cloudflare images, and the admin proof-gallery list and
 detail pages show a countdown once a gallery is paid. Keep the retention
 window in sync across these if it changes.
 
+This cron skips any gallery whose final photos have been published —
+ownership of that gallery's deletion passes entirely to the 180-day finals
+window instead (see Final photo delivery below), so each gallery has
+exactly one deletion countdown, never two. If either retention window
+changes, re-check this interaction.
+
+### Final photo delivery
+
+After a proof order is paid, the photographer uploads full-quality edited
+finals (can exceed Cloudflare Images' 10MB hosted-upload cap) for the client
+to download, on the same `proofGalleries` row/token — no separate link.
+Each final is dual-uploaded: the untouched original goes to **Cloudflare
+R2** (S3-compatible; [app/lib/r2-client.ts](app/lib/r2-client.ts) wraps
+presigned PUT/GET/delete), while a resized preview goes through the
+existing Cloudflare Images pipeline so the client-facing viewer never
+touches the R2 original. `finalPhotos` rows are created incrementally via
+`app/api/admin/final-photos/*`; they're invisible to the client until the
+photographer explicitly publishes
+([app/api/admin/proof-galleries/[id]/publish-finals](app/api/admin/proof-galleries/[id]/publish-finals/route.ts),
+sets `proofGalleries.finalsPublishedAt`), mirroring the `confirmedAt`/mark-paid
+pattern. Client downloads (`app/api/proof/[token]/final-photos/*`) use
+short-lived R2 presigned URLs per photo, plus a "download all" zip streamed
+by a standalone Cloudflare Worker ([workers/delivery-zip](workers/delivery-zip))
+that has its own R2 bucket binding — kept out of the Next.js app to avoid
+Vercel's function duration/memory limits for bulk zips of large files; it's
+deployed independently via `wrangler deploy`, not part of `pnpm build`.
+Retention mirrors the proof-gallery cron in shape:
+[app/lib/final-delivery-retention.ts](app/lib/final-delivery-retention.ts)
+(180 days from `finalsPublishedAt`) and a second daily cron,
+[app/api/cron/delete-expired-final-deliveries](app/api/cron/delete-expired-final-deliveries/route.ts).
+Once finals are published, this cron owns the gallery's entire lifecycle —
+it deletes the final photos' R2/Cloudflare assets, the proof photos'
+Cloudflare images, and then the `proofGalleries` row itself (cascading
+`proofPhotos`/`proofOrders`/`finalPhotos`). Admin UI shows a single
+deletion countdown per gallery: the 15-day one before finals are published,
+the 180-day one after — never both at once.
+
 ### Admin API routes (`app/api/admin/`)
 
 REST-ish route handlers for album/photo CRUD, reordering, and moving photos
@@ -122,7 +159,14 @@ locale-prefixed like pages are.
 `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` / `POSTGRES_URL`,
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_IMAGES_API_TOKEN`, `GMAIL_USER`,
 `GMAIL_PASS` (contact form email delivery via nodemailer), `CRON_SECRET`
-(bearer token checked by `app/api/cron/delete-expired-proofs`). Keep these
+(bearer token checked by `app/api/cron/delete-expired-proofs` and
+`app/api/cron/delete-expired-final-deliveries`). Final photo delivery
+(`app/lib/r2-client.ts`) additionally needs `R2_ACCOUNT_ID`,
+`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_ENDPOINT`
+(Cloudflare R2, S3-compatible — stores full-quality final photos),
+`FINAL_DELIVERY_ZIP_SECRET` (HMAC secret shared with the
+`workers/delivery-zip` Cloudflare Worker) and `FINAL_DELIVERY_WORKER_URL`
+(that Worker's deployed URL, used for bulk zip downloads). Keep these
 in `.env.local`; never commit them.
 
 ## Conventions

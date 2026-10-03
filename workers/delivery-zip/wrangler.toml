@@ -1,0 +1,12 @@
+name = "jan-photoweb-delivery-zip"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+[[r2_buckets]]
+binding = "FINALS_BUCKET"
+bucket_name = "jan-photoweb-finals"
+jurisdiction = "eu"
+
+# FINAL_DELIVERY_ZIP_SECRET is NOT set here — it's a secret, set via:
+#   wrangler secret put FINAL_DELIVERY_ZIP_SECRET
+# (must match the value in the Next.js app's env vars exactly).

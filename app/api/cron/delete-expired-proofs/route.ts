@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq, lte } from "drizzle-orm";
+import { and, eq, isNull, lte } from "drizzle-orm";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
@@ -15,11 +15,21 @@ export async function GET(req: Request) {
     Date.now() - PROOF_RETENTION_DAYS * 24 * 60 * 60 * 1000,
   );
 
+  // Once final photos are published, this gallery's deletion is entirely
+  // owned by the 180-day window in delete-expired-final-deliveries instead
+  // — a single countdown per gallery, rather than two independent (and
+  // confusingly different) ones. This cron only ever touches galleries
+  // where finals were never published.
   const expiredGalleries = await db
     .select({ id: proofGalleries.id, clientName: proofGalleries.clientName })
     .from(proofGalleries)
     .innerJoin(proofOrders, eq(proofOrders.galleryId, proofGalleries.id))
-    .where(lte(proofOrders.confirmedAt, cutoff));
+    .where(
+      and(
+        lte(proofOrders.confirmedAt, cutoff),
+        isNull(proofGalleries.finalsPublishedAt),
+      ),
+    );
 
   const deleted: string[] = [];
   const failed: string[] = [];

@@ -202,6 +202,15 @@
     "followFacebook": "Sledovat na Facebooku",
     "leaveReview": "Napsat recenzi na Googlu"
   },
+  "finalDelivery": {
+    "heading": "Vaše fotky jsou připravené",
+    "instructions": "Klepnutím na fotku ji zobrazíte v plné velikosti, poté ji tlačítkem Stáhnout uložíte — nebo si stáhněte vše najednou níže.",
+    "photoCount": "{count, plural, one {# fotka} few {# fotky} other {# fotek}}",
+    "downloadAllButton": "Stáhnout vše",
+    "downloadingAll": "Stahování…",
+    "downloadButton": "Stáhnout",
+    "downloadFailed": "Stahování se nezdařilo. Zkuste to prosím znovu."
+  },
   "admin": {
     "common": {
       "save": "Uložit",
@@ -443,6 +452,27 @@
       "moving": "Přesouvání...",
       "moveSelected": "Přesunout vybrané",
       "selectPhotosToMove": "Vybrat fotky k přesunu"
+    },
+    "finalDelivery": {
+      "sectionTitle": "Finální fotky",
+      "uploadHint": "Nahrajte upravené fotky v plné kvalitě ke stažení pro klienta. Ukládají se odděleně od náhledových fotek výše, bez limitu velikosti.",
+      "choosePhotos": "Vybrat finální fotky",
+      "uploadingPreview": "Nahrávání náhledu {position} z {total}: {name}",
+      "uploadingOriginal": "Nahrávání originálu {position} z {total}: {name}",
+      "savingPhoto": "Ukládání fotky {position} z {total}: {name}",
+      "createUrlFailed": "Vytvoření URL pro nahrání se nezdařilo.",
+      "uploadOriginalFailed": "Nahrání originálního souboru se nezdařilo.",
+      "savePhotoFailed": "Uložení fotky se nezdařilo.",
+      "noFinalPhotosYet": "Zatím nebyly nahrány žádné finální fotky.",
+      "deletePhotoConfirmMessage": "Smazat tuto finální fotku? Tuto akci nelze vrátit zpět.",
+      "deletePhotoFailed": "Smazání fotky se nezdařilo.",
+      "publishButton": "Zveřejnit klientovi",
+      "publishConfirmTitle": "Zveřejnit finální fotky klientovi?",
+      "publishConfirmMessage": "Klient bude moci tyto fotky okamžitě prohlížet a stahovat na svém odkazu na galerii. Pokračovat?",
+      "publishedOnLabel": "Zveřejněno {date}",
+      "needsPaidOrder": "Klient musí nejprve zaplatit za svůj výběr, než půjde finální fotky zveřejnit.",
+      "publishFailed": "Zveřejnění finálních fotek se nezdařilo.",
+      "publishedBadge": "Finální fotky zveřejněny — zbývá {days, plural, one {# den} few {# dny} other {# dní}}"
     }
   }
 }

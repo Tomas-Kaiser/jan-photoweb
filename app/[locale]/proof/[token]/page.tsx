@@ -8,11 +8,12 @@ import {
   faGoogle,
 } from "@fortawesome/free-brands-svg-icons";
 import { db } from "@/app/db";
-import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
-import { getWatermarkedProofImageUrl } from "@/app/lib/cloudflare-images";
+import { finalPhotos, proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
+import { getCloudflareImageUrl, getWatermarkedProofImageUrl } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
+import FinalsGalleryClient from "./FinalsGalleryClient";
 import Reveal from "./Reveal";
 
 const INSTAGRAM_URL =
@@ -63,6 +64,34 @@ export default async function ProofGalleryPage({ params }: Props) {
     .limit(1);
 
   const order = orderRows[0];
+
+  if (gallery.finalsPublishedAt) {
+    const finalPhotoRows = await db
+      .select()
+      .from(finalPhotos)
+      .where(eq(finalPhotos.galleryId, gallery.id))
+      .orderBy(asc(finalPhotos.sortOrder), asc(finalPhotos.createdAt));
+
+    const finals = finalPhotoRows.map((photo) => ({
+      id: photo.id,
+      fileName: photo.fileName,
+      cardSrc: getCloudflareImageUrl(photo.previewCloudflareId, "card"),
+      detailSrc: getCloudflareImageUrl(photo.previewCloudflareId, "detail"),
+    }));
+
+    return (
+      <div className="bg-brand-cream">
+        <div className="mx-auto max-w-5xl px-6 py-14 sm:px-10 sm:py-20">
+          <noscript>
+            <style>
+              {".reveal{opacity:1!important;transform:none!important}"}
+            </style>
+          </noscript>
+          <FinalsGalleryClient token={token} photos={finals} />
+        </div>
+      </div>
+    );
+  }
 
   // Watermarked via our own proxy (app/api/proof-image/[cloudflareId]) rather
   // than Cloudflare's variants directly — see docs/photo-proofing-design.md

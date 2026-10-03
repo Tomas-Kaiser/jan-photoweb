@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
+import { finalPhotos, proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { getDaysUntilProofDeletion } from "@/app/lib/proof-retention";
 import ProofGalleryDetailClient from "./ProofGalleryDetailClient";
@@ -87,6 +87,19 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
       }
     : null;
 
+  const finalPhotoRows = await db
+    .select()
+    .from(finalPhotos)
+    .where(eq(finalPhotos.galleryId, id));
+
+  const finalsPublishedAtLabel = gallery.finalsPublishedAt
+    ? gallery.finalsPublishedAt.toLocaleString(locale, {
+        timeZone: "Europe/Prague",
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : null;
+
   const requestHeaders = await headers();
   const host = requestHeaders.get("host") ?? "";
   const protocol = host.startsWith("localhost") ? "http" : "https";
@@ -119,6 +132,9 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
         }}
         initialPhotos={photos}
         order={order}
+        initialFinalPhotos={finalPhotoRows}
+        finalsPublishedAt={gallery.finalsPublishedAt?.toISOString() ?? null}
+        finalsPublishedAtLabel={finalsPublishedAtLabel}
       />
     </div>
   );

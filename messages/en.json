@@ -202,6 +202,15 @@
     "followFacebook": "Follow on Facebook",
     "leaveReview": "Leave a Google review"
   },
+  "finalDelivery": {
+    "heading": "Your photos are ready",
+    "instructions": "Tap any photo to view it full size, then use Download to save it, or grab everything at once below.",
+    "photoCount": "{count, plural, one {# photo} other {# photos}}",
+    "downloadAllButton": "Download all",
+    "downloadingAll": "Downloading…",
+    "downloadButton": "Download",
+    "downloadFailed": "Download failed. Please try again."
+  },
   "admin": {
     "common": {
       "save": "Save",
@@ -443,6 +452,27 @@
       "moving": "Moving...",
       "moveSelected": "Move selected",
       "selectPhotosToMove": "Select photos to move"
+    },
+    "finalDelivery": {
+      "sectionTitle": "Final photos",
+      "uploadHint": "Upload the edited, full-quality photos for the client to download. These are stored separately from the proof photos above, with no size limit.",
+      "choosePhotos": "Choose final photos",
+      "uploadingPreview": "Uploading preview {position} of {total}: {name}",
+      "uploadingOriginal": "Uploading original {position} of {total}: {name}",
+      "savingPhoto": "Saving photo {position} of {total}: {name}",
+      "createUrlFailed": "Failed to create upload URL.",
+      "uploadOriginalFailed": "Failed to upload the original file.",
+      "savePhotoFailed": "Failed to save photo.",
+      "noFinalPhotosYet": "No final photos uploaded yet.",
+      "deletePhotoConfirmMessage": "Delete this final photo? This can't be undone.",
+      "deletePhotoFailed": "Failed to delete photo.",
+      "publishButton": "Publish to client",
+      "publishConfirmTitle": "Publish finals to the client?",
+      "publishConfirmMessage": "The client will immediately be able to view and download these photos at their gallery link. Continue?",
+      "publishedOnLabel": "Published {date}",
+      "needsPaidOrder": "The client must pay for their selection before finals can be published.",
+      "publishFailed": "Failed to publish finals.",
+      "publishedBadge": "Finals published — {days, plural, one {# day} other {# days}} left"
     }
   }
 }

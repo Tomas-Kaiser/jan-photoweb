@@ -8,6 +8,7 @@ import { useConfirm } from "@/app/components/ConfirmDialog";
 import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
+import FinalPhotosSection from "./FinalPhotosSection";
 
 type Gallery = {
   id: string;
@@ -40,12 +41,22 @@ type Order = {
   deletionDaysLeft: number | null;
 } | null;
 
+type FinalPhoto = {
+  id: string;
+  fileName: string;
+  sizeBytes: number;
+  previewCloudflareId: string;
+};
+
 type Props = {
   locale: string;
   origin: string;
   gallery: Gallery;
   initialPhotos: Photo[];
   order: Order;
+  initialFinalPhotos: FinalPhoto[];
+  finalsPublishedAt: string | null;
+  finalsPublishedAtLabel: string | null;
 };
 
 export default function ProofGalleryDetailClient({
@@ -54,6 +65,9 @@ export default function ProofGalleryDetailClient({
   gallery,
   initialPhotos,
   order,
+  initialFinalPhotos,
+  finalsPublishedAt,
+  finalsPublishedAtLabel,
 }: Props) {
   const t = useTranslations("admin");
   const router = useRouter();
@@ -579,7 +593,7 @@ export default function ProofGalleryDetailClient({
                   date: order.paidAtLabel ?? "",
                 })}
               </p>
-              {order.deletionDaysLeft !== null ? (
+              {order.deletionDaysLeft !== null && !finalsPublishedAt ? (
                 <p className="mt-1 text-xs font-semibold text-red-900">
                   {t("proofGalleries.willBeDeletedIn", {
                     days: order.deletionDaysLeft,
@@ -907,6 +921,14 @@ export default function ProofGalleryDetailClient({
           </div>
         )}
       </section>
+
+      <FinalPhotosSection
+        galleryId={gallery.id}
+        orderStatus={order?.status ?? null}
+        initialFinalPhotos={initialFinalPhotos}
+        finalsPublishedAt={finalsPublishedAt}
+        finalsPublishedAtLabel={finalsPublishedAtLabel}
+      />
 
       <section>
         <button

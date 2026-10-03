@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/delete-expired-proofs",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/delete-expired-final-deliveries",
+      "schedule": "15 3 * * *"
     }
   ]
 }

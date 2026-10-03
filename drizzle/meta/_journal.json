@@ -78,6 +78,13 @@
       "when": 1790881077914,
       "tag": "0010_lean_sleepwalker",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791045623911,
+      "tag": "0011_faithful_silvermane",
+      "breakpoints": true
     }
   ]
 }
