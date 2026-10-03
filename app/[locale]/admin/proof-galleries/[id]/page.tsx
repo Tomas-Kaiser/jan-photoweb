@@ -102,36 +102,43 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
   const origin = `${protocol}://${host}`;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <Link
-        href={`/${locale}/admin/proof-galleries`}
-        className="mb-6 inline-block text-sm text-gray-500 hover:text-gray-800"
-      >
-        &larr; {t("proofGalleries.backToList")}
-      </Link>
+    <div className="min-h-screen bg-brand-cream/30">
+      <div className="mx-auto max-w-5xl px-6 py-10">
+        <Link
+          href={`/${locale}/admin/proof-galleries`}
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand-green/70 transition hover:text-brand-green"
+        >
+          &larr; {t("proofGalleries.backToList")}
+        </Link>
 
-      <h1 className="mb-6 text-3xl font-bold">{gallery.clientName}</h1>
+        <p className="text-xs font-semibold uppercase tracking-widest text-brand-gold-dark">
+          {t("proofGalleries.detailEyebrow")}
+        </p>
+        <h1 className="mb-8 mt-1 font-display text-4xl font-semibold text-brand-green">
+          {gallery.clientName}
+        </h1>
 
-      <ProofGalleryDetailClient
-        locale={locale}
-        origin={origin}
-        gallery={{
-          id: gallery.id,
-          token: gallery.token,
-          clientName: gallery.clientName,
-          baseCostCents: gallery.baseCostCents,
-          freePhotoCount: gallery.freePhotoCount,
-          extraPhotoPriceCents: gallery.extraPhotoPriceCents,
-          currency: gallery.currency,
-          message: gallery.message,
-          status: gallery.status,
-        }}
-        initialPhotos={photos}
-        order={order}
-        initialFinalPhotos={finalPhotoRows}
-        finalsPublishedAt={gallery.finalsPublishedAt?.toISOString() ?? null}
-        finalsPublishedAtLabel={finalsPublishedAtLabel}
-      />
+        <ProofGalleryDetailClient
+          locale={locale}
+          origin={origin}
+          gallery={{
+            id: gallery.id,
+            token: gallery.token,
+            clientName: gallery.clientName,
+            baseCostCents: gallery.baseCostCents,
+            freePhotoCount: gallery.freePhotoCount,
+            extraPhotoPriceCents: gallery.extraPhotoPriceCents,
+            currency: gallery.currency,
+            message: gallery.message,
+            status: gallery.status,
+          }}
+          initialPhotos={photos}
+          order={order}
+          initialFinalPhotos={finalPhotoRows}
+          finalsPublishedAt={gallery.finalsPublishedAt?.toISOString() ?? null}
+          finalsPublishedAtLabel={finalsPublishedAtLabel}
+        />
+      </div>
     </div>
   );
 }

@@ -260,15 +260,15 @@ export default function FinalPhotosSection({
   const statusText = getStatusText();
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="font-display text-2xl font-semibold text-brand-green">
           {t("finalDelivery.sectionTitle")}
         </h2>
 
         <label
           htmlFor="finalPhotos"
-          className="inline-flex cursor-pointer rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-500"
+          className="inline-flex cursor-pointer rounded-full border border-brand-gold/25 px-4 py-2 text-sm font-medium text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream"
         >
           {t("finalDelivery.choosePhotos")}
           <input
@@ -293,7 +293,7 @@ export default function FinalPhotosSection({
       <p className="mb-4 text-sm text-gray-500">{t("finalDelivery.uploadHint")}</p>
 
       {isPublished ? (
-        <p className="mb-4 text-xs font-medium text-green-800">
+        <p className="mb-4 text-xs font-medium text-brand-green">
           {t("finalDelivery.publishedOnLabel", { date: finalsPublishedAtLabel ?? "" })}
           {deletionDaysLeft !== null ? (
             <span className="ml-2 font-semibold text-red-900">
@@ -312,7 +312,7 @@ export default function FinalPhotosSection({
             type="button"
             onClick={() => handleUpload(files)}
             disabled={saving}
-            className="inline-flex rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+            className="inline-flex rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving
               ? t("common.uploading")
@@ -349,7 +349,7 @@ export default function FinalPhotosSection({
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {photos.map((photo) => (
             <div key={photo.id} className="group relative">
-              <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+              <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md">
                 <Image
                   src={getCloudflareImageUrl(photo.previewCloudflareId, "card")}
                   alt={photo.fileName}
@@ -385,7 +385,7 @@ export default function FinalPhotosSection({
             type="button"
             onClick={handlePublish}
             disabled={publishing || photos.length === 0 || orderStatus !== "paid"}
-            className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {publishing ? t("common.saving") : t("finalDelivery.publishButton")}
           </button>

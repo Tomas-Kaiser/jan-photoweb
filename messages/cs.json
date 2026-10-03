@@ -256,6 +256,7 @@
     },
     "proofGalleries": {
       "pageTitle": "Náhledovky",
+      "detailEyebrow": "Náhledovka",
       "newGallery": "Nová náhledovka",
       "noGalleriesYet": "Zatím žádné náhledovky — vytvořte první výše.",
       "backToList": "Zpět na náhledovky",
