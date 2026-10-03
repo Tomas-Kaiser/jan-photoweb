@@ -19,7 +19,7 @@ type FinalPhoto = {
 
 type Props = {
   galleryId: string;
-  orderStatus: "pending_payment" | "paid" | null;
+  orderStatus: "pending_payment" | "paid";
   initialFinalPhotos: FinalPhoto[];
   finalsPublishedAtLabel: string | null;
   finalsPublishedAt: string | null;

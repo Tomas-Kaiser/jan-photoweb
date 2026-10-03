@@ -320,6 +320,7 @@
       "statusSubmitted": "Submitted",
       "statusPaid": "Paid",
       "statusClosed": "Closed",
+      "sectionPublished": "Published",
       "photoCount": "{count, plural, one {# photo} other {# photos}}"
     },
     "highlights": {
@@ -456,6 +457,7 @@
     },
     "finalDelivery": {
       "sectionTitle": "Final photos",
+      "lockedUntilSubmitted": "This will open once the client submits their photo selection.",
       "uploadHint": "Upload the edited, full-quality photos for the client to download. These are stored separately from the proof photos above, with no size limit.",
       "choosePhotos": "Choose final photos",
       "uploadingPreview": "Uploading preview {position} of {total}: {name}",

@@ -929,13 +929,25 @@ export default function ProofGalleryDetailClient({
         )}
       </section>
 
-      <FinalPhotosSection
-        galleryId={gallery.id}
-        orderStatus={order?.status ?? null}
-        initialFinalPhotos={initialFinalPhotos}
-        finalsPublishedAt={finalsPublishedAt}
-        finalsPublishedAtLabel={finalsPublishedAtLabel}
-      />
+      {order ? (
+        <FinalPhotosSection
+          galleryId={gallery.id}
+          orderStatus={order.status}
+          initialFinalPhotos={initialFinalPhotos}
+          finalsPublishedAt={finalsPublishedAt}
+          finalsPublishedAtLabel={finalsPublishedAtLabel}
+        />
+      ) : (
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-2 text-xl font-semibold text-gray-900">
+            {t("finalDelivery.sectionTitle")}
+          </h2>
+          <p className="flex items-center gap-1.5 text-sm text-gray-500">
+            <LockIcon className="h-4 w-4 shrink-0" />
+            {t("finalDelivery.lockedUntilSubmitted")}
+          </p>
+        </section>
+      )}
 
       <section>
         <button
