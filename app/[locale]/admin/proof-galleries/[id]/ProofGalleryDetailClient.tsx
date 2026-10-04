@@ -105,6 +105,7 @@ export default function ProofGalleryDetailClient({
   );
 
   const [photos, setPhotos] = useState(initialPhotos);
+  const [photosExpanded, setPhotosExpanded] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -822,9 +823,31 @@ export default function ProofGalleryDetailClient({
 
       <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
         <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="font-display text-2xl font-semibold text-brand-green">
-            {t("proofGalleries.photosTitle")}
-          </h2>
+          <button
+            type="button"
+            onClick={() => setPhotosExpanded((expanded) => !expanded)}
+            aria-expanded={photosExpanded}
+            className="flex items-center gap-2 text-left"
+          >
+            <h2 className="font-display text-2xl font-semibold text-brand-green">
+              {t("proofGalleries.photosTitle")} ({photos.length})
+            </h2>
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              className={`h-4 w-4 shrink-0 text-brand-green/60 transition-transform duration-200 ${
+                photosExpanded ? "rotate-180" : ""
+              }`}
+            >
+              <path
+                d="M5 7.5l5 5 5-5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
 
           {order && order.status === "pending_payment" ? (
             <p className="flex items-center gap-1.5 text-xs text-gray-500">
@@ -851,79 +874,83 @@ export default function ProofGalleryDetailClient({
           )}
         </div>
 
-        {uploadStatus ? (
-          <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-700">
-            {uploadStatus}
-          </p>
-        ) : null}
+        {photosExpanded ? (
+          <>
+          {uploadStatus ? (
+            <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-700">
+              {uploadStatus}
+            </p>
+          ) : null}
 
-        {uploadError ? (
-          <p className="mb-4 whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
-            {uploadError}
-          </p>
-        ) : null}
+          {uploadError ? (
+            <p className="mb-4 whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+              {uploadError}
+            </p>
+          ) : null}
 
-        {photos.length === 0 ? (
-          <p className="text-sm text-gray-600">
-            {t("proofGalleries.noPhotosYet")}
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {photos.map((photo) => (
-              <div key={photo.id} className="group relative">
-                <div
-                  className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-4 transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md ${
-                    photo.selected ? "ring-brand-green" : "ring-transparent"
-                  }`}
-                >
-                  <Image
-                    src={photo.cardSrc}
-                    alt={photo.fileName}
-                    fill
-                    sizes="200px"
-                    className="object-cover"
-                  />
-
-                  {photo.selected ? (
-                    <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs font-bold text-white">
-                      ✓
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-1 truncate text-xs text-gray-500">
-                  {photo.fileName}
-                </p>
-                {!photo.selected && photo.rating ? (
-                  <p
-                    className={`mt-0.5 text-xs font-medium ${
-                      photo.rating === "rather_yes"
-                        ? "text-brand-gold-dark"
-                        : "text-gray-500"
+          {photos.length === 0 ? (
+            <p className="text-sm text-gray-600">
+              {t("proofGalleries.noPhotosYet")}
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              {photos.map((photo) => (
+                <div key={photo.id} className="group relative">
+                  <div
+                    className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-4 transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md ${
+                      photo.selected ? "ring-brand-green" : "ring-transparent"
                     }`}
                   >
-                    {photo.rating === "rather_yes"
-                      ? t("proofGalleries.ratingRatherYes")
-                      : t("proofGalleries.ratingRatherNo")}
+                    <Image
+                      src={photo.cardSrc}
+                      alt={photo.fileName}
+                      fill
+                      sizes="200px"
+                      className="object-cover"
+                    />
+
+                    {photo.selected ? (
+                      <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs font-bold text-white">
+                        ✓
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-1 truncate text-xs text-gray-500">
+                    {photo.fileName}
                   </p>
-                ) : null}
-                {photo.comment ? (
-                  <p className="mt-0.5 text-xs text-gray-700">
-                    {photo.comment}
-                  </p>
-                ) : null}
-                {order ? null : (
-                  <button
-                    type="button"
-                    onClick={() => handleDeletePhoto(photo)}
-                    className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100 pointer-coarse:opacity-100"
-                  >
-                    {t("common.delete")}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                  {!photo.selected && photo.rating ? (
+                    <p
+                      className={`mt-0.5 text-xs font-medium ${
+                        photo.rating === "rather_yes"
+                          ? "text-brand-gold-dark"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {photo.rating === "rather_yes"
+                        ? t("proofGalleries.ratingRatherYes")
+                        : t("proofGalleries.ratingRatherNo")}
+                    </p>
+                  ) : null}
+                  {photo.comment ? (
+                    <p className="mt-0.5 text-xs text-gray-700">
+                      {photo.comment}
+                    </p>
+                  ) : null}
+                  {order ? null : (
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePhoto(photo)}
+                      className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100 pointer-coarse:opacity-100"
+                    >
+                      {t("common.delete")}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          </>
+        ) : null}
       </section>
 
       <FinalsPageContentSection
