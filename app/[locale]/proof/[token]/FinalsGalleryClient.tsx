@@ -135,6 +135,16 @@ export default function FinalsGalleryClient({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
 
+            <div className="absolute right-4 top-4 h-12 w-12 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] sm:right-6 sm:top-6 sm:h-14 sm:w-14">
+              <Image
+                src="/logo-mark-dark.png"
+                alt="Jan Hájek Photography"
+                fill
+                sizes="56px"
+                className="object-contain"
+              />
+            </div>
+
             <div className="absolute inset-x-0 bottom-0 px-6 pb-16 sm:px-10 sm:pb-20">
               <h1 className="font-display text-5xl font-semibold text-white sm:text-7xl">
                 {clientName}
