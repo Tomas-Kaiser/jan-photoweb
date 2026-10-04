@@ -45,6 +45,8 @@ type FinalPhoto = {
   fileName: string;
   sizeBytes: number;
   previewCloudflareId: string;
+  width: number | null;
+  height: number | null;
 };
 
 type Props = {

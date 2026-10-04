@@ -43,6 +43,14 @@ export async function POST(req: Request) {
   const fileName = String(body?.fileName || "").trim();
   const previewCloudflareId = String(body?.previewCloudflareId || "").trim();
   const sizeBytes = Number(body?.sizeBytes);
+  const width =
+    body?.width != null && Number.isFinite(Number(body.width))
+      ? Math.round(Number(body.width))
+      : null;
+  const height =
+    body?.height != null && Number.isFinite(Number(body.height))
+      ? Math.round(Number(body.height))
+      : null;
 
   if (
     !galleryId ||
@@ -73,6 +81,8 @@ export async function POST(req: Request) {
       fileName,
       sizeBytes: Math.round(sizeBytes),
       previewCloudflareId,
+      width,
+      height,
       sortOrder: -1,
     })
     .returning({ id: finalPhotos.id });

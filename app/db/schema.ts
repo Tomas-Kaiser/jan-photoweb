@@ -193,6 +193,12 @@ export const finalPhotos = pgTable(
         fileName: text("file_name").notNull(),
         sizeBytes: integer("size_bytes").notNull(),
         previewCloudflareId: text("preview_cloudflare_id").notNull(),
+        // Original pixel dimensions, captured client-side at upload time —
+        // used to compute the justified-gallery layout (aspect ratio per
+        // photo), not available from Cloudflare Images itself. Nullable so
+        // finals uploaded before this existed don't need a backfill.
+        width: integer("width"),
+        height: integer("height"),
         sortOrder: integer("sort_order").default(0).notNull(),
         createdAt: timestamp("created_at").defaultNow().notNull(),
     },

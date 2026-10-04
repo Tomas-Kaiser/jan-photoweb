@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "../i18n/routing";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { ProofChromeContext } from "./ProofChromeContext";
 
 type Props = {
   isAdmin: boolean;
@@ -71,14 +72,22 @@ function ProofFooter() {
 export default function SiteChrome({ isAdmin, children }: Props) {
   const pathname = usePathname();
   const isProofPage = pathname.startsWith("/proof/");
+  const [hideProofChrome, setHideProofChrome] = useState(false);
+  const showProofChrome = isProofPage && !hideProofChrome;
 
   return (
     <div
       className={`flex min-h-screen flex-col ${isProofPage ? "bg-brand-cream" : ""}`}
     >
-      {isProofPage ? <ProofHeader /> : <NavBar isAdmin={isAdmin} />}
-      <main className="flex-1">{children}</main>
-      {isProofPage ? <ProofFooter /> : <Footer />}
+      {showProofChrome ? <ProofHeader /> : null}
+      {!isProofPage ? <NavBar isAdmin={isAdmin} /> : null}
+      <main className="flex-1">
+        <ProofChromeContext.Provider value={setHideProofChrome}>
+          {children}
+        </ProofChromeContext.Provider>
+      </main>
+      {showProofChrome ? <ProofFooter /> : null}
+      {!isProofPage ? <Footer /> : null}
     </div>
   );
 }

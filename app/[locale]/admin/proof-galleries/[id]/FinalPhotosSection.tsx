@@ -15,7 +15,28 @@ type FinalPhoto = {
   fileName: string;
   sizeBytes: number;
   previewCloudflareId: string;
+  width: number | null;
+  height: number | null;
 };
+
+// Reads the original file's real pixel dimensions client-side — needed for
+// the justified-gallery layout on the client-facing finals page, and not
+// something Cloudflare Images exposes back to us.
+function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      URL.revokeObjectURL(objectUrl);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to read image dimensions"));
+    };
+    img.src = objectUrl;
+  });
+}
 
 type Props = {
   galleryId: string;
@@ -84,6 +105,8 @@ export default function FinalPhotosSection({
   }
 
   async function uploadOneFile(file: File): Promise<FinalPhoto> {
+    const dimensions = await getImageDimensions(file).catch(() => null);
+
     setStage("uploadingPreview");
     const { cloudflareId: previewCloudflareId } = await uploadPhotoToCloudflare(file);
 
@@ -125,6 +148,8 @@ export default function FinalPhotosSection({
         sizeBytes: file.size,
         r2Key,
         previewCloudflareId,
+        width: dimensions?.width ?? null,
+        height: dimensions?.height ?? null,
       }),
     });
     const saveData = await saveRes.json().catch(() => null);
@@ -138,6 +163,8 @@ export default function FinalPhotosSection({
       fileName: file.name,
       sizeBytes: file.size,
       previewCloudflareId,
+      width: dimensions?.width ?? null,
+      height: dimensions?.height ?? null,
     };
   }
 
