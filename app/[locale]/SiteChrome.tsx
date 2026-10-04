@@ -72,6 +72,7 @@ function ProofFooter() {
 export default function SiteChrome({ isAdmin, children }: Props) {
   const pathname = usePathname();
   const isProofPage = pathname.startsWith("/proof/");
+  const isAdminPage = pathname.startsWith("/admin");
   const [hideProofChrome, setHideProofChrome] = useState(false);
   const showProofChrome = isProofPage && !hideProofChrome;
 
@@ -87,7 +88,7 @@ export default function SiteChrome({ isAdmin, children }: Props) {
         </ProofChromeContext.Provider>
       </main>
       {showProofChrome ? <ProofFooter /> : null}
-      {!isProofPage ? <Footer /> : null}
+      {!isProofPage && !isAdminPage ? <Footer /> : null}
     </div>
   );
 }
