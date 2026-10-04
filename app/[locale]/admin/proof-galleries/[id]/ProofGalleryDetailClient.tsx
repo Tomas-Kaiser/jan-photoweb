@@ -9,6 +9,7 @@ import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare"
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import FinalPhotosSection from "./FinalPhotosSection";
+import FinalsPageContentSection from "./FinalsPageContentSection";
 
 type Gallery = {
   id: string;
@@ -58,6 +59,8 @@ type Props = {
   initialFinalPhotos: FinalPhoto[];
   finalsPublishedAt: string | null;
   finalsPublishedAtLabel: string | null;
+  initialEventDate: string;
+  initialFinalsMessage: string;
 };
 
 export default function ProofGalleryDetailClient({
@@ -69,6 +72,8 @@ export default function ProofGalleryDetailClient({
   initialFinalPhotos,
   finalsPublishedAt,
   finalsPublishedAtLabel,
+  initialEventDate,
+  initialFinalsMessage,
 }: Props) {
   const t = useTranslations("admin");
   const router = useRouter();
@@ -920,6 +925,12 @@ export default function ProofGalleryDetailClient({
           </div>
         )}
       </section>
+
+      <FinalsPageContentSection
+        galleryId={gallery.id}
+        initialEventDate={initialEventDate}
+        initialFinalsMessage={initialFinalsMessage}
+      />
 
       {order ? (
         <FinalPhotosSection

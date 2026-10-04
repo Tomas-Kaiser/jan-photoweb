@@ -25,14 +25,16 @@ type Photo = {
 type Props = {
   token: string;
   clientName: string;
-  message: string | null;
+  eventDateLabel: string | null;
+  finalsMessage: string | null;
   photos: Photo[];
 };
 
 export default function FinalsGalleryClient({
   token,
   clientName,
-  message,
+  eventDateLabel,
+  finalsMessage,
   photos,
 }: Props) {
   const t = useTranslations("finalDelivery");
@@ -134,12 +136,12 @@ export default function FinalsGalleryClient({
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
 
             <div className="absolute inset-x-0 bottom-0 px-6 pb-16 sm:px-10 sm:pb-20">
-              <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
+              <h1 className="font-display text-5xl font-semibold text-white sm:text-7xl">
                 {clientName}
-              </p>
-              <h1 className="mt-3 font-display text-4xl font-semibold text-white sm:text-6xl">
-                {t("heading")}
               </h1>
+              <p className="mt-3 text-base font-medium uppercase tracking-widest text-white/80 sm:text-lg">
+                {eventDateLabel ?? t("heading")}
+              </p>
             </div>
 
             <div className="absolute inset-x-0 bottom-6 flex justify-center motion-safe:animate-bounce">
@@ -189,34 +191,27 @@ export default function FinalsGalleryClient({
             </style>
           </noscript>
 
-          <Reveal as="header" className="max-w-2xl">
-            <h2 className="font-display text-3xl font-semibold text-brand-green sm:text-4xl">
-              {t("heading")}
+          <Reveal as="header" className="mx-auto max-w-2xl text-center">
+            <h2 className="font-display text-4xl font-semibold text-brand-green sm:text-5xl">
+              {clientName}
             </h2>
-            <div className="mt-5 h-px w-20 bg-brand-gold" />
-            <p className="mt-5 text-lg leading-8 text-gray-600">{t("instructions")}</p>
+            {eventDateLabel ? (
+              <p className="mt-2 text-lg text-brand-gold-dark">{eventDateLabel}</p>
+            ) : null}
+            <div className="mx-auto mt-6 h-px w-20 bg-brand-gold" />
+            {finalsMessage ? (
+              <p className="mx-auto mt-6 max-w-xl whitespace-pre-wrap text-lg leading-8 text-gray-600">
+                {finalsMessage}
+              </p>
+            ) : null}
           </Reveal>
 
-          {message ? (
-            <Reveal className="mt-8 flex items-end gap-3" delay={60}>
-              <Image
-                src="/jan-avatar.jpg"
-                alt="Jan Hájek"
-                width={40}
-                height={40}
-                className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-brand-gold/20"
-              />
-              <div className="relative max-w-md rounded-2xl rounded-bl-sm bg-white p-4 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
-                <p className="whitespace-pre-wrap text-gray-700">{message}</p>
-              </div>
-            </Reveal>
-          ) : null}
-
           <Reveal
-            className="mt-10 text-sm font-medium text-brand-green/70"
+            className="mt-10 flex flex-wrap items-center justify-between gap-2 text-sm font-medium text-brand-green/70"
             delay={100}
           >
-            {t("photoCount", { count: photos.length })}
+            <span>{t("photoCount", { count: photos.length })}</span>
+            <span className="text-gray-500">{t("instructions")}</span>
           </Reveal>
 
           <div className="mt-6">

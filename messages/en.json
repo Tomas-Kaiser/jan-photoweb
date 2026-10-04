@@ -478,7 +478,15 @@
       "addMoreHint": "· you can still add more — new photos appear for the client right away",
       "needsPaidOrder": "The client must pay for their selection before finals can be published.",
       "publishFailed": "Failed to publish finals.",
-      "publishedBadge": "Finals published — {days, plural, one {# day} other {# days}} left"
+      "publishedBadge": "Finals published — {days, plural, one {# day} other {# days}} left",
+      "pageContentTitle": "Finals page content",
+      "pageContentHint": "Shown to the client on the finals delivery page, above their photos. You can set these any time.",
+      "eventDateLabel": "Event date",
+      "finalsMessageLabel": "Message for the finals page",
+      "finalsMessagePlaceholder": "A note for the client, shown on their finals page (optional)",
+      "pageContentSave": "Save",
+      "pageContentSaved": "Saved.",
+      "pageContentSaveFailed": "Failed to save."
     }
   }
 }

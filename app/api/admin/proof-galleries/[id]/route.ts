@@ -33,6 +33,28 @@ export async function PATCH(req: Request, { params }: Params) {
       updates.message = message || null;
     }
 
+    if ("finalsMessage" in body) {
+      const finalsMessage =
+        typeof body.finalsMessage === "string" ? body.finalsMessage.trim() : "";
+      updates.finalsMessage = finalsMessage || null;
+    }
+
+    if ("eventDate" in body) {
+      const raw = typeof body.eventDate === "string" ? body.eventDate.trim() : "";
+      if (!raw) {
+        updates.eventDate = null;
+      } else {
+        const parsed = new Date(raw);
+        if (Number.isNaN(parsed.getTime())) {
+          return NextResponse.json(
+            { error: "Invalid event date." },
+            { status: 400 },
+          );
+        }
+        updates.eventDate = parsed;
+      }
+    }
+
     const hasSettingsFields =
       "clientName" in body ||
       "baseCostCents" in body ||

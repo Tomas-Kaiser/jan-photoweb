@@ -96,7 +96,15 @@ export default async function ProofGalleryPage({ params }: Props) {
         <FinalsGalleryClient
           token={token}
           clientName={gallery.clientName}
-          message={gallery.message}
+          eventDateLabel={
+            gallery.eventDate
+              ? gallery.eventDate.toLocaleDateString(locale, {
+                  dateStyle: "long",
+                  timeZone: "UTC",
+                })
+              : null
+          }
+          finalsMessage={gallery.finalsMessage}
           photos={finals}
         />
       </>

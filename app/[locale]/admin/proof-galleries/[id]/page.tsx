@@ -137,6 +137,8 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
           initialFinalPhotos={finalPhotoRows}
           finalsPublishedAt={gallery.finalsPublishedAt?.toISOString() ?? null}
           finalsPublishedAtLabel={finalsPublishedAtLabel}
+          initialEventDate={gallery.eventDate ? gallery.eventDate.toISOString().slice(0, 10) : ""}
+          initialFinalsMessage={gallery.finalsMessage ?? ""}
         />
       </div>
     </div>

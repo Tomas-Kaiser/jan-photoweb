@@ -6,6 +6,7 @@ import {
     integer,
     boolean,
     timestamp,
+    date,
     jsonb,
     uniqueIndex,
     index,
@@ -127,6 +128,10 @@ export const proofGalleries = pgTable(
         createdAt: timestamp("created_at").defaultNow().notNull(),
         expiresAt: timestamp("expires_at"),
         finalsPublishedAt: timestamp("finals_published_at"),
+        // Shown on the client-facing finals page (hero + title section) —
+        // settable by admin any time, independent of gallery/order status.
+        eventDate: date("event_date", { mode: "date" }),
+        finalsMessage: text("finals_message"),
     },
     (table) => [uniqueIndex("proof_galleries_token_unique").on(table.token)]
 );

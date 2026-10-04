@@ -478,7 +478,15 @@
       "addMoreHint": "· stále můžete přidávat další — nové fotky se klientovi zobrazí okamžitě",
       "needsPaidOrder": "Klient musí nejprve zaplatit za svůj výběr, než půjde finální fotky zveřejnit.",
       "publishFailed": "Zveřejnění finálních fotek se nezdařilo.",
-      "publishedBadge": "Finální fotky zveřejněny — zbývá {days, plural, one {# den} few {# dny} other {# dní}}"
+      "publishedBadge": "Finální fotky zveřejněny — zbývá {days, plural, one {# den} few {# dny} other {# dní}}",
+      "pageContentTitle": "Obsah stránky s finálními fotkami",
+      "pageContentHint": "Zobrazeno klientovi na stránce s finálními fotkami, nad jeho fotkami. Můžete nastavit kdykoliv.",
+      "eventDateLabel": "Datum akce",
+      "finalsMessageLabel": "Vzkaz pro stránku s finálními fotkami",
+      "finalsMessagePlaceholder": "Vzkaz pro klienta, zobrazený na jeho stránce s finálními fotkami (nepovinné)",
+      "pageContentSave": "Uložit",
+      "pageContentSaved": "Uloženo.",
+      "pageContentSaveFailed": "Uložení se nezdařilo."
     }
   }
 }
