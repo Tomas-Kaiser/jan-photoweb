@@ -462,7 +462,7 @@
     },
     "finalDelivery": {
       "sectionTitle": "Final photos",
-      "lockedUntilSubmitted": "This will open once the client submits their photo selection.",
+      "lockedUntilPaid": "This will open once the client has paid.",
       "uploadHint": "Upload the edited, full-quality photos for the client to download. These are stored separately from the proof photos above, with no size limit.",
       "choosePhotos": "Choose final photos",
       "uploadingPreview": "Uploading preview {position} of {total}: {name}",

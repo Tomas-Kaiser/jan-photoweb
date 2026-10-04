@@ -1007,28 +1007,27 @@ export default function ProofGalleryDetailClient({
           <div className="h-px flex-1 bg-brand-gold/25" />
         </div>
 
-        <FinalsPageContentSection
-          galleryId={gallery.id}
-          initialEventDate={initialEventDate}
-          initialFinalsMessage={initialFinalsMessage}
-        />
+        {order?.status === "paid" ? (
+          <>
+            <FinalsPageContentSection
+              galleryId={gallery.id}
+              initialEventDate={initialEventDate}
+              initialFinalsMessage={initialFinalsMessage}
+            />
 
-        {order ? (
-          <FinalPhotosSection
-            galleryId={gallery.id}
-            orderStatus={order.status}
-            initialFinalPhotos={initialFinalPhotos}
-            finalsPublishedAt={finalsPublishedAt}
-            finalsPublishedAtLabel={finalsPublishedAtLabel}
-          />
+            <FinalPhotosSection
+              galleryId={gallery.id}
+              orderStatus={order.status}
+              initialFinalPhotos={initialFinalPhotos}
+              finalsPublishedAt={finalsPublishedAt}
+              finalsPublishedAtLabel={finalsPublishedAtLabel}
+            />
+          </>
         ) : (
           <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
-            <h2 className="mb-2 font-display text-2xl font-semibold text-brand-green">
-              {t("finalDelivery.sectionTitle")}
-            </h2>
             <p className="flex items-center gap-1.5 text-sm text-gray-500">
               <LockIcon className="h-4 w-4 shrink-0" />
-              {t("finalDelivery.lockedUntilSubmitted")}
+              {t("finalDelivery.lockedUntilPaid")}
             </p>
           </section>
         )}

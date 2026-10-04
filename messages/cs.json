@@ -462,7 +462,7 @@
     },
     "finalDelivery": {
       "sectionTitle": "Finální fotky",
-      "lockedUntilSubmitted": "Toto se otevře, jakmile klient odešle svůj výběr fotek.",
+      "lockedUntilPaid": "Toto se otevře, jakmile klient zaplatí.",
       "uploadHint": "Nahrajte upravené fotky v plné kvalitě ke stažení pro klienta. Ukládají se odděleně od náhledových fotek výše, bez limitu velikosti.",
       "choosePhotos": "Vybrat finální fotky",
       "uploadingPreview": "Nahrávání náhledu {position} z {total}: {name}",
