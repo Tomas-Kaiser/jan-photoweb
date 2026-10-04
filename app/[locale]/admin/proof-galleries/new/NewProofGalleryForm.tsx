@@ -299,6 +299,21 @@ export default function NewProofGalleryForm({ locale }: Props) {
                   ? t("form.filesSelected", { count: photoFiles.length })
                   : t("form.multipleFilesHint")}
               </div>
+
+              {photoFiles.length > 0 ? (
+                <ul className="mt-3 space-y-1 text-center text-sm text-gray-600">
+                  {photoFiles.slice(0, 5).map((file) => (
+                    <li key={`${file.name}-${file.size}`} className="truncate">
+                      {file.name}
+                    </li>
+                  ))}
+                  {photoFiles.length > 5 ? (
+                    <li className="text-gray-500">
+                      {t("form.moreFiles", { count: photoFiles.length - 5 })}
+                    </li>
+                  ) : null}
+                </ul>
+              ) : null}
             </div>
           </div>
         </label>

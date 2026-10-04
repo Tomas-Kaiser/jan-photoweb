@@ -492,7 +492,7 @@ export default function ProofSelectionClient({
           return (
             <Reveal key={photo.id} delay={(index % 4) * 70}>
               <div
-                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-2 ring-offset-2 ring-offset-brand-cream transition duration-200 motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.3)] ${
+                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-4 ring-offset-2 ring-offset-brand-cream transition duration-200 motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.3)] ${
                   selection.selected
                     ? "ring-brand-green"
                     : "ring-transparent hover:ring-brand-green/30"
@@ -511,6 +511,11 @@ export default function ProofSelectionClient({
                     sizes="200px"
                     className="object-cover"
                   />
+                  {/* Tints the whole tile so "selected" reads at a glance
+                      across the grid, not just from the thin ring/badge. */}
+                  {selection.selected ? (
+                    <div className="absolute inset-0 bg-brand-green/15" />
+                  ) : null}
                 </button>
 
                 <button
@@ -519,10 +524,10 @@ export default function ProofSelectionClient({
                   onClick={() => toggleSelected(photo.id)}
                   aria-label={selection.selected ? t("selected") : t("select")}
                   aria-pressed={selection.selected}
-                  className={`proof-pop absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold shadow transition motion-safe:active:scale-95 ${
+                  className={`proof-pop absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-base font-bold shadow-md transition motion-safe:active:scale-95 ${
                     selection.selected
                       ? "bg-brand-green text-white"
-                      : "bg-white/70 text-transparent ring-1 ring-inset ring-white hover:bg-white"
+                      : "bg-white text-transparent ring-2 ring-gray-300 hover:ring-brand-green/50"
                   }`}
                 >
                   {selection.selected ? "✓" : ""}

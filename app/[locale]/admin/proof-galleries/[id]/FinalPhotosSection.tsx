@@ -391,7 +391,7 @@ export default function FinalPhotosSection({
                 <button
                   type="button"
                   onClick={() => handleDeletePhoto(photo)}
-                  className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100 pointer-coarse:opacity-100"
+                  className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white"
                 >
                   {t("common.delete")}
                 </button>
