@@ -8,8 +8,16 @@ import {
   faGoogle,
 } from "@fortawesome/free-brands-svg-icons";
 import { db } from "@/app/db";
-import { finalPhotos, proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
-import { getCloudflareImageUrl, getWatermarkedProofImageUrl } from "@/app/lib/cloudflare-images";
+import {
+  finalPhotos,
+  proofGalleries,
+  proofOrders,
+  proofPhotos,
+} from "@/app/db/schema";
+import {
+  getCloudflareImageUrl,
+  getWatermarkedProofImageUrl,
+} from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
@@ -181,7 +189,10 @@ export default async function ProofGalleryPage({ params }: Props) {
               <div className="flex justify-between">
                 <dt className="text-gray-600">{t("summaryBaseCost")}</dt>
                 <dd className="font-medium text-brand-green">
-                  {formatMoneyFromCents(gallery.baseCostCents, gallery.currency)}
+                  {formatMoneyFromCents(
+                    gallery.baseCostCents,
+                    gallery.currency,
+                  )}
                 </dd>
               </div>
               <div className="flex items-center justify-between border-t border-brand-gold/15 pt-3">

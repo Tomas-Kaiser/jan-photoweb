@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { RowsPhotoAlbum } from "react-photo-album";
+import "react-photo-album/rows.css";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
@@ -105,6 +107,35 @@ export default function ProofSelectionClient({
   const [error, setError] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+
+  // proofPhotos has no stored width/height (unlike finalPhotos), so the
+  // justified-row grid below measures each thumbnail's real aspect ratio
+  // client-side instead of a DB-backed value. The probe reuses the same
+  // cardSrc the grid displays, so the browser serves it from cache rather
+  // than double-fetching.
+  const [photoDims, setPhotoDims] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
+
+  useEffect(() => {
+    let cancelled = false;
+
+    for (const photo of photos) {
+      const img = new window.Image();
+      img.onload = () => {
+        if (cancelled) return;
+        setPhotoDims((prev) => ({
+          ...prev,
+          [photo.id]: { width: img.naturalWidth, height: img.naturalHeight },
+        }));
+      };
+      img.src = photo.cardSrc;
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [photos]);
   const summaryBarRef = useRef<HTMLDivElement>(null);
   const [showFloatingSummary, setShowFloatingSummary] = useState(false);
   const [floatingSummaryCollapsed, setFloatingSummaryCollapsed] =
@@ -141,12 +172,14 @@ export default function ProofSelectionClient({
   );
 
   const ratherYesCount = useMemo(
-    () => Object.values(selections).filter((s) => s.rating === "rather_yes").length,
+    () =>
+      Object.values(selections).filter((s) => s.rating === "rather_yes").length,
     [selections],
   );
 
   const ratherNoCount = useMemo(
-    () => Object.values(selections).filter((s) => s.rating === "rather_no").length,
+    () =>
+      Object.values(selections).filter((s) => s.rating === "rather_no").length,
     [selections],
   );
 
@@ -161,6 +194,24 @@ export default function ProofSelectionClient({
           return selection?.rating === filter;
         }),
     [photos, selections, filter],
+  );
+
+  // Falls back to a generic landscape ratio until the real one is measured,
+  // so the album can render immediately rather than waiting on every probe.
+  const albumPhotos = useMemo(
+    () =>
+      visiblePhotos.map(({ photo, index }) => {
+        const dims = photoDims[photo.id];
+        return {
+          key: photo.id,
+          src: photo.cardSrc,
+          width: dims?.width ?? 3,
+          height: dims?.height ?? 2,
+          alt: photo.fileName,
+          galleryIndex: index,
+        };
+      }),
+    [visiblePhotos, photoDims],
   );
 
   const freeRemaining = Math.max(0, freePhotoCount - selectedCount);
@@ -321,9 +372,7 @@ export default function ProofSelectionClient({
           type="button"
           onClick={() => setFloatingSummaryCollapsed((collapsed) => !collapsed)}
           aria-label={
-            floatingSummaryCollapsed
-              ? t("expandSummary")
-              : t("collapseSummary")
+            floatingSummaryCollapsed ? t("expandSummary") : t("collapseSummary")
           }
           aria-expanded={!floatingSummaryCollapsed}
           className="flex w-7 shrink-0 cursor-pointer items-center justify-center self-stretch transition hover:bg-brand-cream"
@@ -359,10 +408,7 @@ export default function ProofSelectionClient({
                 <p className="mt-1 text-xs text-brand-green/70">
                   {t("extraBreakdown", {
                     count: extraCount,
-                    price: formatMoneyFromCents(
-                      extraPhotoPriceCents,
-                      currency,
-                    ),
+                    price: formatMoneyFromCents(extraPhotoPriceCents, currency),
                   })}
                 </p>
               ) : null}
@@ -416,10 +462,7 @@ export default function ProofSelectionClient({
               {extraCount > 0
                 ? t("extraBreakdown", {
                     count: extraCount,
-                    price: formatMoneyFromCents(
-                      extraPhotoPriceCents,
-                      currency,
-                    ),
+                    price: formatMoneyFromCents(extraPhotoPriceCents, currency),
                   })
                 : null}
             </p>
@@ -444,145 +487,191 @@ export default function ProofSelectionClient({
         </button>
       </div>
 
-      <div className="mt-8 flex gap-2 overflow-x-auto pb-1">
-        {(
-          [
-            { key: "all", label: t("filterAll"), count: photos.length },
-            {
-              key: "selected",
-              label: t("filterSelected"),
-              count: selectedCount,
-            },
-            {
-              key: "rather_yes",
-              label: t("filterRatherYes"),
-              count: ratherYesCount,
-            },
-            {
-              key: "rather_no",
-              label: t("filterRatherNo"),
-              count: ratherNoCount,
-            },
-          ] as const
-        ).map((option) => (
-          <button
-            key={option.key}
-            type="button"
-            onClick={() => setFilter(option.key)}
-            aria-pressed={filter === option.key}
-            className={`shrink-0 cursor-pointer rounded-full border px-4 py-1.5 text-sm font-medium transition ${
-              filter === option.key
-                ? "border-transparent bg-brand-green text-white"
-                : "border-brand-gold/20 bg-white text-brand-green hover:bg-brand-cream"
-            }`}
-          >
-            {option.label} ({option.count})
-          </button>
-        ))}
-      </div>
-
-      {visiblePhotos.length === 0 ? (
-        <p className="mt-8 text-sm text-gray-500">{t("filterNoMatches")}</p>
-      ) : null}
-
-      <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-7 md:grid-cols-4">
-        {visiblePhotos.map(({ photo, index }) => {
-          const selection = selections[photo.id];
-
-          return (
-            <Reveal key={photo.id} delay={(index % 4) * 70}>
-              <div
-                className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-4 ring-offset-2 ring-offset-brand-cream transition duration-200 motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.3)] ${
-                  selection.selected
-                    ? "ring-brand-green"
-                    : "ring-transparent hover:ring-brand-green/30"
+      {/* Breaks out of the page's narrower text column — same trick as
+          the final-delivery gallery's wider grid, just without a second
+          top-level container, so the summary card above stays the same
+          width as the pricing section. */}
+      <div
+        style={{
+          marginLeft: "calc(50% - 50vw)",
+          marginRight: "calc(50% - 50vw)",
+        }}
+      >
+        <div className="mx-auto max-w-[2000px] px-6 sm:px-10">
+          <div className="mt-8 flex gap-2 overflow-x-auto pb-1">
+            {(
+              [
+                { key: "all", label: t("filterAll"), count: photos.length },
+                {
+                  key: "selected",
+                  label: t("filterSelected"),
+                  count: selectedCount,
+                },
+                {
+                  key: "rather_yes",
+                  label: t("filterRatherYes"),
+                  count: ratherYesCount,
+                },
+                {
+                  key: "rather_no",
+                  label: t("filterRatherNo"),
+                  count: ratherNoCount,
+                },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setFilter(option.key)}
+                aria-pressed={filter === option.key}
+                className={`shrink-0 cursor-pointer rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+                  filter === option.key
+                    ? "border-transparent bg-brand-green text-white"
+                    : "border-brand-gold/20 bg-white text-brand-green hover:bg-brand-cream"
                 }`}
               >
-                <button
-                  type="button"
-                  onClick={() => setLightboxIndex(index)}
-                  aria-label={t("expand")}
-                  className="absolute inset-0 cursor-pointer"
-                >
-                  <Image
-                    src={photo.cardSrc}
-                    alt={photo.fileName}
-                    fill
-                    sizes="200px"
-                    className="object-cover"
-                  />
-                  {/* Tints the whole tile so "selected" reads at a glance
-                      across the grid, not just from the thin ring/badge. */}
-                  {selection.selected ? (
-                    <div className="absolute inset-0 bg-brand-green/15" />
-                  ) : null}
-                </button>
+                {option.label} ({option.count})
+              </button>
+            ))}
+          </div>
 
-                <button
-                  type="button"
-                  key={selection.selected ? "selected" : "unselected"}
-                  onClick={() => toggleSelected(photo.id)}
-                  aria-label={selection.selected ? t("selected") : t("select")}
-                  aria-pressed={selection.selected}
-                  className={`proof-pop absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-base font-bold shadow-md transition motion-safe:active:scale-95 ${
-                    selection.selected
-                      ? "bg-brand-green text-white"
-                      : "bg-white text-transparent ring-2 ring-gray-300 hover:ring-brand-green/50"
-                  }`}
-                >
-                  {selection.selected ? "✓" : ""}
-                </button>
-              </div>
+          {visiblePhotos.length === 0 ? (
+            <p className="mt-8 text-sm text-gray-500">{t("filterNoMatches")}</p>
+          ) : null}
 
-              <div className="mt-3 grid grid-cols-3 overflow-hidden rounded-full border border-brand-gold/20 bg-white shadow-sm sm:inline-flex sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setRating(photo.id, "rather_no")}
-                  aria-pressed={selection.rating === "rather_no"}
-                  className={`min-w-0 cursor-pointer px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
-                    selection.rating === "rather_no"
-                      ? "bg-gray-500 text-white"
-                      : "text-gray-500 hover:bg-gray-100"
-                  }`}
-                >
-                  {t("ratherNo")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRating(photo.id, "rather_yes")}
-                  aria-pressed={selection.rating === "rather_yes"}
-                  className={`min-w-0 cursor-pointer border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
-                    selection.rating === "rather_yes"
-                      ? "bg-brand-gold text-white"
-                      : "text-brand-gold-dark hover:bg-brand-cream"
-                  }`}
-                >
-                  {t("ratherYes")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggleSelected(photo.id)}
-                  aria-pressed={selection.selected}
-                  className={`min-w-0 cursor-pointer border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
-                    selection.selected
-                      ? "bg-brand-green text-white"
-                      : "text-brand-green hover:bg-brand-cream"
-                  }`}
-                >
-                  {selection.selected ? t("selected") : t("select")}
-                </button>
-              </div>
+          <div className="mt-6">
+            <RowsPhotoAlbum
+              photos={albumPhotos}
+              targetRowHeight={280}
+              spacing={16}
+              rowConstraints={(containerWidth) => ({
+                // Caps how many photos can share a row so narrow/portrait
+                // photos don't get packed many-to-a-row and squashed too
+                // thin for the rating pills + comment input below each
+                // one — most important on small screens, where even two
+                // photos side by side leaves barely any room for them.
+                maxPhotos:
+                  containerWidth < 640
+                    ? 1
+                    : containerWidth < 900
+                      ? 2
+                      : containerWidth < 1280
+                        ? 3
+                        : 4,
+              })}
+              render={{
+                photo: (
+                  _props,
+                  { photo: albumPhoto, index: albumIndex, width, height },
+                ) => {
+                  const index = (albumPhoto as (typeof albumPhotos)[number])
+                    .galleryIndex;
+                  const photo = photos[index];
+                  const selection = selections[photo.id];
 
-              <input
-                type="text"
-                value={selection.comment}
-                onChange={(e) => setComment(photo.id, e.target.value)}
-                placeholder={t("commentPlaceholder")}
-                className="mt-3 w-full rounded-2xl border border-transparent bg-white/80 shadow-sm px-3.5 py-2 text-xs text-gray-800 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green"
-              />
-            </Reveal>
-          );
-        })}
+                  return (
+                    <div key={albumPhoto.key} style={{ width }}>
+                      <Reveal delay={(albumIndex % 6) * 50}>
+                        <div
+                          style={{ width, height }}
+                          className={`relative overflow-hidden rounded-2xl bg-gray-100 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.25)] ring-4 ring-offset-2 ring-offset-brand-cream transition duration-200 motion-safe:hover:-translate-y-1 hover:shadow-[0_12px_30px_-10px_rgba(0,0,0,0.3)] ${
+                            selection.selected
+                              ? "ring-brand-green"
+                              : "ring-transparent hover:ring-brand-green/30"
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setLightboxIndex(index)}
+                            aria-label={t("expand")}
+                            className="absolute inset-0 cursor-pointer"
+                          >
+                            <Image
+                              src={photo.cardSrc}
+                              alt={photo.fileName}
+                              fill
+                              sizes={`${Math.round(width)}px`}
+                              className="object-cover"
+                            />
+                            {/* Tints the whole tile so "selected" reads at a glance
+                          across the grid, not just from the thin ring/badge. */}
+                            {selection.selected ? (
+                              <div className="absolute inset-0 bg-brand-green/15" />
+                            ) : null}
+                          </button>
+
+                          <button
+                            type="button"
+                            key={selection.selected ? "selected" : "unselected"}
+                            onClick={() => toggleSelected(photo.id)}
+                            aria-label={
+                              selection.selected ? t("selected") : t("select")
+                            }
+                            aria-pressed={selection.selected}
+                            className={`proof-pop absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-base font-bold shadow-md transition motion-safe:active:scale-95 ${
+                              selection.selected
+                                ? "bg-brand-green text-white"
+                                : "bg-white text-transparent ring-2 ring-gray-300 hover:ring-brand-green/50"
+                            }`}
+                          >
+                            {selection.selected ? "✓" : ""}
+                          </button>
+                        </div>
+
+                        <div className="mt-3 grid grid-cols-3 overflow-hidden rounded-full border border-brand-gold/20 bg-white shadow-sm">
+                          <button
+                            type="button"
+                            onClick={() => setRating(photo.id, "rather_no")}
+                            aria-pressed={selection.rating === "rather_no"}
+                            className={`min-w-0 cursor-pointer px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                              selection.rating === "rather_no"
+                                ? "bg-gray-500 text-white"
+                                : "text-gray-500 hover:bg-gray-100"
+                            }`}
+                          >
+                            {t("ratherNo")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setRating(photo.id, "rather_yes")}
+                            aria-pressed={selection.rating === "rather_yes"}
+                            className={`min-w-0 cursor-pointer border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                              selection.rating === "rather_yes"
+                                ? "bg-brand-gold text-white"
+                                : "text-brand-gold-dark hover:bg-brand-cream"
+                            }`}
+                          >
+                            {t("ratherYes")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleSelected(photo.id)}
+                            aria-pressed={selection.selected}
+                            className={`min-w-0 cursor-pointer border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                              selection.selected
+                                ? "bg-brand-green text-white"
+                                : "text-brand-green hover:bg-brand-cream"
+                            }`}
+                          >
+                            {selection.selected ? t("selected") : t("select")}
+                          </button>
+                        </div>
+
+                        <input
+                          type="text"
+                          value={selection.comment}
+                          onChange={(e) => setComment(photo.id, e.target.value)}
+                          placeholder={t("commentPlaceholder")}
+                          className="mt-3 w-full rounded-2xl border border-transparent bg-white/80 shadow-sm px-3.5 py-2 text-xs text-gray-800 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green"
+                        />
+                      </Reveal>
+                    </div>
+                  );
+                },
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <Lightbox
