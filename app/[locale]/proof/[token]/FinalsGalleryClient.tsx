@@ -203,7 +203,7 @@ export default function FinalsGalleryClient({
                 type="button"
                 onClick={downloadAll}
                 disabled={downloadingAll}
-                className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-7 lg:px-10 lg:py-3 lg:text-base"
+                className="cursor-pointer rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-7 lg:px-10 lg:py-3 lg:text-base"
               >
                 {downloadingAll ? t("downloadingAll") : t("downloadAllButton")}
               </button>
@@ -263,7 +263,7 @@ export default function FinalsGalleryClient({
                       <button
                         type="button"
                         onClick={props.onClick}
-                        className="absolute inset-0"
+                        className="absolute inset-0 cursor-pointer"
                       >
                         <Image
                           src={photo.src}
@@ -304,7 +304,7 @@ export default function FinalsGalleryClient({
                       type="button"
                       onClick={() => downloadPhoto(lightboxPhoto)}
                       disabled={downloadingId === lightboxPhoto.id}
-                      className="bg-brand-green/90 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-green disabled:opacity-60"
+                      className="cursor-pointer bg-neutral-900/90 px-6 py-3 text-sm font-semibold text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {downloadingId === lightboxPhoto.id
                         ? t("downloadingAll")

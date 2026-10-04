@@ -298,7 +298,7 @@ export default function ProofSelectionClient({
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting || selectedCount === 0}
-                className="rounded-full bg-brand-green px-7 py-3 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="cursor-pointer rounded-full bg-brand-green px-7 py-3 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? t("submitting") : t("submitButton")}
               </button>
@@ -326,7 +326,7 @@ export default function ProofSelectionClient({
               : t("collapseSummary")
           }
           aria-expanded={!floatingSummaryCollapsed}
-          className="flex w-7 shrink-0 items-center justify-center self-stretch transition hover:bg-brand-cream"
+          className="flex w-7 shrink-0 cursor-pointer items-center justify-center self-stretch transition hover:bg-brand-cream"
         >
           <svg
             viewBox="0 0 20 20"
@@ -386,7 +386,7 @@ export default function ProofSelectionClient({
               type="button"
               onClick={handleSubmit}
               disabled={submitting || selectedCount === 0}
-              className="w-full rounded-full bg-brand-green px-5 py-2.5 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full cursor-pointer rounded-full bg-brand-green px-5 py-2.5 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? t("submitting") : t("submitButton")}
             </button>
@@ -438,7 +438,7 @@ export default function ProofSelectionClient({
           type="button"
           onClick={handleSubmit}
           disabled={submitting || selectedCount === 0}
-          className="shrink-0 rounded-full bg-brand-green px-5 py-2.5 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="shrink-0 cursor-pointer rounded-full bg-brand-green px-5 py-2.5 motion-safe:active:scale-95 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? t("submitting") : t("submitButton")}
         </button>
@@ -470,7 +470,7 @@ export default function ProofSelectionClient({
             type="button"
             onClick={() => setFilter(option.key)}
             aria-pressed={filter === option.key}
-            className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+            className={`shrink-0 cursor-pointer rounded-full border px-4 py-1.5 text-sm font-medium transition ${
               filter === option.key
                 ? "border-transparent bg-brand-green text-white"
                 : "border-brand-gold/20 bg-white text-brand-green hover:bg-brand-cream"
@@ -502,7 +502,7 @@ export default function ProofSelectionClient({
                   type="button"
                   onClick={() => setLightboxIndex(index)}
                   aria-label={t("expand")}
-                  className="absolute inset-0"
+                  className="absolute inset-0 cursor-pointer"
                 >
                   <Image
                     src={photo.cardSrc}
@@ -524,7 +524,7 @@ export default function ProofSelectionClient({
                   onClick={() => toggleSelected(photo.id)}
                   aria-label={selection.selected ? t("selected") : t("select")}
                   aria-pressed={selection.selected}
-                  className={`proof-pop absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-base font-bold shadow-md transition motion-safe:active:scale-95 ${
+                  className={`proof-pop absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-base font-bold shadow-md transition motion-safe:active:scale-95 ${
                     selection.selected
                       ? "bg-brand-green text-white"
                       : "bg-white text-transparent ring-2 ring-gray-300 hover:ring-brand-green/50"
@@ -539,7 +539,7 @@ export default function ProofSelectionClient({
                   type="button"
                   onClick={() => setRating(photo.id, "rather_no")}
                   aria-pressed={selection.rating === "rather_no"}
-                  className={`min-w-0 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                  className={`min-w-0 cursor-pointer px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
                     selection.rating === "rather_no"
                       ? "bg-gray-500 text-white"
                       : "text-gray-500 hover:bg-gray-100"
@@ -551,7 +551,7 @@ export default function ProofSelectionClient({
                   type="button"
                   onClick={() => setRating(photo.id, "rather_yes")}
                   aria-pressed={selection.rating === "rather_yes"}
-                  className={`min-w-0 border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                  className={`min-w-0 cursor-pointer border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
                     selection.rating === "rather_yes"
                       ? "bg-brand-gold text-white"
                       : "text-brand-gold-dark hover:bg-brand-cream"
@@ -563,7 +563,7 @@ export default function ProofSelectionClient({
                   type="button"
                   onClick={() => toggleSelected(photo.id)}
                   aria-pressed={selection.selected}
-                  className={`min-w-0 border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
+                  className={`min-w-0 cursor-pointer border-l border-brand-gold/20 px-2 py-1 text-xs font-semibold transition motion-safe:active:scale-95 sm:px-3 ${
                     selection.selected
                       ? "bg-brand-green text-white"
                       : "text-brand-green hover:bg-brand-cream"
@@ -599,7 +599,7 @@ export default function ProofSelectionClient({
                   <button
                     type="button"
                     onClick={() => setRating(lightboxPhoto.id, "rather_no")}
-                    className={`px-5 py-3 text-sm font-semibold transition ${
+                    className={`cursor-pointer px-5 py-3 text-sm font-semibold transition ${
                       lightboxRating === "rather_no"
                         ? "bg-gray-500 text-white"
                         : "bg-white/80 text-gray-600 hover:bg-white"
@@ -610,7 +610,7 @@ export default function ProofSelectionClient({
                   <button
                     type="button"
                     onClick={() => setRating(lightboxPhoto.id, "rather_yes")}
-                    className={`border-l border-white/40 px-5 py-3 text-sm font-semibold transition ${
+                    className={`cursor-pointer border-l border-white/40 px-5 py-3 text-sm font-semibold transition ${
                       lightboxRating === "rather_yes"
                         ? "bg-brand-gold text-white"
                         : "bg-white/80 text-brand-gold-dark hover:bg-white"
@@ -621,7 +621,7 @@ export default function ProofSelectionClient({
                   <button
                     type="button"
                     onClick={() => toggleSelected(lightboxPhoto.id)}
-                    className={`border-l border-white/40 px-5 py-3 text-sm font-semibold transition ${
+                    className={`cursor-pointer border-l border-white/40 px-5 py-3 text-sm font-semibold transition ${
                       lightboxSelected
                         ? "bg-brand-green/70 text-white hover:bg-brand-green/85"
                         : "bg-white/80 text-brand-green hover:bg-white"
