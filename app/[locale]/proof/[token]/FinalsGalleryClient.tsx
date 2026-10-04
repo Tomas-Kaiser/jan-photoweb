@@ -9,6 +9,8 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import { useToast } from "@/app/components/Toast";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import { Link } from "@/app/i18n/routing";
 import { useHideProofChrome } from "../../ProofChromeContext";
 import Reveal from "./Reveal";
 
@@ -179,18 +181,34 @@ export default function FinalsGalleryClient({
 
       <div className="relative z-10 bg-brand-cream">
         <div className="sticky top-0 z-30 border-b border-brand-gold/15 bg-brand-cream/95 shadow-[0_4px_20px_-8px_rgba(1,68,33,0.2)] backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4 sm:px-10">
+          <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4 sm:px-10">
             <span className="font-display text-lg font-semibold text-brand-green">
               {clientName}
             </span>
-            <button
-              type="button"
-              onClick={downloadAll}
-              disabled={downloadingAll}
-              className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+
+            <Link
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute left-1/2 hidden -translate-x-1/2 flex-col items-center text-center leading-none text-brand-green sm:flex"
             >
-              {downloadingAll ? t("downloadingAll") : t("downloadAllButton")}
-            </button>
+              <span className="font-display text-lg font-semibold">Jan Hájek</span>
+              <span className="mt-1 text-[0.6rem] font-medium tracking-[0.2em] text-brand-gold-dark">
+                PHOTOGRAPHY
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <button
+                type="button"
+                onClick={downloadAll}
+                disabled={downloadingAll}
+                className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {downloadingAll ? t("downloadingAll") : t("downloadAllButton")}
+              </button>
+            </div>
           </div>
         </div>
 
