@@ -105,7 +105,11 @@ export default function ProofGalleryDetailClient({
   );
 
   const [photos, setPhotos] = useState(initialPhotos);
-  const [photosExpanded, setPhotosExpanded] = useState(true);
+  // Collapsed by default once paid — at that point the photos are a
+  // locked historical record admin doesn't need to see on every visit,
+  // unlike draft/pending-payment where they're still actively working
+  // with the set.
+  const [photosExpanded, setPhotosExpanded] = useState(order?.status !== "paid");
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
