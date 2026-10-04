@@ -257,6 +257,8 @@
     "proofGalleries": {
       "pageTitle": "Proof galleries",
       "detailEyebrow": "Proof gallery",
+      "groupProofGallery": "Proof gallery",
+      "groupFinalDelivery": "Final delivery",
       "newGallery": "New gallery",
       "noGalleriesYet": "No proof galleries yet — create one above.",
       "backToList": "Back to proof galleries",

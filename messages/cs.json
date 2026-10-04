@@ -257,6 +257,8 @@
     "proofGalleries": {
       "pageTitle": "Náhledovky",
       "detailEyebrow": "Náhledovka",
+      "groupProofGallery": "Náhledovka",
+      "groupFinalDelivery": "Finální předání",
       "newGallery": "Nová náhledovka",
       "noGalleriesYet": "Zatím žádné náhledovky — vytvořte první výše.",
       "backToList": "Zpět na náhledovky",
