@@ -181,7 +181,7 @@ export default function FinalsGalleryClient({
 
       <div className="relative z-10 bg-brand-cream">
         <div className="sticky top-0 z-30 border-b border-brand-gold/15 bg-brand-cream/95 shadow-[0_4px_20px_-8px_rgba(1,68,33,0.2)] backdrop-blur">
-          <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4 sm:px-10">
+          <div className="relative mx-auto flex max-w-[2200px] items-center justify-between gap-4 px-6 py-5 sm:px-10 sm:py-6">
             <span className="font-display text-lg font-semibold text-brand-green">
               {clientName}
             </span>
@@ -199,20 +199,20 @@ export default function FinalsGalleryClient({
             </Link>
 
             <div className="flex items-center gap-2">
-              <LanguageSwitcher />
               <button
                 type="button"
                 onClick={downloadAll}
                 disabled={downloadingAll}
-                className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-7 lg:px-10 lg:py-3 lg:text-base"
               >
                 {downloadingAll ? t("downloadingAll") : t("downloadAllButton")}
               </button>
+              <LanguageSwitcher />
             </div>
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-6 py-14 sm:px-10 sm:py-20">
+        <div className="mx-auto max-w-[2200px] px-6 pt-20 sm:px-10 sm:pt-28">
           <noscript>
             <style>
               {".reveal{opacity:1!important;transform:none!important}"}
@@ -220,13 +220,13 @@ export default function FinalsGalleryClient({
           </noscript>
 
           <Reveal as="header" className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-4xl font-semibold text-brand-green sm:text-5xl">
+            <h2 className="font-display text-5xl font-semibold text-brand-green sm:text-6xl">
               {clientName}
             </h2>
             {eventDateLabel ? (
-              <p className="mt-2 text-lg text-brand-gold-dark">{eventDateLabel}</p>
+              <p className="mt-3 text-lg text-brand-gold-dark">{eventDateLabel}</p>
             ) : null}
-            <div className="mx-auto mt-6 h-px w-20 bg-brand-gold" />
+            <div className="mx-auto mt-8 h-px w-20 bg-brand-gold" />
             {finalsMessage ? (
               <p className="mx-auto mt-6 max-w-xl whitespace-pre-wrap text-lg leading-8 text-gray-600">
                 {finalsMessage}
@@ -234,15 +234,13 @@ export default function FinalsGalleryClient({
             ) : null}
           </Reveal>
 
-          <Reveal
-            className="mt-10 flex flex-wrap items-center justify-between gap-2 text-sm font-medium text-brand-green/70"
-            delay={100}
-          >
-            <span>{t("photoCount", { count: photos.length })}</span>
-            <span className="text-gray-500">{t("instructions")}</span>
-          </Reveal>
+        </div>
 
-          <div className="mt-6">
+        {/* Wider than the text content above — the justified photo grid
+            can make good use of extra width on large screens where a
+            2200px-wide reading column would otherwise waste space. */}
+        <div className="mx-auto max-w-[3000px] px-6 pb-14 pt-16 sm:px-10 sm:pb-20 sm:pt-24">
+          <div>
             <RowsPhotoAlbum
               photos={photos.map((photo) => ({
                 key: photo.id,
