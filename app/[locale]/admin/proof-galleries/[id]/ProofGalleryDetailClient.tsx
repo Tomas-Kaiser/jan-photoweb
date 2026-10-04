@@ -849,10 +849,12 @@ export default function ProofGalleryDetailClient({
             </svg>
           </button>
 
-          {order && order.status === "pending_payment" ? (
+          {order ? (
             <p className="flex items-center gap-1.5 text-xs text-gray-500">
               <LockIcon className="h-3.5 w-3.5 shrink-0" />
-              {t("proofGalleries.photosLocked")}
+              {order.status === "paid"
+                ? t("proofGalleries.photosLockedPaid")
+                : t("proofGalleries.photosLocked")}
             </p>
           ) : (
             <label
