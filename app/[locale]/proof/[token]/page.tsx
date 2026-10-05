@@ -114,6 +114,16 @@ export default async function ProofGalleryPage({ params }: Props) {
           }
           finalsMessage={gallery.finalsMessage}
           photos={finals}
+          heroMobileSrc={
+            gallery.heroMobileCloudflareId
+              ? getCloudflareImageUrl(gallery.heroMobileCloudflareId, "full")
+              : null
+          }
+          heroDesktopSrc={
+            gallery.heroDesktopCloudflareId
+              ? getCloudflareImageUrl(gallery.heroDesktopCloudflareId, "full")
+              : null
+          }
         />
       </>
     );

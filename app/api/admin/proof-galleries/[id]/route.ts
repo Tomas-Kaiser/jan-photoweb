@@ -29,7 +29,8 @@ export async function PATCH(req: Request, { params }: Params) {
     const updates: Partial<typeof proofGalleries.$inferInsert> = {};
 
     if ("message" in body) {
-      const message = typeof body.message === "string" ? body.message.trim() : "";
+      const message =
+        typeof body.message === "string" ? body.message.trim() : "";
       updates.message = message || null;
     }
 
@@ -40,7 +41,8 @@ export async function PATCH(req: Request, { params }: Params) {
     }
 
     if ("eventDate" in body) {
-      const raw = typeof body.eventDate === "string" ? body.eventDate.trim() : "";
+      const raw =
+        typeof body.eventDate === "string" ? body.eventDate.trim() : "";
       if (!raw) {
         updates.eventDate = null;
       } else {
@@ -53,6 +55,22 @@ export async function PATCH(req: Request, { params }: Params) {
         }
         updates.eventDate = parsed;
       }
+    }
+
+    if ("heroMobileCloudflareId" in body) {
+      updates.heroMobileCloudflareId =
+        typeof body.heroMobileCloudflareId === "string" &&
+        body.heroMobileCloudflareId.trim()
+          ? body.heroMobileCloudflareId.trim()
+          : null;
+    }
+
+    if ("heroDesktopCloudflareId" in body) {
+      updates.heroDesktopCloudflareId =
+        typeof body.heroDesktopCloudflareId === "string" &&
+        body.heroDesktopCloudflareId.trim()
+          ? body.heroDesktopCloudflareId.trim()
+          : null;
     }
 
     const hasSettingsFields =
@@ -108,6 +126,28 @@ export async function PATCH(req: Request, { params }: Params) {
       );
     }
 
+    // Replacing (or clearing) a hero photo orphans its old Cloudflare
+    // Images asset unless we clean it up — fetch the previous id(s) first
+    // so we know what to delete once the update succeeds.
+    const touchesHeroMobile = "heroMobileCloudflareId" in updates;
+    const touchesHeroDesktop = "heroDesktopCloudflareId" in updates;
+    let previousHero: {
+      heroMobileCloudflareId: string | null;
+      heroDesktopCloudflareId: string | null;
+    } | null = null;
+
+    if (touchesHeroMobile || touchesHeroDesktop) {
+      const rows = await db
+        .select({
+          heroMobileCloudflareId: proofGalleries.heroMobileCloudflareId,
+          heroDesktopCloudflareId: proofGalleries.heroDesktopCloudflareId,
+        })
+        .from(proofGalleries)
+        .where(eq(proofGalleries.id, id))
+        .limit(1);
+      previousHero = rows[0] ?? null;
+    }
+
     const updated = await db
       .update(proofGalleries)
       .set(updates)
@@ -119,6 +159,32 @@ export async function PATCH(req: Request, { params }: Params) {
         { error: "Proof gallery not found." },
         { status: 404 },
       );
+    }
+
+    if (previousHero) {
+      const toDelete = [
+        touchesHeroMobile &&
+        previousHero.heroMobileCloudflareId &&
+        previousHero.heroMobileCloudflareId !== updates.heroMobileCloudflareId
+          ? previousHero.heroMobileCloudflareId
+          : null,
+        touchesHeroDesktop &&
+        previousHero.heroDesktopCloudflareId &&
+        previousHero.heroDesktopCloudflareId !== updates.heroDesktopCloudflareId
+          ? previousHero.heroDesktopCloudflareId
+          : null,
+      ].filter((cloudflareId): cloudflareId is string => Boolean(cloudflareId));
+
+      for (const cloudflareId of toDelete) {
+        try {
+          await deleteCloudflareImage(cloudflareId);
+        } catch (error) {
+          console.error("Failed to delete replaced hero photo:", {
+            cloudflareId,
+            error,
+          });
+        }
+      }
     }
 
     return NextResponse.json({ success: true });
@@ -140,7 +206,11 @@ export async function DELETE(_req: Request, { params }: Params) {
     const { id } = await params;
 
     const galleryRows = await db
-      .select({ id: proofGalleries.id })
+      .select({
+        id: proofGalleries.id,
+        heroMobileCloudflareId: proofGalleries.heroMobileCloudflareId,
+        heroDesktopCloudflareId: proofGalleries.heroDesktopCloudflareId,
+      })
       .from(proofGalleries)
       .where(eq(proofGalleries.id, id))
       .limit(1);
@@ -150,6 +220,27 @@ export async function DELETE(_req: Request, { params }: Params) {
         { error: "Proof gallery not found." },
         { status: 404 },
       );
+    }
+
+    for (const cloudflareId of [
+      galleryRows[0].heroMobileCloudflareId,
+      galleryRows[0].heroDesktopCloudflareId,
+    ]) {
+      if (!cloudflareId) continue;
+      try {
+        await deleteCloudflareImage(cloudflareId);
+      } catch (error) {
+        console.error("Failed to delete hero photo from Cloudflare:", {
+          cloudflareId,
+          error,
+        });
+        return NextResponse.json(
+          {
+            error: "Failed to delete one or more hero photos from Cloudflare.",
+          },
+          { status: 502 },
+        );
+      }
     }
 
     const galleryPhotos = await db
@@ -173,7 +264,10 @@ export async function DELETE(_req: Request, { params }: Params) {
     }
 
     const galleryFinalPhotos = await db
-      .select({ r2Key: finalPhotos.r2Key, previewCloudflareId: finalPhotos.previewCloudflareId })
+      .select({
+        r2Key: finalPhotos.r2Key,
+        previewCloudflareId: finalPhotos.previewCloudflareId,
+      })
       .from(finalPhotos)
       .where(eq(finalPhotos.galleryId, id));
 

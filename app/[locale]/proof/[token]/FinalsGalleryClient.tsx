@@ -30,6 +30,12 @@ type Props = {
   eventDateLabel: string | null;
   finalsMessage: string | null;
   photos: Photo[];
+  // Dedicated hero banner photos, set by the photographer separately from
+  // the final photos themselves (see FinalsPageContentSection in admin).
+  // Falls back to the first final photo (below) for whichever is unset, so
+  // galleries created before this existed keep working unchanged.
+  heroMobileSrc: string | null;
+  heroDesktopSrc: string | null;
 };
 
 export default function FinalsGalleryClient({
@@ -38,6 +44,8 @@ export default function FinalsGalleryClient({
   eventDateLabel,
   finalsMessage,
   photos,
+  heroMobileSrc,
+  heroDesktopSrc,
 }: Props) {
   const t = useTranslations("finalDelivery");
   const toast = useToast();
@@ -47,6 +55,8 @@ export default function FinalsGalleryClient({
   const [downloadingAll, setDownloadingAll] = useState(false);
 
   const hero = photos[0];
+  const heroMobile = heroMobileSrc ?? hero?.fullSrc;
+  const heroDesktop = heroDesktopSrc ?? hero?.fullSrc;
   const slides = photos.map((photo) => ({ src: photo.detailSrc }));
   const lightboxPhoto =
     lightboxIndex !== null ? photos[lightboxIndex] : undefined;
@@ -114,7 +124,7 @@ export default function FinalsGalleryClient({
 
   return (
     <div>
-      {hero ? (
+      {heroMobile || heroDesktop ? (
         <>
           {/* Fixed in place behind everything — the content wrapper below
               has its own opaque background and a higher z-index, so it
@@ -127,14 +137,31 @@ export default function FinalsGalleryClient({
             onContextMenu={(e) => e.preventDefault()}
             className="fixed inset-0 z-0 h-dvh w-full overflow-hidden"
           >
-            <Image
-              src={hero.fullSrc}
-              alt={hero.fileName}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-[center_22%]"
-            />
+            {/* Two separate photos rather than one stretched/cropped to fit
+                both layouts — a photo composed for a tall mobile screen
+                rarely also works as a wide desktop banner. Admin can set
+                both independently (FinalsPageContentSection); unset ones
+                fall back to the first final photo for that slot. */}
+            {heroMobile ? (
+              <Image
+                src={heroMobile}
+                alt={clientName}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover md:hidden"
+              />
+            ) : null}
+            {heroDesktop ? (
+              <Image
+                src={heroDesktop}
+                alt={clientName}
+                fill
+                priority
+                sizes="100vw"
+                className="hidden object-cover md:block"
+              />
+            ) : null}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
 
             <div className="absolute right-4 top-4 h-12 w-12 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] sm:right-6 sm:top-6 sm:h-14 sm:w-14">
@@ -192,7 +219,9 @@ export default function FinalsGalleryClient({
               rel="noopener noreferrer"
               className="absolute left-1/2 hidden -translate-x-1/2 flex-col items-center text-center leading-none text-brand-green sm:flex"
             >
-              <span className="font-display text-lg font-semibold">Jan Hájek</span>
+              <span className="font-display text-lg font-semibold">
+                Jan Hájek
+              </span>
               <span className="mt-1 text-[0.6rem] font-medium tracking-[0.2em] text-brand-gold-dark">
                 PHOTOGRAPHY
               </span>
@@ -224,7 +253,9 @@ export default function FinalsGalleryClient({
               {clientName}
             </h2>
             {eventDateLabel ? (
-              <p className="mt-3 text-lg text-brand-gold-dark">{eventDateLabel}</p>
+              <p className="mt-3 text-lg text-brand-gold-dark">
+                {eventDateLabel}
+              </p>
             ) : null}
             <div className="mx-auto mt-8 h-px w-20 bg-brand-gold" />
             {finalsMessage ? (
@@ -233,7 +264,6 @@ export default function FinalsGalleryClient({
               </p>
             ) : null}
           </Reveal>
-
         </div>
 
         {/* Wider than the text content above — the justified photo grid

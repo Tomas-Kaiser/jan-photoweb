@@ -99,6 +99,13 @@
       "when": 1791107314821,
       "tag": "0013_wild_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791225863198,
+      "tag": "0014_hot_katie_power",
+      "breakpoints": true
     }
   ]
 }

@@ -5,7 +5,12 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
-import { finalPhotos, proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
+import {
+  finalPhotos,
+  proofGalleries,
+  proofOrders,
+  proofPhotos,
+} from "@/app/db/schema";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import ProofGalleryDetailClient from "./ProofGalleryDetailClient";
 
@@ -137,8 +142,14 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
           initialFinalPhotos={finalPhotoRows}
           finalsPublishedAt={gallery.finalsPublishedAt?.toISOString() ?? null}
           finalsPublishedAtLabel={finalsPublishedAtLabel}
-          initialEventDate={gallery.eventDate ? gallery.eventDate.toISOString().slice(0, 10) : ""}
+          initialEventDate={
+            gallery.eventDate
+              ? gallery.eventDate.toISOString().slice(0, 10)
+              : ""
+          }
           initialFinalsMessage={gallery.finalsMessage ?? ""}
+          initialHeroMobileCloudflareId={gallery.heroMobileCloudflareId}
+          initialHeroDesktopCloudflareId={gallery.heroDesktopCloudflareId}
         />
       </div>
     </div>
