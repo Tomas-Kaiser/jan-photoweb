@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -65,6 +65,20 @@ type Props = {
   initialHeroDesktopCloudflareId: string | null;
 };
 
+// The gallery's lifecycle, left to right. Each stage is a tab: clicking one
+// only changes which panel is shown (selectedTab) — it never changes the
+// gallery's actual progress, which is derived from gallery/order data
+// (currentStageKey) and drives the circles' done/current/todo state
+// independently of whatever tab is currently being viewed.
+const STAGE_KEYS = [
+  "proof",
+  "submitted",
+  "paid",
+  "final",
+  "delivered",
+] as const;
+type StageKey = (typeof STAGE_KEYS)[number];
+
 export default function ProofGalleryDetailClient({
   locale,
   origin,
@@ -106,21 +120,7 @@ export default function ProofGalleryDetailClient({
     null,
   );
 
-  // Collapsed by default once paid — at that point the client-selection
-  // phase is done and admin can go straight to Final delivery instead of
-  // scrolling past the whole proof-gallery group every visit.
-  const [proofGroupExpanded, setProofGroupExpanded] = useState(
-    order?.status !== "paid",
-  );
-
   const [photos, setPhotos] = useState(initialPhotos);
-  // Collapsed by default once paid — at that point the photos are a
-  // locked historical record admin doesn't need to see on every visit,
-  // unlike draft/pending-payment where they're still actively working
-  // with the set.
-  const [photosExpanded, setPhotosExpanded] = useState(
-    order?.status !== "paid",
-  );
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -138,6 +138,35 @@ export default function ProofGalleryDetailClient({
     .map((photo) => photo.fileName);
 
   const shareUrl = `${origin}/${locale}/proof/${gallery.token}`;
+
+  // Where the gallery actually is right now. "paid" never lingers as the
+  // current stage on its own — the moment it's paid, final delivery is the
+  // actionable next step, so progress jumps straight to "final".
+  const currentStageKey: StageKey = finalsPublishedAt
+    ? "delivered"
+    : order?.status === "paid"
+      ? "final"
+      : order
+        ? "submitted"
+        : "proof";
+  const currentStageIndex = STAGE_KEYS.indexOf(currentStageKey);
+
+  const [selectedTab, setSelectedTab] = useState<StageKey>(currentStageKey);
+
+  // Jump the viewed tab forward when the gallery's real progress advances
+  // (e.g. right after marking paid or publishing finals), while still
+  // letting the admin click back to any other tab afterwards.
+  useEffect(() => {
+    setSelectedTab(currentStageKey);
+  }, [currentStageKey]);
+
+  const stageLabels: Record<StageKey, string> = {
+    proof: t("proofGalleries.stageProof"),
+    submitted: t("proofGalleries.stageSubmitted"),
+    paid: t("proofGalleries.stagePaid"),
+    final: t("proofGalleries.stageFinal"),
+    delivered: t("proofGalleries.stageDelivered"),
+  };
 
   async function handleSaveSettings(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -463,8 +492,152 @@ export default function ProofGalleryDetailClient({
     URL.revokeObjectURL(url);
   }
 
+  // Shared between the "submitted" and "paid" tabs — same order data, the
+  // only thing that differs is which actions make sense (reopen/mark paid
+  // while pending, nothing once paid) and that already branches inside here.
+  const orderSection = order ? (
+    <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-display text-2xl font-semibold text-brand-green">
+          {t("proofGalleries.orderTitle")}
+        </h2>
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            order.status === "paid"
+              ? "bg-brand-green text-white"
+              : "bg-brand-gold/15 text-brand-gold-dark"
+          }`}
+        >
+          {order.status === "paid"
+            ? t("proofGalleries.statusPaid")
+            : t("proofGalleries.orderPendingPayment")}
+        </span>
+      </div>
+
+      <dl className="space-y-2 text-sm">
+        <div className="flex justify-between">
+          <dt className="text-gray-600">
+            {t("proofGalleries.orderTotalSelected")}
+          </dt>
+          <dd className="font-medium text-gray-900">
+            {order.includedCount + order.extraCount}
+          </dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-gray-600">{t("proofGalleries.orderIncluded")}</dt>
+          <dd className="font-medium text-gray-900">{order.includedCount}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-gray-600">{t("proofGalleries.orderExtra")}</dt>
+          <dd className="font-medium text-gray-900">{order.extraCount}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-gray-600">{t("proofGalleries.orderBaseCost")}</dt>
+          <dd className="font-medium text-gray-900">
+            {formatMoneyFromCents(gallery.baseCostCents, gallery.currency)}
+          </dd>
+        </div>
+        <div className="flex justify-between border-t border-gray-100 pt-2">
+          <dt className="font-medium text-gray-900">
+            {t("proofGalleries.orderTotal")}
+          </dt>
+          <dd className="font-semibold text-gray-900">
+            {formatMoneyFromCents(order.totalCents, gallery.currency)}
+          </dd>
+        </div>
+      </dl>
+
+      <p className="mt-3 text-xs text-gray-500">
+        {t("proofGalleries.orderSubmittedAt", {
+          date: order.submittedAtLabel,
+        })}
+      </p>
+
+      {order.status === "paid" ? (
+        <p className="mt-1 text-xs font-medium text-brand-green">
+          {t("proofGalleries.orderPaidAt", {
+            date: order.paidAtLabel ?? "",
+          })}
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-col items-end">
+          <div className="flex flex-wrap justify-end gap-3">
+            <button
+              type="button"
+              onClick={handleReopen}
+              disabled={reopening || markingPaid}
+              className="rounded-full border border-brand-gold/25 px-5 py-2.5 text-sm font-semibold text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream disabled:opacity-60"
+            >
+              {reopening ? t("common.saving") : t("proofGalleries.reopen")}
+            </button>
+            <button
+              type="button"
+              onClick={handleMarkPaid}
+              disabled={markingPaid || reopening}
+              className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:opacity-60"
+            >
+              {markingPaid ? t("common.saving") : t("proofGalleries.markPaid")}
+            </button>
+          </div>
+          {paidError ? (
+            <p className="mt-2 text-sm text-red-700">{paidError}</p>
+          ) : null}
+        </div>
+      )}
+
+      {selectedFileNames.length > 0 ? (
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <p className="mb-2 text-sm font-medium text-gray-700">
+            {t("proofGalleries.selectedFileNamesTitle")}
+          </p>
+
+          <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-all rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-800">
+            {selectedFileNames.join("\n")}
+          </pre>
+
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleCopyFilenames}
+              className="rounded-full border border-brand-gold/25 px-4 py-2 text-sm font-medium text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream"
+            >
+              {filenamesCopied
+                ? t("proofGalleries.filenamesCopied")
+                : t("proofGalleries.copyFilenames")}
+            </button>
+            <button
+              type="button"
+              onClick={handleDownloadFilenames}
+              className="rounded-full border border-brand-gold/25 px-4 py-2 text-sm font-medium text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream"
+            >
+              {t("proofGalleries.downloadFilenames")}
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </section>
+  ) : null;
+
+  const notSubmittedYetNotice = (
+    <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
+      <p className="flex items-center gap-1.5 text-sm text-gray-500">
+        <LockIcon className="h-4 w-4 shrink-0" />
+        {t("proofGalleries.notSubmittedYet")}
+      </p>
+    </section>
+  );
+
+  const notPaidYetNotice = (
+    <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
+      <p className="flex items-center gap-1.5 text-sm text-gray-500">
+        <LockIcon className="h-4 w-4 shrink-0" />
+        {t("proofGalleries.notPaidYet")}
+      </p>
+    </section>
+  );
+
   return (
-    <div className="space-y-14">
+    <div className="space-y-10">
       <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
         <p className="mb-2 text-sm font-medium text-gray-700">
           {t("proofGalleries.shareableLink")}
@@ -485,303 +658,84 @@ export default function ProofGalleryDetailClient({
         </div>
       </section>
 
-      <div className="space-y-10">
-        <button
-          type="button"
-          onClick={() => setProofGroupExpanded((expanded) => !expanded)}
-          aria-expanded={proofGroupExpanded}
-          className="flex w-full items-center gap-4"
-        >
-          <h2 className="whitespace-nowrap font-display text-xl font-semibold text-brand-green">
-            {t("proofGalleries.groupProofGallery")}
-          </h2>
-          <div className="h-px flex-1 bg-brand-gold/25" />
-          <svg
-            viewBox="0 0 20 20"
-            fill="none"
-            className={`h-4 w-4 shrink-0 text-brand-green/60 transition-transform duration-200 ${
-              proofGroupExpanded ? "rotate-180" : ""
-            }`}
-          >
-            <path
-              d="M5 7.5l5 5 5-5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+      <section className="rounded-3xl border border-brand-gold/15 bg-white p-7 pb-5 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)]">
+        <div className="relative flex justify-between px-1">
+          <div className="absolute left-[10%] right-[10%] top-[19px] h-0.5 bg-brand-gold/15" />
+          <div
+            className="absolute left-[10%] top-[19px] h-0.5 bg-brand-green transition-[width] duration-300"
+            style={{
+              width: `${(currentStageIndex / (STAGE_KEYS.length - 1)) * 80}%`,
+            }}
+          />
 
-        {proofGroupExpanded ? (
-          <>
-            <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
-              <h2 className="mb-4 font-display text-2xl font-semibold text-brand-green">
-                {t("proofGalleries.settingsTitle")}
-              </h2>
+          {STAGE_KEYS.map((key, index) => {
+            const isDone = index < currentStageIndex;
+            const isCurrent = index === currentStageIndex;
+            const isTodo = index > currentStageIndex;
+            const isSelected = key === selectedTab;
 
-              {order ? (
-                <div>
-                  <p className="mb-4 text-sm text-gray-500">
-                    {t("proofGalleries.settingsLockedNote")}
-                  </p>
-                  <dl className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">
-                        {t("proofGalleries.clientNameLabel")}
-                      </dt>
-                      <dd className="font-medium text-gray-900">
-                        {gallery.clientName}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">
-                        {t("proofGalleries.baseCostLabel")}
-                      </dt>
-                      <dd className="font-medium text-gray-900">
-                        {formatMoneyFromCents(
-                          gallery.baseCostCents,
-                          gallery.currency,
-                        )}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">
-                        {t("proofGalleries.freePhotoCountLabel")}
-                      </dt>
-                      <dd className="font-medium text-gray-900">
-                        {gallery.freePhotoCount}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">
-                        {t("proofGalleries.extraPhotoPriceLabel")}
-                      </dt>
-                      <dd className="font-medium text-gray-900">
-                        {formatMoneyFromCents(
-                          gallery.extraPhotoPriceCents,
-                          gallery.currency,
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              ) : (
-                <form onSubmit={handleSaveSettings} className="space-y-5">
-                  <div>
-                    <label
-                      htmlFor="clientName"
-                      className="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                      {t("proofGalleries.clientNameLabel")}
-                    </label>
-                    <input
-                      id="clientName"
-                      type="text"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      disabled={savingSettings}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
-                      required
-                    />
-                  </div>
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSelectedTab(key)}
+                className="relative z-10 flex flex-1 cursor-pointer flex-col items-center gap-2.5 pb-1"
+              >
+                {isDone ? (
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-brand-green bg-brand-green text-base font-bold text-white">
+                    &#10003;
+                  </span>
+                ) : isCurrent ? (
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-brand-green bg-white text-sm font-bold text-brand-green ring-4 ring-brand-green/15">
+                    {index + 1}
+                  </span>
+                ) : (
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-brand-gold/20 bg-white text-sm font-semibold text-gray-400">
+                    {index + 1}
+                  </span>
+                )}
 
-                  <div>
-                    <label
-                      htmlFor="baseCost"
-                      className="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                      {t("proofGalleries.baseCostLabel")}
-                    </label>
-                    <input
-                      id="baseCost"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={baseCost}
-                      onChange={(e) => setBaseCost(e.target.value)}
-                      disabled={savingSettings}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
-                    />
-                    <p className="mt-1 text-sm text-gray-500">
-                      {t("proofGalleries.baseCostHint", {
-                        currency: gallery.currency,
-                      })}
-                    </p>
-                  </div>
+                <span
+                  className={`max-w-[120px] rounded-lg px-2.5 py-1 text-center text-xs ${
+                    isSelected
+                      ? "bg-brand-green/10 font-semibold text-brand-green"
+                      : isTodo
+                        ? "font-medium text-gray-400"
+                        : "font-semibold text-brand-green"
+                  }`}
+                >
+                  {stageLabels[key]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
-                  <div>
-                    <label
-                      htmlFor="freePhotoCount"
-                      className="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                      {t("proofGalleries.freePhotoCountLabel")}
-                    </label>
-                    <input
-                      id="freePhotoCount"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={freePhotoCount}
-                      onChange={(e) => setFreePhotoCount(e.target.value)}
-                      disabled={savingSettings}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="extraPhotoPrice"
-                      className="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                      {t("proofGalleries.extraPhotoPriceLabel")}
-                    </label>
-                    <input
-                      id="extraPhotoPrice"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={extraPhotoPrice}
-                      onChange={(e) => setExtraPhotoPrice(e.target.value)}
-                      disabled={savingSettings}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
-                      required
-                    />
-                    <p className="mt-1 text-sm text-gray-500">
-                      {t("proofGalleries.extraPhotoPriceHint", {
-                        currency: gallery.currency,
-                      })}
-                    </p>
-                  </div>
-
-                  {settingsMessage ? (
-                    <p className="text-sm text-green-700">{settingsMessage}</p>
-                  ) : null}
-
-                  {settingsError ? (
-                    <p className="text-sm text-red-700">{settingsError}</p>
-                  ) : null}
-
-                  <button
-                    type="submit"
-                    disabled={savingSettings}
-                    className="inline-flex rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {savingSettings
-                      ? t("common.saving")
-                      : t("proofGalleries.saveSettings")}
-                  </button>
-                </form>
-              )}
-            </section>
-
-            <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
-              <h2 className="mb-4 flex items-center gap-2 font-display text-2xl font-semibold text-brand-green">
-                {t("proofGalleries.clientMessageTitle")}
-                {!isDraft ? (
-                  <LockIcon className="h-4 w-4 shrink-0 text-gray-400" />
-                ) : null}
-              </h2>
-
-              {isDraft ? (
-                <form onSubmit={handleSaveClientMessage} className="space-y-3">
-                  <label htmlFor="clientMessage" className="sr-only">
-                    {t("proofGalleries.clientMessageTitle")}
-                  </label>
-                  <textarea
-                    id="clientMessage"
-                    value={clientMessage}
-                    onChange={(e) => setClientMessage(e.target.value)}
-                    disabled={savingClientMessage}
-                    rows={4}
-                    placeholder={t("proofGalleries.clientMessagePlaceholder")}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
-                  />
-
-                  {clientMessageSaved ? (
-                    <p className="text-sm text-green-700">
-                      {clientMessageSaved}
-                    </p>
-                  ) : null}
-
-                  {clientMessageError ? (
-                    <p className="text-sm text-red-700">{clientMessageError}</p>
-                  ) : null}
-
-                  <button
-                    type="submit"
-                    disabled={savingClientMessage}
-                    className="inline-flex rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {savingClientMessage
-                      ? t("common.saving")
-                      : t("proofGalleries.saveClientMessage")}
-                  </button>
-                </form>
-              ) : (
-                <div className="space-y-3">
-                  {clientMessage ? (
-                    <p className="whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
-                      {clientMessage}
-                    </p>
-                  ) : null}
-
-                  <p className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <LockIcon className="h-3.5 w-3.5 shrink-0" />
-                    {t("proofGalleries.clientMessageLocked")}
-                  </p>
-                </div>
-              )}
-            </section>
+      {selectedTab === "proof" ? (
+        <div className="space-y-6">
+          <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
+            <h2 className="mb-4 font-display text-2xl font-semibold text-brand-green">
+              {t("proofGalleries.settingsTitle")}
+            </h2>
 
             {order ? (
-              <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 className="font-display text-2xl font-semibold text-brand-green">
-                    {t("proofGalleries.orderTitle")}
-                  </h2>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      order.status === "paid"
-                        ? "bg-brand-green text-white"
-                        : "bg-brand-gold/15 text-brand-gold-dark"
-                    }`}
-                  >
-                    {order.status === "paid"
-                      ? t("proofGalleries.statusPaid")
-                      : t("proofGalleries.orderPendingPayment")}
-                  </span>
-                </div>
-
+              <div>
+                <p className="mb-4 text-sm text-gray-500">
+                  {t("proofGalleries.settingsLockedNote")}
+                </p>
                 <dl className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <dt className="text-gray-600">
-                      {t("proofGalleries.orderTotalSelected")}
+                      {t("proofGalleries.clientNameLabel")}
                     </dt>
                     <dd className="font-medium text-gray-900">
-                      {order.includedCount + order.extraCount}
+                      {gallery.clientName}
                     </dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-gray-600">
-                      {t("proofGalleries.orderIncluded")}
-                    </dt>
-                    <dd className="font-medium text-gray-900">
-                      {order.includedCount}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-600">
-                      {t("proofGalleries.orderExtra")}
-                    </dt>
-                    <dd className="font-medium text-gray-900">
-                      {order.extraCount}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-gray-600">
-                      {t("proofGalleries.orderBaseCost")}
+                      {t("proofGalleries.baseCostLabel")}
                     </dt>
                     <dd className="font-medium text-gray-900">
                       {formatMoneyFromCents(
@@ -790,240 +744,334 @@ export default function ProofGalleryDetailClient({
                       )}
                     </dd>
                   </div>
-                  <div className="flex justify-between border-t border-gray-100 pt-2">
-                    <dt className="font-medium text-gray-900">
-                      {t("proofGalleries.orderTotal")}
+                  <div className="flex justify-between">
+                    <dt className="text-gray-600">
+                      {t("proofGalleries.freePhotoCountLabel")}
                     </dt>
-                    <dd className="font-semibold text-gray-900">
-                      {formatMoneyFromCents(order.totalCents, gallery.currency)}
+                    <dd className="font-medium text-gray-900">
+                      {gallery.freePhotoCount}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-gray-600">
+                      {t("proofGalleries.extraPhotoPriceLabel")}
+                    </dt>
+                    <dd className="font-medium text-gray-900">
+                      {formatMoneyFromCents(
+                        gallery.extraPhotoPriceCents,
+                        gallery.currency,
+                      )}
                     </dd>
                   </div>
                 </dl>
+              </div>
+            ) : (
+              <form onSubmit={handleSaveSettings} className="space-y-5">
+                <div>
+                  <label
+                    htmlFor="clientName"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                  >
+                    {t("proofGalleries.clientNameLabel")}
+                  </label>
+                  <input
+                    id="clientName"
+                    type="text"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    disabled={savingSettings}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
+                    required
+                  />
+                </div>
 
-                <p className="mt-3 text-xs text-gray-500">
-                  {t("proofGalleries.orderSubmittedAt", {
-                    date: order.submittedAtLabel,
-                  })}
-                </p>
-
-                {order.status === "paid" ? (
-                  <p className="mt-1 text-xs font-medium text-brand-green">
-                    {t("proofGalleries.orderPaidAt", {
-                      date: order.paidAtLabel ?? "",
+                <div>
+                  <label
+                    htmlFor="baseCost"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                  >
+                    {t("proofGalleries.baseCostLabel")}
+                  </label>
+                  <input
+                    id="baseCost"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={baseCost}
+                    onChange={(e) => setBaseCost(e.target.value)}
+                    disabled={savingSettings}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    {t("proofGalleries.baseCostHint", {
+                      currency: gallery.currency,
                     })}
                   </p>
-                ) : (
-                  <div className="mt-4 flex flex-col items-end">
-                    <div className="flex flex-wrap justify-end gap-3">
-                      <button
-                        type="button"
-                        onClick={handleReopen}
-                        disabled={reopening || markingPaid}
-                        className="rounded-full border border-brand-gold/25 px-5 py-2.5 text-sm font-semibold text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream disabled:opacity-60"
-                      >
-                        {reopening
-                          ? t("common.saving")
-                          : t("proofGalleries.reopen")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleMarkPaid}
-                        disabled={markingPaid || reopening}
-                        className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:opacity-60"
-                      >
-                        {markingPaid
-                          ? t("common.saving")
-                          : t("proofGalleries.markPaid")}
-                      </button>
-                    </div>
-                    {paidError ? (
-                      <p className="mt-2 text-sm text-red-700">{paidError}</p>
-                    ) : null}
-                  </div>
-                )}
+                </div>
 
-                {selectedFileNames.length > 0 ? (
-                  <div className="mt-5 border-t border-gray-100 pt-4">
-                    <p className="mb-2 text-sm font-medium text-gray-700">
-                      {t("proofGalleries.selectedFileNamesTitle")}
-                    </p>
+                <div>
+                  <label
+                    htmlFor="freePhotoCount"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                  >
+                    {t("proofGalleries.freePhotoCountLabel")}
+                  </label>
+                  <input
+                    id="freePhotoCount"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={freePhotoCount}
+                    onChange={(e) => setFreePhotoCount(e.target.value)}
+                    disabled={savingSettings}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
+                    required
+                  />
+                </div>
 
-                    <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap break-all rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-800">
-                      {selectedFileNames.join("\n")}
-                    </pre>
+                <div>
+                  <label
+                    htmlFor="extraPhotoPrice"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                  >
+                    {t("proofGalleries.extraPhotoPriceLabel")}
+                  </label>
+                  <input
+                    id="extraPhotoPrice"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={extraPhotoPrice}
+                    onChange={(e) => setExtraPhotoPrice(e.target.value)}
+                    disabled={savingSettings}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
+                    required
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    {t("proofGalleries.extraPhotoPriceHint", {
+                      currency: gallery.currency,
+                    })}
+                  </p>
+                </div>
 
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={handleCopyFilenames}
-                        className="rounded-full border border-brand-gold/25 px-4 py-2 text-sm font-medium text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream"
-                      >
-                        {filenamesCopied
-                          ? t("proofGalleries.filenamesCopied")
-                          : t("proofGalleries.copyFilenames")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDownloadFilenames}
-                        className="rounded-full border border-brand-gold/25 px-4 py-2 text-sm font-medium text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream"
-                      >
-                        {t("proofGalleries.downloadFilenames")}
-                      </button>
-                    </div>
-                  </div>
+                {settingsMessage ? (
+                  <p className="text-sm text-green-700">{settingsMessage}</p>
                 ) : null}
-              </section>
+
+                {settingsError ? (
+                  <p className="text-sm text-red-700">{settingsError}</p>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="inline-flex rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {savingSettings
+                    ? t("common.saving")
+                    : t("proofGalleries.saveSettings")}
+                </button>
+              </form>
+            )}
+          </section>
+
+          <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
+            <h2 className="mb-4 flex items-center gap-2 font-display text-2xl font-semibold text-brand-green">
+              {t("proofGalleries.clientMessageTitle")}
+              {!isDraft ? (
+                <LockIcon className="h-4 w-4 shrink-0 text-gray-400" />
+              ) : null}
+            </h2>
+
+            {isDraft ? (
+              <form onSubmit={handleSaveClientMessage} className="space-y-3">
+                <label htmlFor="clientMessage" className="sr-only">
+                  {t("proofGalleries.clientMessageTitle")}
+                </label>
+                <textarea
+                  id="clientMessage"
+                  value={clientMessage}
+                  onChange={(e) => setClientMessage(e.target.value)}
+                  disabled={savingClientMessage}
+                  rows={4}
+                  placeholder={t("proofGalleries.clientMessagePlaceholder")}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-gray-900 outline-none transition focus:border-brand-green focus:ring-1 focus:ring-brand-green disabled:bg-gray-100 disabled:text-gray-500"
+                />
+
+                {clientMessageSaved ? (
+                  <p className="text-sm text-green-700">{clientMessageSaved}</p>
+                ) : null}
+
+                {clientMessageError ? (
+                  <p className="text-sm text-red-700">{clientMessageError}</p>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={savingClientMessage}
+                  className="inline-flex rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {savingClientMessage
+                    ? t("common.saving")
+                    : t("proofGalleries.saveClientMessage")}
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-3">
+                {clientMessage ? (
+                  <p className="whitespace-pre-wrap rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
+                    {clientMessage}
+                  </p>
+                ) : null}
+
+                <p className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <LockIcon className="h-3.5 w-3.5 shrink-0" />
+                  {t("proofGalleries.clientMessageLocked")}
+                </p>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <h2 className="font-display text-2xl font-semibold text-brand-green">
+                {t("proofGalleries.photosTitle")} ({photos.length})
+              </h2>
+
+              {order ? (
+                <p className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <LockIcon className="h-3.5 w-3.5 shrink-0" />
+                  {order.status === "paid"
+                    ? t("proofGalleries.photosLockedPaid")
+                    : t("proofGalleries.photosLocked")}
+                </p>
+              ) : (
+                <label
+                  htmlFor="addPhotos"
+                  className="inline-flex cursor-pointer rounded-full border border-brand-gold/25 px-4 py-2 text-sm font-medium text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream"
+                >
+                  {t("form.chooseAdditionalPhotos")}
+                  <input
+                    ref={photosInputRef}
+                    id="addPhotos"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={uploading}
+                    onChange={handleAddPhotos}
+                    className="sr-only"
+                  />
+                </label>
+              )}
+            </div>
+
+            {uploadStatus ? (
+              <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-700">
+                {uploadStatus}
+              </p>
             ) : null}
 
-            <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <button
-                  type="button"
-                  onClick={() => setPhotosExpanded((expanded) => !expanded)}
-                  aria-expanded={photosExpanded}
-                  className="flex items-center gap-2 text-left"
-                >
-                  <h2 className="font-display text-2xl font-semibold text-brand-green">
-                    {t("proofGalleries.photosTitle")} ({photos.length})
-                  </h2>
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    className={`h-4 w-4 shrink-0 text-brand-green/60 transition-transform duration-200 ${
-                      photosExpanded ? "rotate-180" : ""
-                    }`}
-                  >
-                    <path
-                      d="M5 7.5l5 5 5-5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+            {uploadError ? (
+              <p className="mb-4 whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+                {uploadError}
+              </p>
+            ) : null}
 
-                {order ? (
-                  <p className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <LockIcon className="h-3.5 w-3.5 shrink-0" />
-                    {order.status === "paid"
-                      ? t("proofGalleries.photosLockedPaid")
-                      : t("proofGalleries.photosLocked")}
-                  </p>
-                ) : (
-                  <label
-                    htmlFor="addPhotos"
-                    className="inline-flex cursor-pointer rounded-full border border-brand-gold/25 px-4 py-2 text-sm font-medium text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream"
-                  >
-                    {t("form.chooseAdditionalPhotos")}
-                    <input
-                      ref={photosInputRef}
-                      id="addPhotos"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      disabled={uploading}
-                      onChange={handleAddPhotos}
-                      className="sr-only"
-                    />
-                  </label>
-                )}
-              </div>
+            {photos.length === 0 ? (
+              <p className="text-sm text-gray-600">
+                {t("proofGalleries.noPhotosYet")}
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                {photos.map((photo) => (
+                  <div key={photo.id} className="group relative">
+                    <div
+                      className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-4 transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md ${
+                        photo.selected ? "ring-brand-green" : "ring-transparent"
+                      }`}
+                    >
+                      <Image
+                        src={photo.cardSrc}
+                        alt={photo.fileName}
+                        fill
+                        sizes="200px"
+                        className="object-cover"
+                      />
 
-              {photosExpanded ? (
-                <>
-                  {uploadStatus ? (
-                    <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-700">
-                      {uploadStatus}
-                    </p>
-                  ) : null}
-
-                  {uploadError ? (
-                    <p className="mb-4 whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
-                      {uploadError}
-                    </p>
-                  ) : null}
-
-                  {photos.length === 0 ? (
-                    <p className="text-sm text-gray-600">
-                      {t("proofGalleries.noPhotosYet")}
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                      {photos.map((photo) => (
-                        <div key={photo.id} className="group relative">
-                          <div
-                            className={`relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-4 transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md ${
-                              photo.selected
-                                ? "ring-brand-green"
-                                : "ring-transparent"
-                            }`}
-                          >
-                            <Image
-                              src={photo.cardSrc}
-                              alt={photo.fileName}
-                              fill
-                              sizes="200px"
-                              className="object-cover"
-                            />
-
-                            {photo.selected ? (
-                              <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs font-bold text-white">
-                                ✓
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="mt-1 truncate text-xs text-gray-500">
-                            {photo.fileName}
-                          </p>
-                          {!photo.selected && photo.rating ? (
-                            <p
-                              className={`mt-0.5 text-xs font-medium ${
-                                photo.rating === "rather_yes"
-                                  ? "text-brand-gold-dark"
-                                  : "text-gray-500"
-                              }`}
-                            >
-                              {photo.rating === "rather_yes"
-                                ? t("proofGalleries.ratingRatherYes")
-                                : t("proofGalleries.ratingRatherNo")}
-                            </p>
-                          ) : null}
-                          {photo.comment ? (
-                            <p className="mt-0.5 text-xs text-gray-700">
-                              {photo.comment}
-                            </p>
-                          ) : null}
-                          {order ? null : (
-                            <button
-                              type="button"
-                              onClick={() => handleDeletePhoto(photo)}
-                              className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white"
-                            >
-                              {t("common.delete")}
-                            </button>
-                          )}
-                        </div>
-                      ))}
+                      {photo.selected ? (
+                        <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs font-bold text-white">
+                          ✓
+                        </span>
+                      ) : null}
                     </div>
-                  )}
-                </>
-              ) : null}
-            </section>
-          </>
-        ) : null}
-      </div>
-
-      <div className="space-y-10">
-        <div className="flex items-center gap-4">
-          <h2 className="whitespace-nowrap font-display text-xl font-semibold text-brand-green">
-            {t("proofGalleries.groupFinalDelivery")}
-          </h2>
-          <div className="h-px flex-1 bg-brand-gold/25" />
+                    <p className="mt-1 truncate text-xs text-gray-500">
+                      {photo.fileName}
+                    </p>
+                    {!photo.selected && photo.rating ? (
+                      <p
+                        className={`mt-0.5 text-xs font-medium ${
+                          photo.rating === "rather_yes"
+                            ? "text-brand-gold-dark"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {photo.rating === "rather_yes"
+                          ? t("proofGalleries.ratingRatherYes")
+                          : t("proofGalleries.ratingRatherNo")}
+                      </p>
+                    ) : null}
+                    {photo.comment ? (
+                      <p className="mt-0.5 text-xs text-gray-700">
+                        {photo.comment}
+                      </p>
+                    ) : null}
+                    {order ? null : (
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePhoto(photo)}
+                        className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-medium text-white"
+                      >
+                        {t("common.delete")}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
+      ) : null}
 
-        {order?.status === "paid" ? (
-          <>
+      {selectedTab === "submitted"
+        ? order
+          ? orderSection
+          : notSubmittedYetNotice
+        : null}
+
+      {selectedTab === "paid" ? (
+        !order ? (
+          notSubmittedYetNotice
+        ) : order.status !== "paid" ? (
+          notPaidYetNotice
+        ) : (
+          <div className="space-y-6">
+            {orderSection}
+            <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
+              <button
+                type="button"
+                onClick={() => setSelectedTab("final")}
+                className="inline-flex rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90"
+              >
+                {t("proofGalleries.goToFinalDelivery")} &rarr;
+              </button>
+            </section>
+          </div>
+        )
+      ) : null}
+
+      {selectedTab === "final" || selectedTab === "delivered" ? (
+        order?.status === "paid" ? (
+          <div className="space-y-6">
             <FinalsPageContentSection
               galleryId={gallery.id}
               initialEventDate={initialEventDate}
@@ -1039,7 +1087,7 @@ export default function ProofGalleryDetailClient({
               finalsPublishedAt={finalsPublishedAt}
               finalsPublishedAtLabel={finalsPublishedAtLabel}
             />
-          </>
+          </div>
         ) : (
           <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
             <p className="flex items-center gap-1.5 text-sm text-gray-500">
@@ -1047,8 +1095,8 @@ export default function ProofGalleryDetailClient({
               {t("finalDelivery.lockedUntilPaid")}
             </p>
           </section>
-        )}
-      </div>
+        )
+      ) : null}
 
       <section>
         <button
