@@ -158,6 +158,7 @@ export default function ProofGalleryDetailClient({
         ? "submitted"
         : "proof";
   const currentStageIndex = stageKeys.indexOf(currentStageKey);
+  const isFinished = currentStageKey === "delivered";
   // The connector line runs between the first and last circle's centers —
   // each stage is an equal-width column, so that's half a column in from
   // either edge.
@@ -689,8 +690,11 @@ export default function ProofGalleryDetailClient({
           />
 
           {stageKeys.map((key, index) => {
-            const isDone = index < currentStageIndex;
-            const isCurrent = index === currentStageIndex;
+            // "delivered" is terminal — reaching it means it's complete,
+            // not an in-progress step, so it gets the checkmark too.
+            const isDone =
+              index < currentStageIndex || (isFinished && index === currentStageIndex);
+            const isCurrent = index === currentStageIndex && !isFinished;
             const isTodo = index > currentStageIndex;
             const isSelected = key === selectedTab;
 
