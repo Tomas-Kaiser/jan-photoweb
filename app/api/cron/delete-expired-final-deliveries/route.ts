@@ -10,7 +10,7 @@ import { FINAL_DELIVERY_RETENTION_DAYS } from "@/app/lib/final-delivery-retentio
 // gallery is never auto-deleted while paid but undelivered (finals not yet
 // published), since the photographer may still need time to edit and
 // upload them. Deletion only starts counting down once finals are
-// published, 180 days later. Deletes both the proof photos' and final
+// published, 356 days later. Deletes both the proof photos' and final
 // photos' Cloudflare Images, the final photos' R2 originals, then the
 // proofGalleries row itself, which cascades
 // proofPhotos/proofOrders/finalPhotos. (Manual deletion via the admin UI's

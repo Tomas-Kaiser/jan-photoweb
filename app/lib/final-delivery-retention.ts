@@ -1,4 +1,4 @@
-export const FINAL_DELIVERY_RETENTION_DAYS = 180;
+export const FINAL_DELIVERY_RETENTION_DAYS = 356;
 
 /**
  * Days left before a gallery's final photos are auto-deleted, counting from
