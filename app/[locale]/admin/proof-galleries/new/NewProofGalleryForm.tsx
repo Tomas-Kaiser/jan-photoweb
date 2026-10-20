@@ -21,6 +21,7 @@ export default function NewProofGalleryForm({ locale }: Props) {
   const photosInputRef = useRef<HTMLInputElement | null>(null);
 
   const [clientName, setClientName] = useState("");
+  const [skipProof, setSkipProof] = useState(false);
   const [baseCost, setBaseCost] = useState("");
   const [freePhotoCount, setFreePhotoCount] = useState("10");
   const [extraPhotoPrice, setExtraPhotoPrice] = useState("");
@@ -74,19 +75,21 @@ export default function NewProofGalleryForm({ locale }: Props) {
         return;
       }
 
-      if (!Number.isFinite(baseCostUnits) || baseCostUnits < 0) {
-        setError(t("proofGalleries.baseCostLabel"));
-        return;
-      }
+      if (!skipProof) {
+        if (!Number.isFinite(baseCostUnits) || baseCostUnits < 0) {
+          setError(t("proofGalleries.baseCostLabel"));
+          return;
+        }
 
-      if (!Number.isFinite(freeCount) || freeCount < 0) {
-        setError(t("proofGalleries.freePhotoCountLabel"));
-        return;
-      }
+        if (!Number.isFinite(freeCount) || freeCount < 0) {
+          setError(t("proofGalleries.freePhotoCountLabel"));
+          return;
+        }
 
-      if (!Number.isFinite(priceUnits) || priceUnits < 0) {
-        setError(t("proofGalleries.extraPhotoPriceLabel"));
-        return;
+        if (!Number.isFinite(priceUnits) || priceUnits < 0) {
+          setError(t("proofGalleries.extraPhotoPriceLabel"));
+          return;
+        }
       }
 
       setSaving(true);
@@ -96,12 +99,24 @@ export default function NewProofGalleryForm({ locale }: Props) {
         const res = await fetch("/api/admin/proof-galleries", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clientName: name,
-            baseCostCents: Math.round(baseCostUnits * 100),
-            freePhotoCount: Math.round(freeCount),
-            extraPhotoPriceCents: Math.round(priceUnits * 100),
-          }),
+          // Pricing only applies to the proof selection, so a direct
+          // delivery gallery stores zeros instead of whatever was typed.
+          body: JSON.stringify(
+            skipProof
+              ? {
+                  clientName: name,
+                  baseCostCents: 0,
+                  freePhotoCount: 0,
+                  extraPhotoPriceCents: 0,
+                  skipProof: true,
+                }
+              : {
+                  clientName: name,
+                  baseCostCents: Math.round(baseCostUnits * 100),
+                  freePhotoCount: Math.round(freeCount),
+                  extraPhotoPriceCents: Math.round(priceUnits * 100),
+                },
+          ),
         });
 
         const data = await res.json().catch(() => null);
@@ -127,7 +142,7 @@ export default function NewProofGalleryForm({ locale }: Props) {
     const succeeded: File[] = [];
     const failed: UploadFailure[] = [];
 
-    for (const file of photoFiles) {
+    for (const file of skipProof ? [] : photoFiles) {
       setStatusText(
         t("upload.uploadingPhoto", {
           position: succeeded.length + failed.length + 1,
@@ -169,6 +184,24 @@ export default function NewProofGalleryForm({ locale }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-300 bg-white p-4 transition hover:border-gray-500">
+        <input
+          type="checkbox"
+          checked={skipProof}
+          onChange={(e) => setSkipProof(e.target.checked)}
+          disabled={saving || !!createdGalleryId}
+          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer"
+        />
+        <span>
+          <span className="block text-sm font-semibold text-gray-900">
+            {t("proofGalleries.skipProofLabel")}
+          </span>
+          <span className="mt-1 block text-sm text-gray-600">
+            {t("proofGalleries.skipProofHint")}
+          </span>
+        </span>
+      </label>
+
       <div>
         <label
           htmlFor="clientName"
@@ -188,136 +221,140 @@ export default function NewProofGalleryForm({ locale }: Props) {
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="baseCost"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          {t("proofGalleries.baseCostLabel")}
-        </label>
-        <input
-          id="baseCost"
-          type="number"
-          min={0}
-          step={1}
-          value={baseCost}
-          onChange={(e) => setBaseCost(e.target.value)}
-          disabled={saving || !!createdGalleryId}
-          className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-          placeholder="0"
-        />
-        <p className="mt-1 text-sm text-gray-500">
-          {t("proofGalleries.baseCostHint", { currency: "CZK" })}
-        </p>
-      </div>
-
-      <div>
-        <label
-          htmlFor="freePhotoCount"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          {t("proofGalleries.freePhotoCountLabel")}
-        </label>
-        <input
-          id="freePhotoCount"
-          type="number"
-          min={0}
-          step={1}
-          value={freePhotoCount}
-          onChange={(e) => setFreePhotoCount(e.target.value)}
-          disabled={saving || !!createdGalleryId}
-          className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="extraPhotoPrice"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          {t("proofGalleries.extraPhotoPriceLabel")}
-        </label>
-        <input
-          id="extraPhotoPrice"
-          type="number"
-          min={0}
-          step={1}
-          value={extraPhotoPrice}
-          onChange={(e) => setExtraPhotoPrice(e.target.value)}
-          disabled={saving || !!createdGalleryId}
-          className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
-          required
-        />
-        <p className="mt-1 text-sm text-gray-500">
-          {t("proofGalleries.extraPhotoPriceHint", { currency: "CZK" })}
-        </p>
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          {t("form.additionalPhotosLabel")}
-        </label>
-
-        <label
-          htmlFor="photoFiles"
-          className="group block cursor-pointer rounded-2xl border border-dashed border-gray-300 bg-white p-5 transition hover:border-gray-500 hover:bg-gray-50 focus-within:border-gray-900 focus-within:ring-4 focus-within:ring-gray-200"
-        >
-          <input
-            ref={photosInputRef}
-            id="photoFiles"
-            type="file"
-            accept="image/*"
-            multiple
-            disabled={saving}
-            onChange={(e) => {
-              setPhotoFiles(Array.from(e.target.files ?? []));
-              setError(null);
-              setFailures([]);
-            }}
-            className="sr-only"
-          />
-
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-gray-50 text-lg text-gray-700">
-              ⬆️
-            </div>
-
-            <div className="min-w-0 text-center">
-              <div className="text-sm font-semibold text-gray-900">
-                {photoFiles.length > 0
-                  ? t("form.changeSelectedPhotos")
-                  : t("form.chooseAdditionalPhotos")}
-              </div>
-
-              <div className="mt-1 text-sm text-gray-600">
-                {t("form.additionalPhotosHint")}
-              </div>
-
-              <div className="mt-2 text-sm text-gray-500">
-                {photoFiles.length > 0
-                  ? t("form.filesSelected", { count: photoFiles.length })
-                  : t("form.multipleFilesHint")}
-              </div>
-
-              {photoFiles.length > 0 ? (
-                <ul className="mt-3 space-y-1 text-center text-sm text-gray-600">
-                  {photoFiles.slice(0, 5).map((file) => (
-                    <li key={`${file.name}-${file.size}`} className="truncate">
-                      {file.name}
-                    </li>
-                  ))}
-                  {photoFiles.length > 5 ? (
-                    <li className="text-gray-500">
-                      {t("form.moreFiles", { count: photoFiles.length - 5 })}
-                    </li>
-                  ) : null}
-                </ul>
-              ) : null}
-            </div>
+      {skipProof ? null : (
+        <>
+          <div>
+            <label
+              htmlFor="baseCost"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              {t("proofGalleries.baseCostLabel")}
+            </label>
+            <input
+              id="baseCost"
+              type="number"
+              min={0}
+              step={1}
+              value={baseCost}
+              onChange={(e) => setBaseCost(e.target.value)}
+              disabled={saving || !!createdGalleryId}
+              className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+              placeholder="0"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              {t("proofGalleries.baseCostHint", { currency: "CZK" })}
+            </p>
           </div>
-        </label>
-      </div>
+
+          <div>
+            <label
+              htmlFor="freePhotoCount"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              {t("proofGalleries.freePhotoCountLabel")}
+            </label>
+            <input
+              id="freePhotoCount"
+              type="number"
+              min={0}
+              step={1}
+              value={freePhotoCount}
+              onChange={(e) => setFreePhotoCount(e.target.value)}
+              disabled={saving || !!createdGalleryId}
+              className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="extraPhotoPrice"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              {t("proofGalleries.extraPhotoPriceLabel")}
+            </label>
+            <input
+              id="extraPhotoPrice"
+              type="number"
+              min={0}
+              step={1}
+              value={extraPhotoPrice}
+              onChange={(e) => setExtraPhotoPrice(e.target.value)}
+              disabled={saving || !!createdGalleryId}
+              className="w-full rounded-xl border border-gray-300 px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+              required
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              {t("proofGalleries.extraPhotoPriceHint", { currency: "CZK" })}
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              {t("form.additionalPhotosLabel")}
+            </label>
+
+            <label
+              htmlFor="photoFiles"
+              className="group block cursor-pointer rounded-2xl border border-dashed border-gray-300 bg-white p-5 transition hover:border-gray-500 hover:bg-gray-50 focus-within:border-gray-900 focus-within:ring-4 focus-within:ring-gray-200"
+            >
+              <input
+                ref={photosInputRef}
+                id="photoFiles"
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={saving}
+                onChange={(e) => {
+                  setPhotoFiles(Array.from(e.target.files ?? []));
+                  setError(null);
+                  setFailures([]);
+                }}
+                className="sr-only"
+              />
+
+              <div className="flex flex-col items-center justify-center gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-gray-50 text-lg text-gray-700">
+                  ⬆️
+                </div>
+
+                <div className="min-w-0 text-center">
+                  <div className="text-sm font-semibold text-gray-900">
+                    {photoFiles.length > 0
+                      ? t("form.changeSelectedPhotos")
+                      : t("form.chooseAdditionalPhotos")}
+                  </div>
+
+                  <div className="mt-1 text-sm text-gray-600">
+                    {t("form.additionalPhotosHint")}
+                  </div>
+
+                  <div className="mt-2 text-sm text-gray-500">
+                    {photoFiles.length > 0
+                      ? t("form.filesSelected", { count: photoFiles.length })
+                      : t("form.multipleFilesHint")}
+                  </div>
+
+                  {photoFiles.length > 0 ? (
+                    <ul className="mt-3 space-y-1 text-center text-sm text-gray-600">
+                      {photoFiles.slice(0, 5).map((file) => (
+                        <li key={`${file.name}-${file.size}`} className="truncate">
+                          {file.name}
+                        </li>
+                      ))}
+                      {photoFiles.length > 5 ? (
+                        <li className="text-gray-500">
+                          {t("form.moreFiles", { count: photoFiles.length - 5 })}
+                        </li>
+                      ) : null}
+                    </ul>
+                  ) : null}
+                </div>
+              </div>
+            </label>
+          </div>
+        </>
+      )}
 
       {statusText ? (
         <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-700">

@@ -151,6 +151,8 @@
     "acceptOptional": "Přijmout volitelné"
   },
   "proof": {
+    "finalsComingSoonTitle": "Vaše fotky jsou na cestě",
+    "finalsComingSoonMessage": "Fotograf vaše fotky ještě dokončuje. Jakmile budou hotové, objeví se na této stránce — zkuste to prosím později.",
     "notFoundTitle": "Náhledovka nenalezena",
     "notFoundMessage": "Tomuto odkazu neodpovídá žádná náhledovka. Zkontrolujte prosím odkaz, který vám fotograf poslal.",
     "noPhotosYet": "Do této náhledovky zatím nebyly nahrány žádné fotky — zkuste to prosím později.",
@@ -255,6 +257,10 @@
       "defaultUserName": "Administrátor"
     },
     "proofGalleries": {
+      "skipProofLabel": "Přeskočit náhledy — rovnou předat finální fotky",
+      "skipProofHint": "Pro svatby a další focení, kde si klient fotky nevybírá. Bez výběru náhledů a bez platby: nahrajete hotové fotky a rovnou je zveřejníte.",
+      "directDelivery": "Přímé předání",
+      "directDeliveryHint": "Bez výběru náhledů — pouze finální fotky",
       "pageTitle": "Náhledovky",
       "detailEyebrow": "Náhledovka",
       "stageProof": "Výběr fotek",

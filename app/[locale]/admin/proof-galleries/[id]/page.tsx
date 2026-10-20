@@ -117,7 +117,9 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
         </Link>
 
         <p className="text-xs font-semibold uppercase tracking-widest text-brand-gold-dark">
-          {t("proofGalleries.detailEyebrow")}
+          {gallery.skipProof
+            ? t("proofGalleries.directDelivery")
+            : t("proofGalleries.detailEyebrow")}
         </p>
         <h1 className="mb-8 mt-1 font-display text-4xl font-semibold text-brand-green">
           {gallery.clientName}
@@ -136,6 +138,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
             currency: gallery.currency,
             message: gallery.message,
             status: gallery.status,
+            skipProof: gallery.skipProof,
           }}
           initialPhotos={photos}
           order={order}

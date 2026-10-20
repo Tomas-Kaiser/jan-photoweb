@@ -40,7 +40,8 @@ function getImageDimensions(file: File): Promise<{ width: number; height: number
 
 type Props = {
   galleryId: string;
-  orderStatus: "pending_payment" | "paid";
+  // Paid order, or a direct delivery gallery that never had one.
+  canPublish: boolean;
   initialFinalPhotos: FinalPhoto[];
   finalsPublishedAtLabel: string | null;
   finalsPublishedAt: string | null;
@@ -55,7 +56,7 @@ type UploadFailure = {
 
 export default function FinalPhotosSection({
   galleryId,
-  orderStatus,
+  canPublish,
   initialFinalPhotos,
   finalsPublishedAtLabel,
   finalsPublishedAt,
@@ -403,7 +404,7 @@ export default function FinalPhotosSection({
 
       {!isPublished ? (
         <div className="mt-5 flex flex-col items-end border-t border-gray-100 pt-4">
-          {orderStatus !== "paid" ? (
+          {!canPublish ? (
             <p className="mb-2 text-xs text-gray-500">
               {t("finalDelivery.needsPaidOrder")}
             </p>
@@ -411,7 +412,7 @@ export default function FinalPhotosSection({
           <button
             type="button"
             onClick={handlePublish}
-            disabled={publishing || photos.length === 0 || orderStatus !== "paid"}
+            disabled={publishing || photos.length === 0 || !canPublish}
             className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {publishing ? t("common.saving") : t("finalDelivery.publishButton")}

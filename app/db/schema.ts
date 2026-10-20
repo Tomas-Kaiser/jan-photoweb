@@ -128,6 +128,11 @@ export const proofGalleries = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     expiresAt: timestamp("expires_at"),
     finalsPublishedAt: timestamp("finals_published_at"),
+    // Direct delivery (e.g. weddings): no proof selection or payment step
+    // — the photographer uploads and publishes finals straight away. Set
+    // at creation only; stands in for a paid order wherever final
+    // delivery would otherwise require one.
+    skipProof: boolean("skip_proof").default(false).notNull(),
     // Shown on the client-facing finals page (hero + title section) —
     // settable by admin any time, independent of gallery/order status.
     eventDate: date("event_date", { mode: "date" }),

@@ -21,6 +21,7 @@ type Gallery = {
   currency: string;
   message: string | null;
   status: "draft" | "active" | "submitted" | "paid" | "closed";
+  skipProof: boolean;
 };
 
 type Photo = {
@@ -78,6 +79,10 @@ const STAGE_KEYS = [
   "delivered",
 ] as const;
 type StageKey = (typeof STAGE_KEYS)[number];
+
+// Direct delivery galleries (skipProof) have no proof/submission/payment,
+// so their stepper only covers the final delivery itself.
+const DIRECT_DELIVERY_STAGE_KEYS: readonly StageKey[] = ["final", "delivered"];
 
 export default function ProofGalleryDetailClient({
   locale,
@@ -139,17 +144,25 @@ export default function ProofGalleryDetailClient({
 
   const shareUrl = `${origin}/${locale}/proof/${gallery.token}`;
 
+  const stageKeys = gallery.skipProof ? DIRECT_DELIVERY_STAGE_KEYS : STAGE_KEYS;
+  const canDeliverFinals = gallery.skipProof || order?.status === "paid";
+
   // Where the gallery actually is right now. "paid" never lingers as the
   // current stage on its own — the moment it's paid, final delivery is the
   // actionable next step, so progress jumps straight to "final".
   const currentStageKey: StageKey = finalsPublishedAt
     ? "delivered"
-    : order?.status === "paid"
+    : canDeliverFinals
       ? "final"
       : order
         ? "submitted"
         : "proof";
-  const currentStageIndex = STAGE_KEYS.indexOf(currentStageKey);
+  const currentStageIndex = stageKeys.indexOf(currentStageKey);
+  // The connector line runs between the first and last circle's centers —
+  // each stage is an equal-width column, so that's half a column in from
+  // either edge.
+  const stageInsetPercent = 50 / stageKeys.length;
+  const stageSpanPercent = 100 - 2 * stageInsetPercent;
 
   const [selectedTab, setSelectedTab] = useState<StageKey>(currentStageKey);
 
@@ -660,15 +673,22 @@ export default function ProofGalleryDetailClient({
 
       <section className="rounded-3xl border border-brand-gold/15 bg-white p-7 pb-5 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)]">
         <div className="relative flex justify-between px-1">
-          <div className="absolute left-[10%] right-[10%] top-[19px] h-0.5 bg-brand-gold/15" />
           <div
-            className="absolute left-[10%] top-[19px] h-0.5 bg-brand-green transition-[width] duration-300"
+            className="absolute top-[19px] h-0.5 bg-brand-gold/15"
             style={{
-              width: `${(currentStageIndex / (STAGE_KEYS.length - 1)) * 80}%`,
+              left: `${stageInsetPercent}%`,
+              right: `${stageInsetPercent}%`,
+            }}
+          />
+          <div
+            className="absolute top-[19px] h-0.5 bg-brand-green transition-[width] duration-300"
+            style={{
+              left: `${stageInsetPercent}%`,
+              width: `${(currentStageIndex / (stageKeys.length - 1)) * stageSpanPercent}%`,
             }}
           />
 
-          {STAGE_KEYS.map((key, index) => {
+          {stageKeys.map((key, index) => {
             const isDone = index < currentStageIndex;
             const isCurrent = index === currentStageIndex;
             const isTodo = index > currentStageIndex;
@@ -1070,7 +1090,7 @@ export default function ProofGalleryDetailClient({
       ) : null}
 
       {selectedTab === "final" || selectedTab === "delivered" ? (
-        order?.status === "paid" ? (
+        canDeliverFinals ? (
           <div className="space-y-6">
             <FinalsPageContentSection
               galleryId={gallery.id}
@@ -1082,7 +1102,7 @@ export default function ProofGalleryDetailClient({
 
             <FinalPhotosSection
               galleryId={gallery.id}
-              orderStatus={order.status}
+              canPublish={canDeliverFinals}
               initialFinalPhotos={initialFinalPhotos}
               finalsPublishedAt={finalsPublishedAt}
               finalsPublishedAtLabel={finalsPublishedAtLabel}

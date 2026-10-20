@@ -129,6 +129,24 @@ export default async function ProofGalleryPage({ params }: Props) {
     );
   }
 
+  // Direct delivery: there's nothing for the client to do until finals are
+  // published, so never show the proof selection flow.
+  if (gallery.skipProof) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-24 text-center">
+        <div className="rounded-3xl bg-white p-10 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
+          <p className="text-sm font-semibold uppercase tracking-widest text-brand-gold-dark">
+            {gallery.clientName}
+          </p>
+          <h1 className="mt-3 font-display text-3xl font-semibold text-brand-green">
+            {t("finalsComingSoonTitle")}
+          </h1>
+          <p className="mt-3 text-gray-600">{t("finalsComingSoonMessage")}</p>
+        </div>
+      </div>
+    );
+  }
+
   // Watermarked via our own proxy (app/api/proof-image/[cloudflareId]) rather
   // than Cloudflare's variants directly — see docs/photo-proofing-design.md
   // §7. Deliberately never requesting "full" here even for the expanded

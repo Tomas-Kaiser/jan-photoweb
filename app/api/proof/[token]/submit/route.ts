@@ -143,6 +143,13 @@ export async function POST(req: Request, { params }: Params) {
 
     const gallery = galleryRows[0];
 
+    if (gallery.skipProof) {
+      return NextResponse.json(
+        { error: "This gallery has no proof selection." },
+        { status: 409 },
+      );
+    }
+
     const existingOrder = await db
       .select({ id: proofOrders.id })
       .from(proofOrders)

@@ -17,6 +17,7 @@ type Gallery = {
   orderStatus: "pending_payment" | "paid" | null;
   orderTotalCents: number | null;
   finalsPublishedAt: Date | null;
+  skipProof: boolean;
   photoCount: number;
 };
 
@@ -46,6 +47,7 @@ export default async function ProofGalleriesAdminPage({
       orderStatus: proofOrders.status,
       orderTotalCents: proofOrders.totalCents,
       finalsPublishedAt: proofGalleries.finalsPublishedAt,
+      skipProof: proofGalleries.skipProof,
       photoCount: sql<number>`count(${proofPhotos.id})`.mapWith(Number),
     })
     .from(proofGalleries)
@@ -57,11 +59,12 @@ export default async function ProofGalleriesAdminPage({
   // Grouped by where each gallery actually is in its lifecycle, rather than
   // the raw `status` column — "draft" and "active" both mean "no submission
   // yet" from this page's point of view, and "paid" splits further into
-  // whether finals have been published.
-  const draft = galleries.filter((g) => !g.orderStatus);
+  // whether finals have been published. Direct delivery galleries never
+  // get an order, so they sit alongside paid ones until published.
+  const draft = galleries.filter((g) => !g.orderStatus && !g.skipProof);
   const awaitingPayment = galleries.filter((g) => g.orderStatus === "pending_payment");
   const paid = galleries.filter(
-    (g) => g.orderStatus === "paid" && !g.finalsPublishedAt,
+    (g) => (g.orderStatus === "paid" || g.skipProof) && !g.finalsPublishedAt,
   );
   const published = galleries.filter((g) => g.finalsPublishedAt);
 
@@ -140,7 +143,11 @@ function GalleryCard({
         <h2 className="font-display text-xl font-semibold text-brand-green">
           {gallery.clientName}
         </h2>
-        {gallery.orderStatus === "paid" ? (
+        {gallery.skipProof ? (
+          <span className="shrink-0 rounded-full bg-brand-gold/15 px-3 py-1 text-xs font-semibold text-brand-gold-dark">
+            {t("proofGalleries.directDelivery")}
+          </span>
+        ) : gallery.orderStatus === "paid" ? (
           <span className="shrink-0 rounded-full bg-brand-green px-3 py-1 text-xs font-semibold text-white">
             {t("proofGalleries.statusPaid")}
           </span>
@@ -156,7 +163,9 @@ function GalleryCard({
       </div>
 
       <p className="mt-3 text-sm text-gray-600">
-        {t("proofGalleries.photoCount", { count: gallery.photoCount })}
+        {gallery.skipProof
+          ? t("proofGalleries.directDeliveryHint")
+          : t("proofGalleries.photoCount", { count: gallery.photoCount })}
         {gallery.orderTotalCents !== null ? (
           <>
             {" · "}

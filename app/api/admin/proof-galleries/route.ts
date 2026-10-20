@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     const baseCostCents = Number(body?.baseCostCents ?? 0);
     const freePhotoCount = Number(body?.freePhotoCount);
     const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
+    const skipProof = body?.skipProof === true;
 
     if (!clientName) {
       return NextResponse.json(
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
         baseCostCents,
         freePhotoCount,
         extraPhotoPriceCents,
+        skipProof,
       })
       .returning({ id: proofGalleries.id });
 

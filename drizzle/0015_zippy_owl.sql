@@ -1,0 +1,1 @@
+ALTER TABLE "proof_galleries" ADD COLUMN "skip_proof" boolean DEFAULT false NOT NULL;

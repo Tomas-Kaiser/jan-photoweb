@@ -151,6 +151,8 @@
     "acceptOptional": "Accept optional"
   },
   "proof": {
+    "finalsComingSoonTitle": "Your photos are on their way",
+    "finalsComingSoonMessage": "Your photographer is still finishing your photos. They'll appear on this page as soon as they're ready — please check back later.",
     "notFoundTitle": "Gallery not found",
     "notFoundMessage": "This link doesn't match a proof gallery. Please check the link your photographer sent you.",
     "noPhotosYet": "No photos have been uploaded to this gallery yet — please check back later.",
@@ -255,6 +257,10 @@
       "defaultUserName": "Admin"
     },
     "proofGalleries": {
+      "skipProofLabel": "Skip proof — deliver final photos directly",
+      "skipProofHint": "For weddings and other shoots where the client doesn't pick photos. No proof selection or payment step: you upload the finished photos and publish them straight away.",
+      "directDelivery": "Direct delivery",
+      "directDeliveryHint": "No proof selection — final photos only",
       "pageTitle": "Proof galleries",
       "detailEyebrow": "Proof gallery",
       "stageProof": "Proof",
