@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
-import { proofGalleries, proofOrders } from "@/app/db/schema";
+import { proofOrders } from "@/app/db/schema";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -29,17 +29,10 @@ export const POST = withAdmin(async (_req: Request, { params }: Params) => {
       return NextResponse.json({ success: true });
     }
 
-    await db.transaction(async (tx) => {
-      await tx
-        .update(proofOrders)
-        .set({ status: "paid", confirmedAt: new Date() })
-        .where(eq(proofOrders.id, orderRows[0].id));
-
-      await tx
-        .update(proofGalleries)
-        .set({ status: "paid" })
-        .where(eq(proofGalleries.id, id));
-    });
+    await db
+      .update(proofOrders)
+      .set({ status: "paid", confirmedAt: new Date() })
+      .where(eq(proofOrders.id, orderRows[0].id));
 
     return NextResponse.json({ success: true });
   } catch (error) {

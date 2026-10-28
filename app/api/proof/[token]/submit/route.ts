@@ -221,11 +221,6 @@ export async function POST(req: Request, { params }: Params) {
         extraCount,
         totalCents,
       });
-
-      await tx
-        .update(proofGalleries)
-        .set({ status: "submitted" })
-        .where(eq(proofGalleries.id, gallery.id));
     });
 
     try {

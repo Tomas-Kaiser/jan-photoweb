@@ -19,6 +19,7 @@ import {
   getWatermarkedProofImageUrl,
 } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
+import { getClientView } from "@/app/lib/gallery-lifecycle";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
 import FinalsGalleryClient from "./FinalsGalleryClient";
@@ -72,8 +73,13 @@ export default async function ProofGalleryPage({ params }: Props) {
     .limit(1);
 
   const order = orderRows[0];
+  const view = getClientView({
+    skipProof: gallery.skipProof,
+    finalsPublishedAt: gallery.finalsPublishedAt,
+    order: order ?? null,
+  });
 
-  if (gallery.finalsPublishedAt) {
+  if (view === "finals") {
     const finalPhotoRows = await db
       .select()
       .from(finalPhotos)
@@ -131,7 +137,7 @@ export default async function ProofGalleryPage({ params }: Props) {
 
   // Direct delivery: there's nothing for the client to do until finals are
   // published, so never show the proof selection flow.
-  if (gallery.skipProof) {
+  if (view === "finalsComingSoon") {
     return (
       <div className="mx-auto max-w-xl px-6 py-24 text-center">
         <div className="rounded-3xl bg-white p-10 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
@@ -162,7 +168,7 @@ export default async function ProofGalleryPage({ params }: Props) {
     rating: photo.rating,
   }));
 
-  if (order) {
+  if (view === "submitted" && order) {
     const selectedIds = new Set(order.selectedPhotoIds);
     const selectedPhotos = photos.filter((p) => selectedIds.has(p.id));
 

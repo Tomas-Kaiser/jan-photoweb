@@ -19,14 +19,6 @@ export const photoVisibilityEnum = pgEnum("photo_visibility", [
   "highlights_only",
 ]);
 
-export const proofGalleryStatusEnum = pgEnum("proof_gallery_status", [
-  "draft",
-  "active",
-  "submitted",
-  "paid",
-  "closed",
-]);
-
 export const proofOrderStatusEnum = pgEnum("proof_order_status", [
   "pending_payment",
   "paid",
@@ -123,10 +115,8 @@ export const proofGalleries = pgTable(
       .default(0)
       .notNull(),
     currency: text("currency").default("CZK").notNull(),
-    status: proofGalleryStatusEnum("status").default("draft").notNull(),
     message: text("message"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    expiresAt: timestamp("expires_at"),
     finalsPublishedAt: timestamp("finals_published_at"),
     // Direct delivery (e.g. weddings): no proof selection or payment step
     // — the photographer uploads and publishes finals straight away. Set

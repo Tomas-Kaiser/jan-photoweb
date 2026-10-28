@@ -137,7 +137,6 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
             extraPhotoPriceCents: gallery.extraPhotoPriceCents,
             currency: gallery.currency,
             message: gallery.message,
-            status: gallery.status,
             skipProof: gallery.skipProof,
           }}
           initialPhotos={photos}

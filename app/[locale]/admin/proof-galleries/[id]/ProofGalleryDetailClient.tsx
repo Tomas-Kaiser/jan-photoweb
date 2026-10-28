@@ -9,6 +9,11 @@ import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare"
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import {
+  getGalleryPermissions,
+  getGalleryStage,
+  type GalleryStage,
+} from "@/app/lib/gallery-lifecycle";
+import {
   PROOF_LINK_SEGMENTS,
   getProofLinkPath,
   type ProofLinkLocale,
@@ -25,7 +30,6 @@ type Gallery = {
   extraPhotoPriceCents: number;
   currency: string;
   message: string | null;
-  status: "draft" | "active" | "submitted" | "paid" | "closed";
   skipProof: boolean;
 };
 
@@ -73,7 +77,7 @@ type Props = {
 
 // The gallery's lifecycle, left to right. Each stage is a tab: clicking one
 // only changes which panel is shown (selectedTab) — it never changes the
-// gallery's actual progress, which is derived from gallery/order data
+// gallery's actual progress, which comes from the lifecycle module
 // (currentStageKey) and drives the circles' done/current/todo state
 // independently of whatever tab is currently being viewed.
 const STAGE_KEYS = [
@@ -88,6 +92,16 @@ type StageKey = (typeof STAGE_KEYS)[number];
 // Direct delivery galleries (skipProof) have no proof/submission/payment,
 // so their stepper only covers the final delivery itself.
 const DIRECT_DELIVERY_STAGE_KEYS: readonly StageKey[] = ["final", "delivered"];
+
+// "paid" never lingers as the current stage on its own — the moment it's
+// paid, final delivery is the actionable next step, so progress sits on
+// "final" until finals are published.
+const STAGE_KEY_BY_STAGE: Record<GalleryStage, StageKey> = {
+  proof: "proof",
+  submitted: "submitted",
+  awaitingFinals: "final",
+  delivered: "delivered",
+};
 
 export default function ProofGalleryDetailClient({
   locale,
@@ -144,7 +158,13 @@ export default function ProofGalleryDetailClient({
   const [paidError, setPaidError] = useState<string | null>(null);
   const [reopening, setReopening] = useState(false);
 
-  const isDraft = gallery.status === "draft";
+  const lifecycle = {
+    skipProof: gallery.skipProof,
+    finalsPublishedAt,
+    order,
+  };
+  const stage = getGalleryStage(lifecycle);
+  const permissions = getGalleryPermissions(lifecycle);
 
   const selectedFileNames = photos
     .filter((photo) => photo.selected)
@@ -153,18 +173,7 @@ export default function ProofGalleryDetailClient({
   const shareUrl = `${origin}${getProofLinkPath(linkLocale, gallery.token)}`;
 
   const stageKeys = gallery.skipProof ? DIRECT_DELIVERY_STAGE_KEYS : STAGE_KEYS;
-  const canDeliverFinals = gallery.skipProof || order?.status === "paid";
-
-  // Where the gallery actually is right now. "paid" never lingers as the
-  // current stage on its own — the moment it's paid, final delivery is the
-  // actionable next step, so progress jumps straight to "final".
-  const currentStageKey: StageKey = finalsPublishedAt
-    ? "delivered"
-    : canDeliverFinals
-      ? "final"
-      : order
-        ? "submitted"
-        : "proof";
+  const currentStageKey = STAGE_KEY_BY_STAGE[stage];
   const currentStageIndex = stageKeys.indexOf(currentStageKey);
   const isFinished = currentStageKey === "delivered";
   // The connector line runs between the first and last circle's centers —
@@ -581,31 +590,37 @@ export default function ProofGalleryDetailClient({
             date: order.paidAtLabel ?? "",
           })}
         </p>
-      ) : (
+      ) : null}
+
+      {permissions.canReopen || permissions.canMarkPaid ? (
         <div className="mt-4 flex flex-col items-end">
           <div className="flex flex-wrap justify-end gap-3">
-            <button
-              type="button"
-              onClick={handleReopen}
-              disabled={reopening || markingPaid}
-              className="rounded-full border border-brand-gold/25 px-5 py-2.5 text-sm font-semibold text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream disabled:opacity-60"
-            >
-              {reopening ? t("common.saving") : t("proofGalleries.reopen")}
-            </button>
-            <button
-              type="button"
-              onClick={handleMarkPaid}
-              disabled={markingPaid || reopening}
-              className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:opacity-60"
-            >
-              {markingPaid ? t("common.saving") : t("proofGalleries.markPaid")}
-            </button>
+            {permissions.canReopen ? (
+              <button
+                type="button"
+                onClick={handleReopen}
+                disabled={reopening || markingPaid}
+                className="rounded-full border border-brand-gold/25 px-5 py-2.5 text-sm font-semibold text-brand-green transition hover:border-brand-gold/50 hover:bg-brand-cream disabled:opacity-60"
+              >
+                {reopening ? t("common.saving") : t("proofGalleries.reopen")}
+              </button>
+            ) : null}
+            {permissions.canMarkPaid ? (
+              <button
+                type="button"
+                onClick={handleMarkPaid}
+                disabled={markingPaid || reopening}
+                className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:opacity-60"
+              >
+                {markingPaid ? t("common.saving") : t("proofGalleries.markPaid")}
+              </button>
+            ) : null}
           </div>
           {paidError ? (
             <p className="mt-2 text-sm text-red-700">{paidError}</p>
           ) : null}
         </div>
-      )}
+      ) : null}
 
       {selectedFileNames.length > 0 ? (
         <div className="mt-5 border-t border-gray-100 pt-4">
@@ -778,7 +793,7 @@ export default function ProofGalleryDetailClient({
               {t("proofGalleries.settingsTitle")}
             </h2>
 
-            {order ? (
+            {!permissions.canEditPricing ? (
               <div>
                 <p className="mb-4 text-sm text-gray-500">
                   {t("proofGalleries.settingsLockedNote")}
@@ -937,12 +952,12 @@ export default function ProofGalleryDetailClient({
           <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
             <h2 className="mb-4 flex items-center gap-2 font-display text-2xl font-semibold text-brand-green">
               {t("proofGalleries.clientMessageTitle")}
-              {!isDraft ? (
+              {!permissions.canEditClientMessage ? (
                 <LockIcon className="h-4 w-4 shrink-0 text-gray-400" />
               ) : null}
             </h2>
 
-            {isDraft ? (
+            {permissions.canEditClientMessage ? (
               <form onSubmit={handleSaveClientMessage} className="space-y-3">
                 <label htmlFor="clientMessage" className="sr-only">
                   {t("proofGalleries.clientMessageTitle")}
@@ -997,12 +1012,12 @@ export default function ProofGalleryDetailClient({
                 {t("proofGalleries.photosTitle")} ({photos.length})
               </h2>
 
-              {order ? (
+              {!permissions.canEditProofPhotos ? (
                 <p className="flex items-center gap-1.5 text-xs text-gray-500">
                   <LockIcon className="h-3.5 w-3.5 shrink-0" />
-                  {order.status === "paid"
-                    ? t("proofGalleries.photosLockedPaid")
-                    : t("proofGalleries.photosLocked")}
+                  {stage === "submitted"
+                    ? t("proofGalleries.photosLocked")
+                    : t("proofGalleries.photosLockedPaid")}
                 </p>
               ) : (
                 <label
@@ -1084,7 +1099,7 @@ export default function ProofGalleryDetailClient({
                         {photo.comment}
                       </p>
                     ) : null}
-                    {order ? null : (
+                    {permissions.canEditProofPhotos ? (
                       <button
                         type="button"
                         onClick={() => handleDeletePhoto(photo)}
@@ -1092,7 +1107,7 @@ export default function ProofGalleryDetailClient({
                       >
                         {t("common.delete")}
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -1108,9 +1123,9 @@ export default function ProofGalleryDetailClient({
         : null}
 
       {selectedTab === "paid" ? (
-        !order ? (
+        stage === "proof" ? (
           notSubmittedYetNotice
-        ) : order.status !== "paid" ? (
+        ) : stage === "submitted" ? (
           notPaidYetNotice
         ) : (
           <div className="space-y-6">
@@ -1129,7 +1144,7 @@ export default function ProofGalleryDetailClient({
       ) : null}
 
       {selectedTab === "final" || selectedTab === "delivered" ? (
-        canDeliverFinals ? (
+        permissions.canEditFinalsPage ? (
           <div className="space-y-6">
             <FinalsPageContentSection
               galleryId={gallery.id}
@@ -1141,7 +1156,8 @@ export default function ProofGalleryDetailClient({
 
             <FinalPhotosSection
               galleryId={gallery.id}
-              canPublish={canDeliverFinals}
+              canDelete={permissions.canDeleteFinals}
+              canPublish={permissions.canPublishFinals}
               initialFinalPhotos={initialFinalPhotos}
               finalsPublishedAt={finalsPublishedAt}
               finalsPublishedAtLabel={finalsPublishedAtLabel}

@@ -40,7 +40,8 @@ function getImageDimensions(file: File): Promise<{ width: number; height: number
 
 type Props = {
   galleryId: string;
-  // Paid order, or a direct delivery gallery that never had one.
+  // Finals can be removed only until they're published.
+  canDelete: boolean;
   canPublish: boolean;
   initialFinalPhotos: FinalPhoto[];
   finalsPublishedAtLabel: string | null;
@@ -56,6 +57,7 @@ type UploadFailure = {
 
 export default function FinalPhotosSection({
   galleryId,
+  canDelete,
   canPublish,
   initialFinalPhotos,
   finalsPublishedAtLabel,
@@ -388,7 +390,7 @@ export default function FinalPhotosSection({
               </div>
               <p className="mt-1 truncate text-xs text-gray-500">{photo.fileName}</p>
 
-              {!isPublished ? (
+              {canDelete ? (
                 <button
                   type="button"
                   onClick={() => handleDeletePhoto(photo)}

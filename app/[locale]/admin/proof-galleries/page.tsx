@@ -7,11 +7,11 @@ import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import { getDaysUntilFinalDeliveryDeletion } from "@/app/lib/final-delivery-retention";
+import { getGalleryStage, type GalleryStage } from "@/app/lib/gallery-lifecycle";
 
 type Gallery = {
   id: string;
   clientName: string;
-  status: string;
   currency: string;
   createdAt: Date;
   orderStatus: "pending_payment" | "paid" | null;
@@ -20,6 +20,38 @@ type Gallery = {
   skipProof: boolean;
   photoCount: number;
 };
+
+type Translator = Awaited<ReturnType<typeof getTranslations>>;
+
+const STAGE_ORDER: GalleryStage[] = [
+  "proof",
+  "submitted",
+  "awaitingFinals",
+  "delivered",
+];
+
+// Shared by the section headings and each card's badge, so a gallery's
+// badge always names the section it's listed under.
+function stageLabel(stage: GalleryStage, t: Translator) {
+  switch (stage) {
+    case "proof":
+      return t("proofGalleries.statusDraft");
+    case "submitted":
+      return t("proofGalleries.orderPendingPayment");
+    case "awaitingFinals":
+      return t("proofGalleries.stageFinal");
+    case "delivered":
+      return t("proofGalleries.sectionPublished");
+  }
+}
+
+function getStage(gallery: Gallery) {
+  return getGalleryStage({
+    skipProof: gallery.skipProof,
+    finalsPublishedAt: gallery.finalsPublishedAt,
+    order: gallery.orderStatus ? { status: gallery.orderStatus } : null,
+  });
+}
 
 export default async function ProofGalleriesAdminPage({
   params,
@@ -41,7 +73,6 @@ export default async function ProofGalleriesAdminPage({
     .select({
       id: proofGalleries.id,
       clientName: proofGalleries.clientName,
-      status: proofGalleries.status,
       currency: proofGalleries.currency,
       createdAt: proofGalleries.createdAt,
       orderStatus: proofOrders.status,
@@ -56,32 +87,13 @@ export default async function ProofGalleriesAdminPage({
     .groupBy(proofGalleries.id, proofOrders.id)
     .orderBy(desc(proofGalleries.createdAt));
 
-  // Grouped by where each gallery actually is in its lifecycle, rather than
-  // the raw `status` column — "draft" and "active" both mean "no submission
-  // yet" from this page's point of view, and "paid" splits further into
-  // whether finals have been published. Direct delivery galleries never
-  // get an order, so they sit alongside paid ones until published.
-  const draft = galleries.filter((g) => !g.orderStatus && !g.skipProof);
-  const awaitingPayment = galleries.filter((g) => g.orderStatus === "pending_payment");
-  const paid = galleries.filter(
-    (g) => (g.orderStatus === "paid" || g.skipProof) && !g.finalsPublishedAt,
-  );
-  const published = galleries.filter((g) => g.finalsPublishedAt);
-
-  const sections = [
-    { key: "draft", title: t("proofGalleries.statusDraft"), items: draft },
-    {
-      key: "awaitingPayment",
-      title: t("proofGalleries.orderPendingPayment"),
-      items: awaitingPayment,
-    },
-    { key: "paid", title: t("proofGalleries.statusPaid"), items: paid },
-    {
-      key: "published",
-      title: t("proofGalleries.sectionPublished"),
-      items: published,
-    },
-  ];
+  // Grouped by lifecycle stage. Direct delivery galleries never get an
+  // order, so they sit alongside paid ones until published.
+  const sections = STAGE_ORDER.map((stage) => ({
+    key: stage,
+    title: stageLabel(stage, t),
+    items: galleries.filter((g) => getStage(g) === stage),
+  }));
 
   return (
     <div className="min-h-screen bg-brand-cream/30">
@@ -132,8 +144,10 @@ function GalleryCard({
 }: {
   locale: string;
   gallery: Gallery;
-  t: Awaited<ReturnType<typeof getTranslations>>;
+  t: Translator;
 }) {
+  const stage = getStage(gallery);
+
   return (
     <Link
       href={`/${locale}/admin/proof-galleries/${gallery.id}`}
@@ -143,23 +157,17 @@ function GalleryCard({
         <h2 className="font-display text-xl font-semibold text-brand-green">
           {gallery.clientName}
         </h2>
-        {gallery.skipProof ? (
-          <span className="shrink-0 rounded-full bg-brand-gold/15 px-3 py-1 text-xs font-semibold text-brand-gold-dark">
-            {t("proofGalleries.directDelivery")}
-          </span>
-        ) : gallery.orderStatus === "paid" ? (
-          <span className="shrink-0 rounded-full bg-brand-green px-3 py-1 text-xs font-semibold text-white">
-            {t("proofGalleries.statusPaid")}
-          </span>
-        ) : gallery.orderStatus === "pending_payment" ? (
-          <span className="shrink-0 rounded-full bg-brand-gold/15 px-3 py-1 text-xs font-semibold text-brand-gold-dark">
-            {t("proofGalleries.orderPendingPayment")}
-          </span>
-        ) : (
-          <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-            {t(`proofGalleries.status${capitalize(gallery.status)}`)}
-          </span>
-        )}
+        <span
+          className={`shrink-0 rounded-full px-3 py-1 text-xs ${
+            stage === "proof"
+              ? "bg-gray-100 font-medium text-gray-700"
+              : stage === "submitted"
+                ? "bg-brand-gold/15 font-semibold text-brand-gold-dark"
+                : "bg-brand-green font-semibold text-white"
+          }`}
+        >
+          {stageLabel(stage, t)}
+        </span>
       </div>
 
       <p className="mt-3 text-sm text-gray-600">
@@ -176,7 +184,7 @@ function GalleryCard({
         ) : null}
       </p>
 
-      {gallery.finalsPublishedAt ? (
+      {stage === "delivered" && gallery.finalsPublishedAt ? (
         <p className="mt-2 text-xs font-semibold text-brand-green">
           {t("finalDelivery.publishedBadge", {
             days: getDaysUntilFinalDeliveryDeletion(gallery.finalsPublishedAt),
@@ -185,8 +193,4 @@ function GalleryCard({
       ) : null}
     </Link>
   );
-}
-
-function capitalize(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
 }
