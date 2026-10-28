@@ -7,6 +7,7 @@ import NavBar from "./NavBar";
 import Footer from "./Footer";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { ProofChromeContext } from "./ProofChromeContext";
+import { isProofPathname } from "../lib/proof-link";
 
 type Props = {
   isAdmin: boolean;
@@ -71,7 +72,7 @@ function ProofFooter() {
 
 export default function SiteChrome({ isAdmin, children }: Props) {
   const pathname = usePathname();
-  const isProofPage = pathname.startsWith("/proof/");
+  const isProofPage = isProofPathname(pathname);
   const isAdminPage = pathname.startsWith("/admin");
   const [hideProofChrome, setHideProofChrome] = useState(false);
   const showProofChrome = isProofPage && !hideProofChrome;

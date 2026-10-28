@@ -8,6 +8,11 @@ import { useConfirm } from "@/app/components/ConfirmDialog";
 import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
+import {
+  PROOF_LINK_SEGMENTS,
+  getProofLinkPath,
+  type ProofLinkLocale,
+} from "@/app/lib/proof-link";
 import FinalPhotosSection from "./FinalPhotosSection";
 import FinalsPageContentSection from "./FinalsPageContentSection";
 
@@ -131,6 +136,9 @@ export default function ProofGalleryDetailClient({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingGallery, setDeletingGallery] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [linkLocale, setLinkLocale] = useState<ProofLinkLocale>(
+    locale === "cs" ? "cs" : "en",
+  );
   const [filenamesCopied, setFilenamesCopied] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
   const [paidError, setPaidError] = useState<string | null>(null);
@@ -142,7 +150,7 @@ export default function ProofGalleryDetailClient({
     .filter((photo) => photo.selected)
     .map((photo) => photo.fileName);
 
-  const shareUrl = `${origin}/${locale}/proof/${gallery.token}`;
+  const shareUrl = `${origin}${getProofLinkPath(linkLocale, gallery.token)}`;
 
   const stageKeys = gallery.skipProof ? DIRECT_DELIVERY_STAGE_KEYS : STAGE_KEYS;
   const canDeliverFinals = gallery.skipProof || order?.status === "paid";
@@ -657,6 +665,33 @@ export default function ProofGalleryDetailClient({
           {t("proofGalleries.shareableLink")}
         </p>
         <div className="flex flex-wrap items-center gap-3">
+          <div
+            role="radiogroup"
+            aria-label={t("proofGalleries.linkLanguage")}
+            className="flex rounded-full border border-brand-gold/25 p-0.5 text-sm"
+          >
+            {(Object.keys(PROOF_LINK_SEGMENTS) as ProofLinkLocale[]).map(
+              (option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={linkLocale === option}
+                  onClick={() => {
+                    setLinkLocale(option);
+                    setLinkCopied(false);
+                  }}
+                  className={`rounded-full px-3 py-1.5 font-medium uppercase transition ${
+                    linkLocale === option
+                      ? "bg-brand-green text-white"
+                      : "text-brand-green hover:bg-brand-cream"
+                  }`}
+                >
+                  {option}
+                </button>
+              ),
+            )}
+          </div>
           <code className="break-all rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-800">
             {shareUrl}
           </code>

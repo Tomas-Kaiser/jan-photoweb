@@ -310,6 +310,7 @@
       "saveSettings": "Save settings",
       "settingsSaved": "Settings saved.",
       "settingsSaveFailed": "Failed to save settings.",
+      "linkLanguage": "Link language",
       "shareableLink": "Shareable client link",
       "copyLink": "Copy link",
       "linkCopied": "Link copied.",

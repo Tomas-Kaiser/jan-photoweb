@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     const [inserted] = await db
       .insert(proofGalleries)
       .values({
-        token: generateProofToken(),
+        token: generateProofToken(clientName),
         clientName,
         baseCostCents,
         freePhotoCount,

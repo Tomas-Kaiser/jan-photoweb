@@ -3,13 +3,19 @@ import createMiddleware from "next-intl/middleware";
 import type { NextAuthRequest } from "next-auth";
 import { routing } from "./app/i18n/routing";
 import { auth } from "@/auth";
+import { PROOF_PATH_SEGMENTS } from "@/app/lib/proof-link";
 
 const intlMiddleware = createMiddleware(routing);
 
-// "/proof/[^/]+" is a regex fragment, not a literal path — it matches any
-// single path segment (the gallery token) after /proof/, since that route
-// has no session (see docs/photo-proofing-design.md §6, §7a).
-const publicPages = ["/", "/admin/login", "/proof/[^/]+"];
+// "/(proof|photos|fotky)/[^/]+" is a regex fragment, not a literal path —
+// it matches any single path segment (the gallery token) after one of the
+// proof link segments, since that route has no session (see
+// docs/photo-proofing-design.md §6, §7a, and app/lib/proof-link.ts).
+const publicPages = [
+  "/",
+  "/admin/login",
+  `/(${PROOF_PATH_SEGMENTS.join("|")})/[^/]+`,
+];
 
 const authMiddleware = auth((req: NextAuthRequest, _event: NextFetchEvent) => {
   return intlMiddleware(req);
