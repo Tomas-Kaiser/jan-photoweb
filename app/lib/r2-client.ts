@@ -21,6 +21,13 @@ function getR2Client(): S3Client {
     // subdomain) — without this, the SDK's default addressing produces a
     // host that doesn't resolve to the actual bucket.
     forcePathStyle: true,
+    // Newer SDK versions add a CRC32 checksum to every request by default.
+    // For presigned PUT URLs that checksum is computed over an empty body
+    // at signing time (the file isn't here yet), so R2 would reject the
+    // browser's real upload as a mismatch. Only send checksums when an
+    // operation actually requires one.
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
     credentials: {
       accessKeyId: process.env.R2_ACCESS_KEY_ID!,
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
