@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { auth } from "@/auth";
+import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { proofGalleries } from "@/app/db/schema";
 import { createPresignedUploadUrl } from "@/app/lib/r2-client";
@@ -13,15 +13,7 @@ function sanitizeFileName(fileName: string): string {
 // Unlike the Cloudflare Images upload-url flow (app/api/admin/photos/upload-url),
 // the client uploads here with a raw PUT of the file body — not a multipart
 // FormData POST. See uploadOriginalToR2 in FinalPhotosSection.tsx.
-export async function POST(req: Request) {
-  const session = await auth();
-  const isAdmin =
-    !!session?.user && (session.user as { role?: string }).role === "admin";
-
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export const POST = withAdmin(async (req: Request) => {
   const body = await req.json().catch(() => null);
   const galleryId = String(body?.galleryId || "").trim();
   const fileName = String(body?.fileName || "").trim();
@@ -56,4 +48,4 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
-}
+});

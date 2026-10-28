@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { auth } from "@/auth";
+import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders } from "@/app/db/schema";
 
@@ -8,16 +8,8 @@ type Params = {
   params: Promise<{ id: string }>;
 };
 
-export async function POST(_req: Request, { params }: Params) {
+export const POST = withAdmin(async (_req: Request, { params }: Params) => {
   try {
-    const session = await auth();
-    const isAdmin =
-      !!session?.user && (session.user as { role?: string }).role === "admin";
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
 
     const orderRows = await db
@@ -59,4 +51,4 @@ export async function POST(_req: Request, { params }: Params) {
       { status: 500 },
     );
   }
-}
+});

@@ -1,23 +1,12 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { auth } from "@/auth";
+import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { finalPhotos, proofGalleries } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
 import { deleteR2Object } from "@/app/lib/r2-client";
 
-async function requireAdmin() {
-  const session = await auth();
-  return (
-    !!session?.user && (session.user as { role?: string }).role === "admin"
-  );
-}
-
-export async function GET(req: Request) {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export const GET = withAdmin(async (req: Request) => {
   const galleryId = new URL(req.url).searchParams.get("galleryId");
 
   if (!galleryId) {
@@ -30,13 +19,9 @@ export async function GET(req: Request) {
     .where(eq(finalPhotos.galleryId, galleryId));
 
   return NextResponse.json({ photos: rows });
-}
+});
 
-export async function POST(req: Request) {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export const POST = withAdmin(async (req: Request) => {
   const body = await req.json().catch(() => null);
   const galleryId = String(body?.galleryId || "").trim();
   const r2Key = String(body?.r2Key || "").trim();
@@ -91,13 +76,9 @@ export async function POST(req: Request) {
     { success: true, photo: { id: inserted.id } },
     { status: 201 },
   );
-}
+});
 
-export async function DELETE(req: Request) {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export const DELETE = withAdmin(async (req: Request) => {
   const body = await req.json().catch(() => null);
   const photoId = String(body?.photoId || "").trim();
 
@@ -144,4 +125,4 @@ export async function DELETE(req: Request) {
   await db.delete(finalPhotos).where(eq(finalPhotos.id, photoId));
 
   return NextResponse.json({ success: true });
-}
+});

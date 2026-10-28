@@ -57,8 +57,9 @@ preserved. Translation messages live in `messages/`.
 it hardcodes `publicPages = ["/", "/admin/login"]`, builds a locale-aware
 regex from `routing.locales` to match them, and otherwise delegates to the
 NextAuth `authorized` callback in [auth.ts](auth.ts) (which gates any path
-containing `/admin`). If you add a new public route, update `publicPages`
-here.
+containing `/admin`). The matcher excludes `/api`, so this gate covers pages
+only — see "Admin API routes" below. If you add a new public route, update
+`publicPages` here.
 
 Albums use a catch-all route: `app/[locale]/albums/[[...slug]]/page.tsx`
 resolves nested album hierarchy from the `slug` segments.
@@ -144,9 +145,13 @@ chance to deliver finals through this same system.
 
 REST-ish route handlers for album/photo CRUD, reordering, and moving photos
 between albums (`albums/[id]`, `albums/reorder`, `photos/move`,
-`photos/reorder`, `photos/upload-url`). These are protected by the
-middleware's admin gate, not by per-route checks — don't assume routes are
-locale-prefixed like pages are.
+`photos/reorder`, `photos/upload-url`). The middleware's matcher excludes
+`/api`, so it does **not** protect these routes — each handler must protect
+itself by being wrapped in `withAdmin` from
+[app/lib/with-admin.ts](app/lib/with-admin.ts)
+(`export const POST = withAdmin(async (req: Request) => { ... })`), which
+returns 401 unless the session has the admin role. Don't write ad-hoc session
+checks. Unlike pages, these routes aren't locale-prefixed.
 
 ### Env vars
 

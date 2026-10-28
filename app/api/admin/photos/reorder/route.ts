@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { photos } from "@/app/db/schema";
 import { and, asc, eq, inArray } from "drizzle-orm";
@@ -16,17 +16,8 @@ type RequestBody = {
     revalidatePaths?: string[];
 };
 
-export async function POST(req: Request) {
+export const POST = withAdmin(async (req: Request) => {
     try {
-        const session = await auth();
-        const isAdmin =
-            !!session?.user &&
-            (session.user as { role?: string }).role === "admin";
-
-        if (!isAdmin) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
         const body = (await req.json()) as RequestBody;
 
         const albumId = String(body?.albumId || "").trim();
@@ -91,4 +82,4 @@ export async function POST(req: Request) {
             { status: 500 }
         );
     }
-}
+});

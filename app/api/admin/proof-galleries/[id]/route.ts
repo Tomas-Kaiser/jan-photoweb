@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { auth } from "@/auth";
+import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { finalPhotos, proofGalleries, proofPhotos } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
@@ -10,19 +10,8 @@ type Params = {
   params: Promise<{ id: string }>;
 };
 
-async function requireAdmin() {
-  const session = await auth();
-  return (
-    !!session?.user && (session.user as { role?: string }).role === "admin"
-  );
-}
-
-export async function PATCH(req: Request, { params }: Params) {
+export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
   try {
-    if (!(await requireAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
     const body = await req.json();
 
@@ -195,14 +184,10 @@ export async function PATCH(req: Request, { params }: Params) {
       { status: 500 },
     );
   }
-}
+});
 
-export async function DELETE(_req: Request, { params }: Params) {
+export const DELETE = withAdmin(async (_req: Request, { params }: Params) => {
   try {
-    if (!(await requireAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
 
     const galleryRows = await db
@@ -297,4 +282,4 @@ export async function DELETE(_req: Request, { params }: Params) {
       { status: 500 },
     );
   }
-}
+});

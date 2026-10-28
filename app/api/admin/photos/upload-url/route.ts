@@ -1,16 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { withAdmin } from "@/app/lib/with-admin";
 
-export async function POST() {
-    const session = await auth();
-    const isAdmin =
-        !!session?.user &&
-        (session.user as { role?: string }).role === "admin";
-
-    if (!isAdmin) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+export const POST = withAdmin(async () => {
     const res = await fetch(
         `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v2/direct_upload`,
         {
@@ -34,4 +25,4 @@ export async function POST() {
         id: data.result.id,
         uploadURL: data.result.uploadURL,
     });
-}
+});
