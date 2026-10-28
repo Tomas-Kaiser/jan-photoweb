@@ -16,6 +16,7 @@ Package manager is `pnpm`.
 ```bash
 pnpm dev            # dev server (turbopack)
 pnpm lint           # eslint
+pnpm test           # vitest, single run (pnpm exec vitest for watch mode)
 pnpm build          # runs db:migrate, then next build — has a DB side effect
 pnpm start          # run production build
 
@@ -26,9 +27,13 @@ pnpm db:seed        # run app/db/seed.ts
 pnpm db:studio      # drizzle studio
 ```
 
-There is no test suite in this repo. `pnpm build` runs database migrations as
-a side effect — only run it when that's intended and `DATABASE_URL` is
-configured. Do not run destructive database commands unless explicitly asked.
+Tests use Vitest ([vitest.config.ts](vitest.config.ts)) and live next to the
+module they cover as `*.test.ts`; the `@/` alias resolves as in the app. Keep
+tests to pure modules tested through their interfaces — they must not need
+`DATABASE_URL` or Cloudflare/R2 credentials.
+
+`pnpm build` runs database migrations as a side effect — only run it when
+that's intended and `DATABASE_URL` is configured. Do not run destructive database commands unless explicitly asked.
 
 The user often has their own `pnpm dev` running in a separate terminal. Before
 starting a dev server to verify a change, check for an existing one (e.g.
