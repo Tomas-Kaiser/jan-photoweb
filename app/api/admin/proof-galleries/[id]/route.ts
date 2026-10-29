@@ -2,10 +2,21 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
-import { finalPhotos, proofGalleries, proofPhotos } from "@/app/db/schema";
+import { proofGalleries } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
-import { deleteR2Object } from "@/app/lib/r2-client";
+import { deleteGalleryById } from "@/app/lib/delete-gallery-by-id";
+import {
+  AssetDeletionError,
+  type AssetKind,
+} from "@/app/lib/gallery-teardown";
 import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
+
+const ASSET_DELETION_ERRORS: Record<AssetKind, string> = {
+  hero: "Failed to delete one or more hero photos from Cloudflare.",
+  proof: "Failed to delete one or more photos from Cloudflare.",
+  "final original": "Failed to delete one or more final photos.",
+  "final preview": "Failed to delete one or more final photos.",
+};
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -212,92 +223,23 @@ export const DELETE = withAdmin(async (_req: Request, { params }: Params) => {
   try {
     const { id } = await params;
 
-    const galleryRows = await db
-      .select({
-        id: proofGalleries.id,
-        heroMobileCloudflareId: proofGalleries.heroMobileCloudflareId,
-        heroDesktopCloudflareId: proofGalleries.heroDesktopCloudflareId,
-      })
-      .from(proofGalleries)
-      .where(eq(proofGalleries.id, id))
-      .limit(1);
-
-    if (!galleryRows.length) {
+    if (!(await deleteGalleryById(id))) {
       return NextResponse.json(
         { error: "Proof gallery not found." },
         { status: 404 },
       );
     }
 
-    for (const cloudflareId of [
-      galleryRows[0].heroMobileCloudflareId,
-      galleryRows[0].heroDesktopCloudflareId,
-    ]) {
-      if (!cloudflareId) continue;
-      try {
-        await deleteCloudflareImage(cloudflareId);
-      } catch (error) {
-        console.error("Failed to delete hero photo from Cloudflare:", {
-          cloudflareId,
-          error,
-        });
-        return NextResponse.json(
-          {
-            error: "Failed to delete one or more hero photos from Cloudflare.",
-          },
-          { status: 502 },
-        );
-      }
-    }
-
-    const galleryPhotos = await db
-      .select({ cloudflareId: proofPhotos.cloudflareId })
-      .from(proofPhotos)
-      .where(eq(proofPhotos.galleryId, id));
-
-    for (const photo of galleryPhotos) {
-      try {
-        await deleteCloudflareImage(photo.cloudflareId);
-      } catch (error) {
-        console.error("Failed to delete proof photo from Cloudflare:", {
-          cloudflareId: photo.cloudflareId,
-          error,
-        });
-        return NextResponse.json(
-          { error: "Failed to delete one or more photos from Cloudflare." },
-          { status: 502 },
-        );
-      }
-    }
-
-    const galleryFinalPhotos = await db
-      .select({
-        r2Key: finalPhotos.r2Key,
-        previewCloudflareId: finalPhotos.previewCloudflareId,
-      })
-      .from(finalPhotos)
-      .where(eq(finalPhotos.galleryId, id));
-
-    for (const photo of galleryFinalPhotos) {
-      try {
-        await deleteR2Object(photo.r2Key);
-        await deleteCloudflareImage(photo.previewCloudflareId);
-      } catch (error) {
-        console.error("Failed to delete final photo assets:", {
-          r2Key: photo.r2Key,
-          error,
-        });
-        return NextResponse.json(
-          { error: "Failed to delete one or more final photos." },
-          { status: 502 },
-        );
-      }
-    }
-
-    await db.delete(proofGalleries).where(eq(proofGalleries.id, id));
-
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AssetDeletionError) {
+      console.error("Failed to delete gallery assets:", error);
+      return NextResponse.json(
+        { error: ASSET_DELETION_ERRORS[error.kind] },
+        { status: 502 },
+      );
+    }
+
     console.error("DELETE /api/admin/proof-galleries/[id] failed:", error);
     return NextResponse.json(
       { error: "Failed to delete proof gallery." },

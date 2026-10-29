@@ -136,15 +136,21 @@ finals are actually published. Once published,
 daily Vercel cron ([vercel.json](vercel.json) →
 [app/api/cron/delete-expired-final-deliveries](app/api/cron/delete-expired-final-deliveries/route.ts),
 auth'd via `CRON_SECRET`) take over the gallery's entire lifecycle — it
-deletes the final photos' R2/Cloudflare assets, the proof photos'
-Cloudflare images, and then the `proofGalleries` row itself (cascading
-`proofPhotos`/`proofOrders`/`finalPhotos`). This is the *only* automatic
-deletion path in the app — manual deletion via the admin UI's "Delete
-gallery" button (which also cleans up R2 + both Cloudflare Images sets) is
-always available regardless of state. There used to be a separate 15-day
-post-payment cron for proof-only galleries; it was retired because it
-could delete a paid gallery's proof photos before the photographer had a
-chance to deliver finals through this same system.
+deletes the hero images, the proof photos' Cloudflare images, the final
+photos' R2/Cloudflare assets, and then the `proofGalleries` row itself
+(cascading `proofPhotos`/`proofOrders`/`finalPhotos`). This is the *only*
+automatic deletion path in the app — manual deletion via the admin UI's
+"Delete gallery" button is always available regardless of state. Both
+paths (and single-final delete) go through one teardown module,
+[app/lib/gallery-teardown.ts](app/lib/gallery-teardown.ts), behind an
+`AssetStore` interface (real adapter:
+[app/lib/asset-store.ts](app/lib/asset-store.ts); DB loading:
+[app/lib/delete-gallery-by-id.ts](app/lib/delete-gallery-by-id.ts)) —
+assets are deleted before the row, so a failure leaves the gallery in
+place to retry. There used to be a separate 15-day post-payment cron for
+proof-only galleries; it was retired because it could delete a paid
+gallery's proof photos before the photographer had a chance to deliver
+finals through this same system.
 
 ### Admin API routes (`app/api/admin/`)
 

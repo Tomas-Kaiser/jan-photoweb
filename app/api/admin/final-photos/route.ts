@@ -3,8 +3,8 @@ import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { finalPhotos } from "@/app/db/schema";
-import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
-import { deleteR2Object } from "@/app/lib/r2-client";
+import { assetStore } from "@/app/lib/asset-store";
+import { deleteFinalPhotoAssets } from "@/app/lib/gallery-teardown";
 import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 export const GET = withAdmin(async (req: Request) => {
@@ -115,8 +115,7 @@ export const DELETE = withAdmin(async (req: Request) => {
   }
 
   try {
-    await deleteR2Object(photo.r2Key);
-    await deleteCloudflareImage(photo.previewCloudflareId);
+    await deleteFinalPhotoAssets(assetStore, photo);
   } catch (error) {
     console.error("Failed to delete final photo assets:", error);
     return NextResponse.json(
