@@ -62,7 +62,9 @@ export default function FinalsPageContentSection({
     setHeroError(null);
 
     try {
-      const { cloudflareId } = await uploadPhotoToCloudflare(file);
+      const upload = await uploadPhotoToCloudflare(file);
+      if (!upload.ok) throw new Error(upload.error.message);
+      const { cloudflareId } = upload;
       await saveHeroField(slot, cloudflareId);
 
       if (slot === "heroMobileCloudflareId") {

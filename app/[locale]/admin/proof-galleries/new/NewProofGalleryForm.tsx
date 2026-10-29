@@ -38,7 +38,9 @@ export default function NewProofGalleryForm({ locale }: Props) {
   );
 
   async function uploadOnePhoto(galleryId: string, file: File) {
-    const { cloudflareId } = await uploadPhotoToCloudflare(file);
+    const upload = await uploadPhotoToCloudflare(file);
+    if (!upload.ok) throw new Error(upload.error.message);
+    const { cloudflareId } = upload;
 
     const res = await fetch(
       `/api/admin/proof-galleries/${galleryId}/photos`,

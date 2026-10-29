@@ -4,10 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { slugify } from "@/app/lib/slugify";
-import {
-  MAX_UPLOAD_BYTES,
-  optimizeImageForUpload,
-} from "../utils/optimize-image-for-upload";
+import { uploadPhotoToCloudflare } from "../utils/upload-photo-to-cloudflare";
 
 type AlbumOption = {
   id: string;
@@ -26,11 +23,6 @@ type Props = {
   fixedParent?: FixedParent;
   locale: string;
   onBusyChange?: (busy: boolean) => void;
-};
-
-type DirectUploadResponse = {
-  id: string;
-  uploadURL: string;
 };
 
 type UploadStage =
@@ -99,46 +91,6 @@ export default function AddAlbumForm({
       : generatedSlug;
   }, [generatedSlug, selectedParent]);
 
-  async function requestUploadUrl(): Promise<DirectUploadResponse> {
-    const res = await fetch("/api/admin/photos/upload-url", {
-      method: "POST",
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data?.error || t("upload.createUrlFailed"));
-    }
-
-    return data;
-  }
-
-  async function uploadToCloudflare(file: File): Promise<{
-    cloudflareId: string;
-    name: string;
-  }> {
-    const { id, uploadURL } = await requestUploadUrl();
-
-    const formData = new FormData();
-    formData.append("file", file, file.name);
-
-    const uploadRes = await fetch(uploadURL, {
-      method: "POST",
-      body: formData,
-    });
-
-    const uploadData = await uploadRes.json().catch(() => null);
-
-    if (!uploadRes.ok || uploadData?.success === false) {
-      throw new Error(t("upload.uploadImageFailed", { name: file.name }));
-    }
-
-    return {
-      cloudflareId: id,
-      name: file.name,
-    };
-  }
-
   function resetInputs() {
     if (coverInputRef.current) {
       coverInputRef.current.value = "";
@@ -195,15 +147,19 @@ export default function AddAlbumForm({
   }
 
   async function uploadOnePhoto(albumId: string, file: File): Promise<void> {
-    setStage("optimizing-photo");
-    const optimizedPhoto = await optimizeImageForUpload(file);
+    const upload = await uploadPhotoToCloudflare(file, {
+      onStage: (stage) => setStage(`${stage}-photo`),
+    });
 
-    if (optimizedPhoto.size > MAX_UPLOAD_BYTES) {
-      throw new Error(t("upload.stillTooLarge"));
+    if (!upload.ok) {
+      throw new Error(
+        upload.error.kind === "too-large"
+          ? t("upload.stillTooLarge")
+          : upload.error.kind === "upload-failed"
+            ? t("upload.uploadImageFailed", { name: file.name })
+            : upload.error.message,
+      );
     }
-
-    setStage("uploading-photo");
-    const uploaded = await uploadToCloudflare(optimizedPhoto);
 
     setStage("saving-photo");
     const photoRes = await fetch("/api/admin/photos", {
@@ -213,8 +169,8 @@ export default function AddAlbumForm({
       },
       body: JSON.stringify({
         albumId,
-        name: uploaded.name,
-        cloudflareId: uploaded.cloudflareId,
+        name: file.name,
+        cloudflareId: upload.cloudflareId,
       }),
     });
 
@@ -258,17 +214,19 @@ export default function AddAlbumForm({
     } else {
       try {
         setCurrentFileName(coverFile!.name);
-        setStage("optimizing-cover");
-        const optimizedCover = await optimizeImageForUpload(coverFile!);
+        const coverUpload = await uploadPhotoToCloudflare(coverFile!, {
+          onStage: (stage) => setStage(`${stage}-cover`),
+        });
 
-        if (optimizedCover.size > MAX_UPLOAD_BYTES) {
+        if (!coverUpload.ok) {
           throw new Error(
-            t("upload.coverTooLarge", { name: coverFile!.name }),
+            coverUpload.error.kind === "too-large"
+              ? t("upload.coverTooLarge", { name: coverFile!.name })
+              : coverUpload.error.kind === "upload-failed"
+                ? t("upload.uploadImageFailed", { name: coverFile!.name })
+                : coverUpload.error.message,
           );
         }
-
-        setStage("uploading-cover");
-        const coverUpload = await uploadToCloudflare(optimizedCover);
 
         setStage("creating-album");
         const albumRes = await fetch("/api/admin/albums", {

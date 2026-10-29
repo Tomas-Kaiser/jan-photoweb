@@ -8,10 +8,7 @@ import { useTranslations } from "next-intl";
 import DeleteAlbumButton from "@/app/components/DeleteAlbumButton";
 import CreateAlbumButton from "./CreateAlbumButton";
 import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
-import {
-  MAX_UPLOAD_BYTES,
-  optimizeImageForUpload,
-} from "../utils/optimize-image-for-upload";
+import { uploadPhotoToCloudflare } from "../utils/upload-photo-to-cloudflare";
 
 type AlbumOption = {
   id: string;
@@ -120,34 +117,16 @@ export default function AlbumHeaderActions({
       setCoverSaving(true);
       setCoverMessage("");
 
-      const optimized = await optimizeImageForUpload(file);
+      const upload = await uploadPhotoToCloudflare(file);
 
-      if (optimized.size > MAX_UPLOAD_BYTES) {
+      if (!upload.ok) {
         throw new Error(
-          t("upload.coverTooLarge", { name: file.name }),
+          upload.error.kind === "too-large"
+            ? t("upload.coverTooLarge", { name: file.name })
+            : upload.error.kind === "upload-failed"
+              ? t("upload.uploadImageFailed", { name: file.name })
+              : upload.error.message,
         );
-      }
-
-      const uploadUrlRes = await fetch("/api/admin/photos/upload-url", {
-        method: "POST",
-      });
-      const uploadUrlData = await uploadUrlRes.json().catch(() => null);
-
-      if (!uploadUrlRes.ok) {
-        throw new Error(uploadUrlData?.error || t("upload.createUrlFailed"));
-      }
-
-      const formData = new FormData();
-      formData.append("file", optimized, file.name);
-
-      const uploadRes = await fetch(uploadUrlData.uploadURL, {
-        method: "POST",
-        body: formData,
-      });
-      const uploadData = await uploadRes.json().catch(() => null);
-
-      if (!uploadRes.ok || uploadData?.success === false) {
-        throw new Error(t("upload.uploadImageFailed", { name: file.name }));
       }
 
       const res = await fetch(`/api/admin/albums/${albumId}`, {
@@ -157,7 +136,7 @@ export default function AlbumHeaderActions({
         },
         body: JSON.stringify({
           name: albumName,
-          coverCloudflareId: uploadUrlData.id,
+          coverCloudflareId: upload.cloudflareId,
         }),
       });
 

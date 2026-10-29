@@ -22,10 +22,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { PortfolioHighlightPhoto } from "@/app/components/swiper/SwiperWrapper";
 import { normalizePhotoPosition } from "@/app/utils/normalizePhotoPosition";
-import {
-  MAX_UPLOAD_BYTES,
-  optimizeImageForUpload,
-} from "@/app/utils/optimize-image-for-upload";
+import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
 import {
   addPortfolioHighlight,
   deletePortfolioHighlight,
@@ -206,35 +203,19 @@ export default function AdminHighlightsClient({ photos, addAlbums }: Props) {
 
     startUploadTransition(async () => {
       try {
-        const optimized = await optimizeImageForUpload(file);
+        const upload = await uploadPhotoToCloudflare(file);
 
-        if (optimized.size > MAX_UPLOAD_BYTES) {
-          throw new Error(t("upload.stillTooLarge"));
+        if (!upload.ok) {
+          throw new Error(
+            upload.error.kind === "too-large"
+              ? t("upload.stillTooLarge")
+              : upload.error.kind === "upload-failed"
+                ? t("upload.uploadImageFailed", { name: file.name })
+                : upload.error.message,
+          );
         }
 
-        const uploadUrlRes = await fetch("/api/admin/photos/upload-url", {
-          method: "POST",
-        });
-        const uploadUrlData = await uploadUrlRes.json().catch(() => null);
-
-        if (!uploadUrlRes.ok) {
-          throw new Error(uploadUrlData?.error || t("upload.createUrlFailed"));
-        }
-
-        const formData = new FormData();
-        formData.append("file", optimized, optimized.name);
-
-        const cfRes = await fetch(uploadUrlData.uploadURL, {
-          method: "POST",
-          body: formData,
-        });
-        const cfData = await cfRes.json().catch(() => null);
-
-        if (!cfRes.ok || cfData?.success === false) {
-          throw new Error(t("upload.uploadImageFailed", { name: file.name }));
-        }
-
-        await uploadPhotoToHighlights(uploadUrlData.id, file.name);
+        await uploadPhotoToHighlights(upload.cloudflareId, file.name);
 
         setUploadFile(null);
         if (uploadInputRef.current) {

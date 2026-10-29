@@ -3,10 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import {
-  MAX_UPLOAD_BYTES,
-  optimizeImageForUpload,
-} from "../utils/optimize-image-for-upload";
+import { uploadPhotoToCloudflare } from "../utils/upload-photo-to-cloudflare";
 
 type Album = {
   id: string;
@@ -17,11 +14,6 @@ type Album = {
 type Props = {
   album: Album;
   onBusyChange?: (busy: boolean) => void;
-};
-
-type DirectUploadResponse = {
-  id: string;
-  uploadURL: string;
 };
 
 type UploadStage = "idle" | "optimizing" | "uploading" | "saving";
@@ -47,20 +39,6 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
   useEffect(() => {
     onBusyChange?.(saving);
   }, [saving, onBusyChange]);
-
-  async function requestUploadUrl(): Promise<DirectUploadResponse> {
-    const res = await fetch("/api/admin/photos/upload-url", {
-      method: "POST",
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data?.error || t("upload.createUrlFailed"));
-    }
-
-    return data;
-  }
 
   function resetFileInput() {
     if (inputRef.current) {
@@ -90,28 +68,16 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
   }
 
   async function uploadOneFile(file: File): Promise<void> {
-    setStage("optimizing");
-    const optimizedFile = await optimizeImageForUpload(file);
+    const upload = await uploadPhotoToCloudflare(file, { onStage: setStage });
 
-    if (optimizedFile.size > MAX_UPLOAD_BYTES) {
-      throw new Error(t("upload.stillTooLarge"));
-    }
-
-    setStage("uploading");
-    const { id, uploadURL } = await requestUploadUrl();
-
-    const formData = new FormData();
-    formData.append("file", optimizedFile, optimizedFile.name);
-
-    const uploadRes = await fetch(uploadURL, {
-      method: "POST",
-      body: formData,
-    });
-
-    const uploadData = await uploadRes.json().catch(() => null);
-
-    if (!uploadRes.ok || uploadData?.success === false) {
-      throw new Error(t("upload.uploadStorageFailed"));
+    if (!upload.ok) {
+      throw new Error(
+        upload.error.kind === "too-large"
+          ? t("upload.stillTooLarge")
+          : upload.error.kind === "upload-failed"
+            ? t("upload.uploadStorageFailed")
+            : upload.error.message,
+      );
     }
 
     setStage("saving");
@@ -123,7 +89,7 @@ export default function AddPhotosForm({ album, onBusyChange }: Props) {
       body: JSON.stringify({
         albumId: album.id,
         name: file.name,
-        cloudflareId: id,
+        cloudflareId: upload.cloudflareId,
       }),
     });
 

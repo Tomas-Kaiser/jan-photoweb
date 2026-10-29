@@ -111,7 +111,9 @@ export default function FinalPhotosSection({
     const dimensions = await getImageDimensions(file).catch(() => null);
 
     setStage("uploadingPreview");
-    const { cloudflareId: previewCloudflareId } = await uploadPhotoToCloudflare(file);
+    const preview = await uploadPhotoToCloudflare(file);
+    if (!preview.ok) throw new Error(preview.error.message);
+    const previewCloudflareId = preview.cloudflareId;
 
     setStage("uploadingOriginal");
     const urlRes = await fetch("/api/admin/final-photos/upload-url", {

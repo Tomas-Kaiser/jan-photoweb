@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
+import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
 
 type AlbumOption = {
     name: string;
@@ -117,29 +118,19 @@ export default function AddAlbumCard({ categories }: AddAlbumCardProps) {
     };
 
     async function uploadCoverImage(file: File) {
-        const uploadUrlRes = await fetch("/api/admin/photos/upload-url", {
-            method: "POST",
-        });
+        const upload = await uploadPhotoToCloudflare(file);
 
-        if (!uploadUrlRes.ok) {
-            throw new Error("Failed to create cover upload URL");
+        if (!upload.ok) {
+            throw new Error(
+                upload.error.kind === "upload-url-failed"
+                    ? "Failed to create cover upload URL"
+                    : upload.error.kind === "upload-failed"
+                        ? "Failed to upload cover image"
+                        : upload.error.message
+            );
         }
 
-        const { id, uploadURL } = await uploadUrlRes.json();
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const uploadRes = await fetch(uploadURL, {
-            method: "POST",
-            body: formData,
-        });
-
-        if (!uploadRes.ok) {
-            throw new Error("Failed to upload cover image");
-        }
-
-        return getCloudflareImageUrl(id, "detail");
+        return getCloudflareImageUrl(upload.cloudflareId, "detail");
     }
 
     async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
