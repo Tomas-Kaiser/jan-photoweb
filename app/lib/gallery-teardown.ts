@@ -11,6 +11,13 @@ export type FinalPhotoAssets = {
   previewCloudflareId: string;
 };
 
+// What a failed upload may have left behind: the preview always exists, the
+// R2 original only if the upload got as far as an R2 key.
+export type PartialFinalPhotoAssets = {
+  r2Key?: string;
+  previewCloudflareId: string;
+};
+
 export type GalleryAssets = {
   heroMobileCloudflareId: string | null;
   heroDesktopCloudflareId: string | null;
@@ -79,16 +86,19 @@ export async function tearDownGallery(
 }
 
 // Deletes one final photo's R2 original and Cloudflare preview. Used by
-// gallery teardown and by the admin's single-final delete, which removes
-// the row itself afterwards.
+// gallery teardown, by the admin's single-final delete (which removes the
+// row itself afterwards), and to discard a failed upload, which may not
+// have reached R2.
 export async function deleteFinalPhotoAssets(
   store: AssetStore,
-  photo: FinalPhotoAssets,
+  photo: FinalPhotoAssets | PartialFinalPhotoAssets,
 ) {
-  await deleteAsset("final original", photo.r2Key, () =>
-    store.deleteR2Object(photo.r2Key),
-  );
-  await deleteAsset("final preview", photo.previewCloudflareId, () =>
-    store.deleteCloudflareImage(photo.previewCloudflareId),
+  const { r2Key, previewCloudflareId } = photo;
+
+  if (r2Key) {
+    await deleteAsset("final original", r2Key, () => store.deleteR2Object(r2Key));
+  }
+  await deleteAsset("final preview", previewCloudflareId, () =>
+    store.deleteCloudflareImage(previewCloudflareId),
   );
 }

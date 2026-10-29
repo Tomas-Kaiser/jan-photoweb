@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/app/db";
 import { finalPhotos } from "@/app/db/schema";
+import { finalPhotoOrder } from "@/app/lib/final-photo-order";
 import {
   clientGalleryNotFound,
   loadClientGallery,
@@ -33,7 +34,7 @@ export async function GET(_req: Request, { params }: Params) {
     .select({ r2Key: finalPhotos.r2Key, fileName: finalPhotos.fileName })
     .from(finalPhotos)
     .where(eq(finalPhotos.galleryId, galleryId))
-    .orderBy(asc(finalPhotos.sortOrder), asc(finalPhotos.createdAt));
+    .orderBy(...finalPhotoOrder);
 
   if (!photoRows.length) {
     return NextResponse.json({ error: "No photos to download" }, { status: 404 });

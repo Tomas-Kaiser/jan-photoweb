@@ -95,4 +95,14 @@ describe("deleteFinalPhotoAssets", () => {
     expect(cloudflareIds.has("preview-1")).toBe(false);
     expect(cloudflareIds.has("preview-2")).toBe(true);
   });
+
+  it("deletes just the preview of an upload that never reached R2", async () => {
+    const { store, r2Keys, cloudflareIds } = createInMemoryAssetStore(allAssets);
+
+    await deleteFinalPhotoAssets(store, { previewCloudflareId: "preview-1" });
+
+    expect(r2Keys.size).toBe(2);
+    expect(cloudflareIds.has("preview-1")).toBe(false);
+    expect(cloudflareIds.has("preview-2")).toBe(true);
+  });
 });

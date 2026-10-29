@@ -15,6 +15,7 @@ import {
   getWatermarkedProofImageUrl,
 } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
+import { finalPhotoOrder } from "@/app/lib/final-photo-order";
 import { loadClientGallery } from "@/app/lib/client-gallery";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
@@ -56,7 +57,7 @@ export default async function ProofGalleryPage({ params }: Props) {
       .select()
       .from(finalPhotos)
       .where(eq(finalPhotos.galleryId, gallery.id))
-      .orderBy(asc(finalPhotos.sortOrder), asc(finalPhotos.createdAt));
+      .orderBy(...finalPhotoOrder);
 
     const finals = finalPhotoRows.map((photo) => ({
       id: photo.id,

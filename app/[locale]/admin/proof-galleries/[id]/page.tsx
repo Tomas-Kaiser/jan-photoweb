@@ -12,6 +12,7 @@ import {
   proofPhotos,
 } from "@/app/db/schema";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
+import { finalPhotoOrder } from "@/app/lib/final-photo-order";
 import ProofGalleryDetailClient from "./ProofGalleryDetailClient";
 
 type Props = {
@@ -91,7 +92,8 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
   const finalPhotoRows = await db
     .select()
     .from(finalPhotos)
-    .where(eq(finalPhotos.galleryId, id));
+    .where(eq(finalPhotos.galleryId, id))
+    .orderBy(...finalPhotoOrder);
 
   const finalsPublishedAtLabel = gallery.finalsPublishedAt
     ? gallery.finalsPublishedAt.toLocaleString(locale, {

@@ -6,7 +6,11 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { useToast } from "@/app/components/Toast";
-import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
+import {
+  type FinalUploadError,
+  type FinalUploadStage,
+  uploadFinalPhoto,
+} from "@/app/utils/upload-final-photo";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { getDaysUntilFinalDeliveryDeletion } from "@/app/lib/final-delivery-retention";
 
@@ -48,7 +52,7 @@ type Props = {
   finalsPublishedAt: string | null;
 };
 
-type UploadStage = "idle" | "uploadingPreview" | "uploadingOriginal" | "saving";
+type UploadStage = "idle" | FinalUploadStage;
 
 type UploadFailure = {
   file: File;
@@ -80,6 +84,15 @@ export default function FinalPhotosSection({
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
+  const uploadErrorFallback: Record<
+    Exclude<FinalUploadError["kind"], "preview-failed">,
+    string
+  > = {
+    "upload-url-failed": t("finalDelivery.createUrlFailed"),
+    "original-upload-failed": t("finalDelivery.uploadOriginalFailed"),
+    "save-failed": t("finalDelivery.savePhotoFailed"),
+  };
+
   const isPublished = Boolean(finalsPublishedAt);
   const deletionDaysLeft = finalsPublishedAt
     ? getDaysUntilFinalDeliveryDeletion(new Date(finalsPublishedAt))
@@ -110,64 +123,29 @@ export default function FinalPhotosSection({
   async function uploadOneFile(file: File): Promise<FinalPhoto> {
     const dimensions = await getImageDimensions(file).catch(() => null);
 
-    setStage("uploadingPreview");
-    const preview = await uploadPhotoToCloudflare(file);
-    if (!preview.ok) throw new Error(preview.error.message);
-    const previewCloudflareId = preview.cloudflareId;
-
-    setStage("uploadingOriginal");
-    const urlRes = await fetch("/api/admin/final-photos/upload-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        galleryId,
-        fileName: file.name,
-        contentType: file.type || "application/octet-stream",
-      }),
-    });
-    const urlData = await urlRes.json().catch(() => null);
-
-    if (!urlRes.ok) {
-      throw new Error(urlData?.error || t("finalDelivery.createUrlFailed"));
-    }
-
-    const { r2Key, uploadURL } = urlData;
-
-    const putRes = await fetch(uploadURL, {
-      method: "PUT",
-      body: file,
-      headers: { "Content-Type": file.type || "application/octet-stream" },
+    // A failed attempt asks the server to discard whatever it uploaded, so
+    // retrying the file doesn't pile up orphaned assets.
+    const result = await uploadFinalPhoto({
+      galleryId,
+      file,
+      dimensions,
+      onStage: setStage,
     });
 
-    if (!putRes.ok) {
-      throw new Error(t("finalDelivery.uploadOriginalFailed"));
-    }
-
-    setStage("saving");
-    const saveRes = await fetch("/api/admin/final-photos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        galleryId,
-        fileName: file.name,
-        sizeBytes: file.size,
-        r2Key,
-        previewCloudflareId,
-        width: dimensions?.width ?? null,
-        height: dimensions?.height ?? null,
-      }),
-    });
-    const saveData = await saveRes.json().catch(() => null);
-
-    if (!saveRes.ok) {
-      throw new Error(saveData?.error || t("finalDelivery.savePhotoFailed"));
+    if (!result.ok) {
+      const { error } = result;
+      throw new Error(
+        error.kind === "preview-failed"
+          ? error.message
+          : (error.message ?? uploadErrorFallback[error.kind]),
+      );
     }
 
     return {
-      id: saveData.photo.id as string,
+      id: result.id,
       fileName: file.name,
       sizeBytes: file.size,
-      previewCloudflareId,
+      previewCloudflareId: result.previewCloudflareId,
       width: dimensions?.width ?? null,
       height: dimensions?.height ?? null,
     };

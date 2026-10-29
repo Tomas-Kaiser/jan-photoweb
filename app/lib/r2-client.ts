@@ -37,6 +37,12 @@ function getR2Client(): S3Client {
   return client;
 }
 
+// Every final original for a gallery lives under this prefix — upload-url
+// builds keys with it, and discard-upload only deletes keys that have it.
+export function finalR2KeyPrefix(galleryId: string): string {
+  return `finals/${galleryId}/`;
+}
+
 const UPLOAD_URL_EXPIRY_SECONDS = 10 * 60;
 const DOWNLOAD_URL_EXPIRY_SECONDS = 5 * 60;
 

@@ -4,6 +4,7 @@ import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { finalPhotos } from "@/app/db/schema";
 import { assetStore } from "@/app/lib/asset-store";
+import { finalPhotoOrder } from "@/app/lib/final-photo-order";
 import { deleteFinalPhotoAssets } from "@/app/lib/gallery-teardown";
 import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
@@ -17,7 +18,8 @@ export const GET = withAdmin(async (req: Request) => {
   const rows = await db
     .select()
     .from(finalPhotos)
-    .where(eq(finalPhotos.galleryId, galleryId));
+    .where(eq(finalPhotos.galleryId, galleryId))
+    .orderBy(...finalPhotoOrder);
 
   return NextResponse.json({ photos: rows });
 });

@@ -1,7 +1,10 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { withAdmin } from "@/app/lib/with-admin";
-import { createPresignedUploadUrl } from "@/app/lib/r2-client";
+import {
+  createPresignedUploadUrl,
+  finalR2KeyPrefix,
+} from "@/app/lib/r2-client";
 import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 function sanitizeFileName(fileName: string): string {
@@ -10,7 +13,7 @@ function sanitizeFileName(fileName: string): string {
 
 // Unlike the Cloudflare Images upload-url flow (app/api/admin/photos/upload-url),
 // the client uploads here with a raw PUT of the file body — not a multipart
-// FormData POST. See uploadOriginalToR2 in FinalPhotosSection.tsx.
+// FormData POST. See app/utils/upload-final-photo.ts.
 export const POST = withAdmin(async (req: Request) => {
   const body = await req.json().catch(() => null);
   const galleryId = String(body?.galleryId || "").trim();
@@ -40,7 +43,7 @@ export const POST = withAdmin(async (req: Request) => {
     );
   }
 
-  const r2Key = `finals/${galleryId}/${randomUUID()}-${sanitizeFileName(fileName)}`;
+  const r2Key = `${finalR2KeyPrefix(galleryId)}${randomUUID()}-${sanitizeFileName(fileName)}`;
 
   try {
     const uploadURL = await createPresignedUploadUrl(r2Key, contentType);
