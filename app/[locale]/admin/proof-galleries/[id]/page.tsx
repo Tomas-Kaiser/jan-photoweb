@@ -2,8 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { asc, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { auth } from "@/auth";
+import { Link } from "@/app/i18n/routing";
 import { db } from "@/app/db";
 import {
   finalPhotos,
@@ -13,6 +13,7 @@ import {
 } from "@/app/db/schema";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { finalPhotoOrder } from "@/app/lib/final-photo-order";
+import { formatPragueDateTime } from "@/app/lib/format-date-time";
 import ProofGalleryDetailClient from "./ProofGalleryDetailClient";
 
 type Props = {
@@ -69,22 +70,10 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
         includedCount: orderRows[0].includedCount,
         extraCount: orderRows[0].extraCount,
         totalCents: orderRows[0].totalCents,
-        // Formatted server-side (fixed locale/timezone) and passed down as
-        // a plain string — formatting this with toLocaleString() inside the
-        // client component would re-run on hydration and can mismatch the
-        // server-rendered output depending on the client's locale/timezone.
-        submittedAtLabel: orderRows[0].submittedAt.toLocaleString(locale, {
-          timeZone: "Europe/Prague",
-          dateStyle: "medium",
-          timeStyle: "short",
-        }),
+        submittedAtLabel: formatPragueDateTime(orderRows[0].submittedAt, locale),
         status: orderRows[0].status,
         paidAtLabel: orderRows[0].confirmedAt
-          ? orderRows[0].confirmedAt.toLocaleString(locale, {
-              timeZone: "Europe/Prague",
-              dateStyle: "medium",
-              timeStyle: "short",
-            })
+          ? formatPragueDateTime(orderRows[0].confirmedAt, locale)
           : null,
       }
     : null;
@@ -96,11 +85,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
     .orderBy(...finalPhotoOrder);
 
   const finalsPublishedAtLabel = gallery.finalsPublishedAt
-    ? gallery.finalsPublishedAt.toLocaleString(locale, {
-        timeZone: "Europe/Prague",
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
+    ? formatPragueDateTime(gallery.finalsPublishedAt, locale)
     : null;
 
   const requestHeaders = await headers();
@@ -112,7 +97,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
     <div className="min-h-screen bg-brand-cream/30">
       <div className="mx-auto max-w-5xl px-6 py-10">
         <Link
-          href={`/${locale}/admin/proof-galleries`}
+          href="/admin/proof-galleries"
           className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand-green/70 transition hover:text-brand-green"
         >
           &larr; {t("proofGalleries.backToList")}

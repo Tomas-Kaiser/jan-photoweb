@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useRouter } from "@/app/i18n/routing";
 import { useConfirm } from "@/app/components/ConfirmDialog";
 import { useToast } from "@/app/components/Toast";
 import {
@@ -11,17 +11,13 @@ import {
   type FinalUploadStage,
   uploadFinalPhoto,
 } from "@/app/utils/upload-final-photo";
+import {
+  deleteFinalPhoto,
+  publishFinals,
+} from "@/app/utils/proof-gallery-admin-api";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { getDaysUntilFinalDeliveryDeletion } from "@/app/lib/final-delivery-retention";
-
-type FinalPhoto = {
-  id: string;
-  fileName: string;
-  sizeBytes: number;
-  previewCloudflareId: string;
-  width: number | null;
-  height: number | null;
-};
+import type { FinalPhoto } from "./types";
 
 // Reads the original file's real pixel dimensions client-side — needed for
 // the justified-gallery layout on the client-facing finals page, and not
@@ -46,7 +42,6 @@ type Props = {
   galleryId: string;
   // Finals can be removed only until they're published.
   canDelete: boolean;
-  canPublish: boolean;
   initialFinalPhotos: FinalPhoto[];
   finalsPublishedAtLabel: string | null;
   finalsPublishedAt: string | null;
@@ -62,7 +57,6 @@ type UploadFailure = {
 export default function FinalPhotosSection({
   galleryId,
   canDelete,
-  canPublish,
   initialFinalPhotos,
   finalsPublishedAtLabel,
   finalsPublishedAt,
@@ -213,25 +207,15 @@ export default function FinalPhotosSection({
     });
     if (!confirmed) return;
 
-    try {
-      const res = await fetch("/api/admin/final-photos", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photoId: photo.id }),
-      });
-      const data = await res.json().catch(() => null);
+    const result = await deleteFinalPhoto(photo.id);
 
-      if (!res.ok) {
-        throw new Error(data?.error || t("finalDelivery.deletePhotoFailed"));
-      }
-
-      setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
-      router.refresh();
-    } catch (err) {
-      toast.showError(
-        err instanceof Error ? err.message : t("finalDelivery.deletePhotoFailed"),
-      );
+    if (!result.ok) {
+      toast.showError(result.error ?? t("finalDelivery.deletePhotoFailed"));
+      return;
     }
+
+    setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
+    router.refresh();
   }
 
   async function handlePublish() {
@@ -246,25 +230,16 @@ export default function FinalPhotosSection({
     setPublishing(true);
     setPublishError(null);
 
-    try {
-      const res = await fetch(
-        `/api/admin/proof-galleries/${galleryId}/publish-finals`,
-        { method: "POST" },
-      );
-      const data = await res.json().catch(() => null);
+    const result = await publishFinals(galleryId);
 
-      if (!res.ok) {
-        throw new Error(data?.error || t("finalDelivery.publishFailed"));
-      }
+    setPublishing(false);
 
-      router.refresh();
-    } catch (err) {
-      setPublishError(
-        err instanceof Error ? err.message : t("finalDelivery.publishFailed"),
-      );
-    } finally {
-      setPublishing(false);
+    if (!result.ok) {
+      setPublishError(result.error ?? t("finalDelivery.publishFailed"));
+      return;
     }
+
+    router.refresh();
   }
 
   const statusText = getStatusText();
@@ -386,15 +361,10 @@ export default function FinalPhotosSection({
 
       {!isPublished ? (
         <div className="mt-5 flex flex-col items-end border-t border-gray-100 pt-4">
-          {!canPublish ? (
-            <p className="mb-2 text-xs text-gray-500">
-              {t("finalDelivery.needsPaidOrder")}
-            </p>
-          ) : null}
           <button
             type="button"
             onClick={handlePublish}
-            disabled={publishing || photos.length === 0 || !canPublish}
+            disabled={publishing || photos.length === 0}
             className="rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(1,68,33,0.5)] transition hover:bg-brand-green/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {publishing ? t("common.saving") : t("finalDelivery.publishButton")}

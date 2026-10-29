@@ -1,20 +1,20 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/app/i18n/routing";
 import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
-
-type Props = {
-  locale: string;
-};
+import {
+  addProofPhoto,
+  createProofGallery,
+} from "@/app/utils/proof-gallery-admin-api";
 
 type UploadFailure = {
   file: File;
   message: string;
 };
 
-export default function NewProofGalleryForm({ locale }: Props) {
+export default function NewProofGalleryForm() {
   const t = useTranslations("admin");
   const router = useRouter();
 
@@ -42,19 +42,13 @@ export default function NewProofGalleryForm({ locale }: Props) {
     if (!upload.ok) throw new Error(upload.error.message);
     const { cloudflareId } = upload;
 
-    const res = await fetch(
-      `/api/admin/proof-galleries/${galleryId}/photos`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cloudflareId, fileName: file.name }),
-      },
-    );
+    const saved = await addProofPhoto(galleryId, {
+      cloudflareId,
+      fileName: file.name,
+    });
 
-    const data = await res.json().catch(() => null);
-
-    if (!res.ok) {
-      throw new Error(data?.error || t("common.genericError"));
+    if (!saved.ok) {
+      throw new Error(saved.error ?? t("common.genericError"));
     }
   }
 
@@ -97,46 +91,34 @@ export default function NewProofGalleryForm({ locale }: Props) {
       setSaving(true);
       setStatusText(t("proofGalleries.createGallery"));
 
-      try {
-        const res = await fetch("/api/admin/proof-galleries", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          // Pricing only applies to the proof selection, so a direct
-          // delivery gallery stores zeros instead of whatever was typed.
-          body: JSON.stringify(
-            skipProof
-              ? {
-                  clientName: name,
-                  baseCostCents: 0,
-                  freePhotoCount: 0,
-                  extraPhotoPriceCents: 0,
-                  skipProof: true,
-                }
-              : {
-                  clientName: name,
-                  baseCostCents: Math.round(baseCostUnits * 100),
-                  freePhotoCount: Math.round(freeCount),
-                  extraPhotoPriceCents: Math.round(priceUnits * 100),
-                },
-          ),
-        });
+      // Pricing only applies to the proof selection, so a direct
+      // delivery gallery stores zeros instead of whatever was typed.
+      const created = await createProofGallery(
+        skipProof
+          ? {
+              clientName: name,
+              baseCostCents: 0,
+              freePhotoCount: 0,
+              extraPhotoPriceCents: 0,
+              skipProof: true,
+            }
+          : {
+              clientName: name,
+              baseCostCents: Math.round(baseCostUnits * 100),
+              freePhotoCount: Math.round(freeCount),
+              extraPhotoPriceCents: Math.round(priceUnits * 100),
+            },
+      );
 
-        const data = await res.json().catch(() => null);
-
-        if (!res.ok) {
-          throw new Error(data?.error || t("proofGalleries.createFailed"));
-        }
-
-        galleryId = data.gallery.id as string;
-        setCreatedGalleryId(galleryId);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : t("common.genericError"),
-        );
+      if (!created.ok) {
+        setError(created.error ?? t("proofGalleries.createFailed"));
         setSaving(false);
         setStatusText(null);
         return;
       }
+
+      galleryId = created.galleryId;
+      setCreatedGalleryId(galleryId);
     } else {
       setSaving(true);
     }
@@ -169,7 +151,7 @@ export default function NewProofGalleryForm({ locale }: Props) {
 
     if (!failed.length) {
       router.refresh();
-      router.push(`/${locale}/admin/proof-galleries/${galleryId}`);
+      router.push(`/admin/proof-galleries/${galleryId}`);
       return;
     }
 

@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useRouter } from "@/app/i18n/routing";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
+import { updateProofGallery } from "@/app/utils/proof-gallery-admin-api";
 
 type Props = {
   galleryId: string;
@@ -45,15 +46,12 @@ export default function FinalsPageContentSection({
   const desktopInputRef = useRef<HTMLInputElement | null>(null);
 
   async function saveHeroField(slot: HeroSlot, cloudflareId: string | null) {
-    const res = await fetch(`/api/admin/proof-galleries/${galleryId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [slot]: cloudflareId ?? "" }),
+    const result = await updateProofGallery(galleryId, {
+      [slot]: cloudflareId ?? "",
     });
-    const data = await res.json().catch(() => null);
 
-    if (!res.ok) {
-      throw new Error(data?.error || t("finalDelivery.heroPhotoSaveFailed"));
+    if (!result.ok) {
+      throw new Error(result.error ?? t("finalDelivery.heroPhotoSaveFailed"));
     }
   }
 
@@ -117,32 +115,20 @@ export default function FinalsPageContentSection({
     setError(null);
     setSaved(null);
 
-    try {
-      const res = await fetch(`/api/admin/proof-galleries/${galleryId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventDate, finalsMessage }),
-      });
+    const result = await updateProofGallery(galleryId, {
+      eventDate,
+      finalsMessage,
+    });
 
-      const data = await res.json().catch(() => null);
+    setSaving(false);
 
-      if (!res.ok) {
-        throw new Error(
-          data?.error || t("finalDelivery.pageContentSaveFailed"),
-        );
-      }
-
-      setSaved(t("finalDelivery.pageContentSaved"));
-      router.refresh();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("finalDelivery.pageContentSaveFailed"),
-      );
-    } finally {
-      setSaving(false);
+    if (!result.ok) {
+      setError(result.error ?? t("finalDelivery.pageContentSaveFailed"));
+      return;
     }
+
+    setSaved(t("finalDelivery.pageContentSaved"));
+    router.refresh();
   }
 
   return (

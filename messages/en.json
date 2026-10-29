@@ -492,7 +492,6 @@
       "publishConfirmMessage": "The client will immediately be able to view and download these photos at their gallery link. Continue?",
       "publishedOnLabel": "Published {date}",
       "addMoreHint": "· you can still add more — new photos appear for the client right away",
-      "needsPaidOrder": "The client must pay for their selection before finals can be published.",
       "publishFailed": "Failed to publish finals.",
       "publishedBadge": "Finals published — {days, plural, one {# day} other {# days}} left",
       "pageContentTitle": "Finals page content",

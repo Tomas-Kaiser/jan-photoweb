@@ -1,15 +1,10 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { auth } from "@/auth";
+import { Link } from "@/app/i18n/routing";
 import NewProofGalleryForm from "./NewProofGalleryForm";
 
-export default async function NewProofGalleryPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default async function NewProofGalleryPage() {
   const session = await auth();
   const isAdmin =
     !!session?.user && (session.user as { role?: string }).role === "admin";
@@ -23,7 +18,7 @@ export default async function NewProofGalleryPage({
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
       <Link
-        href={`/${locale}/admin/proof-galleries`}
+        href="/admin/proof-galleries"
         className="mb-6 inline-block text-sm text-gray-500 hover:text-gray-800"
       >
         &larr; {t("proofGalleries.backToList")}
@@ -33,7 +28,7 @@ export default async function NewProofGalleryPage({
         {t("proofGalleries.newGallery")}
       </h1>
 
-      <NewProofGalleryForm locale={locale} />
+      <NewProofGalleryForm />
     </div>
   );
 }

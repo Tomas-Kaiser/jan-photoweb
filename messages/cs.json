@@ -492,7 +492,6 @@
       "publishConfirmMessage": "Klient bude moci tyto fotky okamžitě prohlížet a stahovat na svém odkazu na galerii. Pokračovat?",
       "publishedOnLabel": "Zveřejněno {date}",
       "addMoreHint": "· stále můžete přidávat další — nové fotky se klientovi zobrazí okamžitě",
-      "needsPaidOrder": "Klient musí nejprve zaplatit za svůj výběr, než půjde finální fotky zveřejnit.",
       "publishFailed": "Zveřejnění finálních fotek se nezdařilo.",
       "publishedBadge": "Finální fotky zveřejněny — zbývá {days, plural, one {# den} few {# dny} other {# dní}}",
       "pageContentTitle": "Obsah stránky s finálními fotkami",
