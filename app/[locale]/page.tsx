@@ -13,6 +13,7 @@ import { portfolioHighlights, photos as photosTable } from "../db/schema";
 import { db } from "../db";
 import ConsentGate from "../components/consent/ConsentGate";
 import { getFeaturedHomepageAlbums } from "../lib/homepage-albums";
+import { getCloudflareImageUrl } from "../lib/cloudflare-images";
 import SocialPopup from "../components/SocialPopup";
 
 export const metadata: Metadata = {
@@ -39,17 +40,17 @@ const serviceCards = [
   {
     key: "couples",
     href: "/contact?service=couples",
-    backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/302f0c15-eec3-4117-9d5b-34b80556fe00/card",
+    backgroundImage: getCloudflareImageUrl("302f0c15-eec3-4117-9d5b-34b80556fe00", "card"),
   },
   {
     key: "weddings",
     href: "/contact?service=wedding",
-    backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/8d0ba214-31f8-470f-a3f2-1f247a40f000/card",
+    backgroundImage: getCloudflareImageUrl("8d0ba214-31f8-470f-a3f2-1f247a40f000", "card"),
   },
   {
     key: "voucher",
     href: "/contact?service=voucher",
-    backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/50b4c52f-bd2f-4a2a-e144-06fd782ebe00/card",
+    backgroundImage: getCloudflareImageUrl("50b4c52f-bd2f-4a2a-e144-06fd782ebe00", "card"),
   },
 ] as const;
 
@@ -61,12 +62,12 @@ export default async function Home() {
     {
       label: "Small screen",
       visibility: "block md:hidden",
-      src: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/b4aa0be4-c13b-4962-7fee-356a89f19300/full",
+      src: getCloudflareImageUrl("b4aa0be4-c13b-4962-7fee-356a89f19300", "full"),
     },
     {
       label: "Large screen",
       visibility: "hidden md:block",
-      src: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/873f89a4-28fe-4a5c-6187-a4b82fda0500/full",
+      src: getCloudflareImageUrl("873f89a4-28fe-4a5c-6187-a4b82fda0500", "full"),
     },
   ];
 
@@ -85,8 +86,8 @@ export default async function Home() {
 
   const photos = highlightRows.map((row) => ({
     id: row.highlightId,
-    cardSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/card`,
-    fullSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/full`,
+    cardSrc: getCloudflareImageUrl(row.cloudflareId, "card"),
+    fullSrc: getCloudflareImageUrl(row.cloudflareId, "full"),
     alt: row.name ?? "Portfolio highlight",
     objectPosition: row.photoObjectPosition ?? "center",
   }));
@@ -120,7 +121,7 @@ export default async function Home() {
               <div className="flex justify-center">
                 <div className="mb-6 block md:w-1/2 lg:hidden">
                   <Image
-                    src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
+                    src={getCloudflareImageUrl("3861b556-534f-47cb-6a4a-c40ee75bca00", "card")}
                     alt="Jan Hájek"
                     width={600}
                     height={800}
@@ -143,7 +144,7 @@ export default async function Home() {
 
           <div className="order-2 hidden w-full lg:order-1 lg:block lg:w-1/2">
             <Image
-              src="https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/3861b556-534f-47cb-6a4a-c40ee75bca00/card"
+              src={getCloudflareImageUrl("3861b556-534f-47cb-6a4a-c40ee75bca00", "card")}
               alt="Jan Hájek"
               width={600}
               height={800}

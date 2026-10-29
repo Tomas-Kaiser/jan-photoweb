@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
 import { Link } from "@/app/i18n/routing";
+import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 
 export const metadata: Metadata = {
     title: "Photography Services | Jan Hájek",
@@ -20,7 +21,7 @@ export default async function ServicesPage() {
             text: t("couples.text"),
             button: t("couples.btn"),
             href: "/contact?service=couples",
-            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/302f0c15-eec3-4117-9d5b-34b80556fe00/card",
+            backgroundImage: getCloudflareImageUrl("302f0c15-eec3-4117-9d5b-34b80556fe00", "card"),
         },
         {
             id: "wedding",
@@ -28,7 +29,7 @@ export default async function ServicesPage() {
             text: t("weddings.text"),
             button: t("weddings.btn"),
             href: "/contact?service=wedding",
-            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/8d0ba214-31f8-470f-a3f2-1f247a40f000/card",
+            backgroundImage: getCloudflareImageUrl("8d0ba214-31f8-470f-a3f2-1f247a40f000", "card"),
         },
         {
             id: "portrait",
@@ -36,7 +37,7 @@ export default async function ServicesPage() {
             text: t("portrait.text"),
             button: t("portrait.btn"),
             href: "/contact?service=portrait",
-            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/a4b24e0f-c98a-4558-10a6-e7ccdc3a3e00/card",
+            backgroundImage: getCloudflareImageUrl("a4b24e0f-c98a-4558-10a6-e7ccdc3a3e00", "card"),
         },
         {
             id: "personalWorkshops",
@@ -44,7 +45,7 @@ export default async function ServicesPage() {
             text: t("personalWorkshops.text"),
             button: t("personalWorkshops.btn"),
             href: "/contact?service=personal-workshops",
-            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/16f10ff3-5c79-4a1a-fb64-7a2932507400/card",
+            backgroundImage: getCloudflareImageUrl("16f10ff3-5c79-4a1a-fb64-7a2932507400", "card"),
         },
         {
             id: "voucher",
@@ -52,7 +53,7 @@ export default async function ServicesPage() {
             text: t("voucher.text"),
             button: t("voucher.btn"),
             href: "/contact?service=voucher",
-            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/50b4c52f-bd2f-4a2a-e144-06fd782ebe00/card",
+            backgroundImage: getCloudflareImageUrl("50b4c52f-bd2f-4a2a-e144-06fd782ebe00", "card"),
         },
         {
             id: "other",
@@ -60,7 +61,7 @@ export default async function ServicesPage() {
             text: t("other.text"),
             button: t("other.btn"),
             href: "/contact?service=other",
-            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/50c784ff-0022-47f1-34d2-712371221800/full",
+            backgroundImage: getCloudflareImageUrl("50c784ff-0022-47f1-34d2-712371221800", "full"),
         },
         {
             id: "workshops",
@@ -69,7 +70,7 @@ export default async function ServicesPage() {
             button: t("workshops.btn"),
             href: "https://byjj.cz",
             isExternal: true,
-            backgroundImage: "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/367c8001-42ef-40cc-7523-2d4ed4f04600/card",
+            backgroundImage: getCloudflareImageUrl("367c8001-42ef-40cc-7523-2d4ed4f04600", "card"),
         },
     ];
 

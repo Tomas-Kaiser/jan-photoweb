@@ -6,6 +6,7 @@ import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { albums, photos } from "@/app/db/schema";
 import { slugify } from "@/app/lib/slugify";
+import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
 
 type Params = {
     params: Promise<{
@@ -22,57 +23,6 @@ type RequestBody = {
 function normalize(value: unknown) {
     if (typeof value !== "string") return "";
     return value.trim();
-}
-
-async function deleteCloudflareImage(imageId: string) {
-    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-    const apiToken = process.env.CLOUDFLARE_IMAGES_API_TOKEN;
-
-    if (!accountId || !apiToken) {
-        return {
-            ok: false as const,
-            missing: false as const,
-            status: 500,
-            data: { error: "Missing Cloudflare configuration" },
-        };
-    }
-
-    const res = await fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1/${encodeURIComponent(imageId)}`,
-        {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${apiToken}`,
-            },
-        }
-    );
-
-    const data = await res.json().catch(() => null);
-
-    if (res.status === 404) {
-        return {
-            ok: true as const,
-            missing: true as const,
-            status: res.status,
-            data,
-        };
-    }
-
-    if (!res.ok || data?.success === false) {
-        return {
-            ok: false as const,
-            missing: false as const,
-            status: res.status,
-            data,
-        };
-    }
-
-    return {
-        ok: true as const,
-        missing: false as const,
-        status: res.status,
-        data,
-    };
 }
 
 export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
@@ -199,15 +149,12 @@ export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
         });
 
         if (coverChanged && previousCoverCloudflareId) {
-            const result = await deleteCloudflareImage(previousCoverCloudflareId);
-
-            if (!result.ok && !result.missing) {
+            await deleteCloudflareImage(previousCoverCloudflareId).catch((error) => {
                 console.error("Failed to delete old cover image from Cloudflare:", {
                     imageId: previousCoverCloudflareId,
-                    status: result.status,
-                    body: result.data,
+                    error,
                 });
-            }
+            });
         }
 
         revalidatePath("/albums");
@@ -282,23 +229,10 @@ export const DELETE = withAdmin(async (_req: Request, { params }: Params) => {
         ) as string[];
 
         for (const imageId of imageIdsToDelete) {
-            const result = await deleteCloudflareImage(imageId);
-
-            if (result.missing) {
-                console.warn("Cloudflare image already missing, continuing delete:", {
-                    imageId,
-                    status: result.status,
-                    body: result.data,
-                });
-                continue;
-            }
-
-            if (!result.ok) {
-                console.error("Cloudflare delete failed:", {
-                    imageId,
-                    status: result.status,
-                    body: result.data,
-                });
+            try {
+                await deleteCloudflareImage(imageId);
+            } catch (error) {
+                console.error("Cloudflare delete failed:", { imageId, error });
 
                 return NextResponse.json(
                     { error: `Failed to delete Cloudflare image ${imageId}.` },

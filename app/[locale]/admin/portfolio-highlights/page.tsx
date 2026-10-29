@@ -8,6 +8,7 @@ import {
   portfolioHighlights,
   photos as photosTable,
 } from "@/app/db/schema";
+import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import AdminHighlightsClient from "./AdminHighlightsClient";
 
 export default async function PortfolioHighlightsAdminPage() {
@@ -78,8 +79,8 @@ export default async function PortfolioHighlightsAdminPage() {
   const photos = highlightRows.map((row) => ({
     id: row.highlightId,
     photoId: row.photoId,
-    cardSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/card`,
-    fullSrc: `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${row.cloudflareId}/full`,
+    cardSrc: getCloudflareImageUrl(row.cloudflareId, "card"),
+    fullSrc: getCloudflareImageUrl(row.cloudflareId, "full"),
     alt: row.name ?? t("highlights.fallbackAlt"),
     objectPosition: row.objectPosition ?? "center",
   }));
@@ -99,9 +100,9 @@ export default async function PortfolioHighlightsAdminPage() {
   >();
 
   for (const photo of availablePhotos) {
-    const previewSrc = `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${photo.cloudflareId}/card`;
+    const previewSrc = getCloudflareImageUrl(photo.cloudflareId, "card");
     const albumCoverSrc = photo.albumCoverCloudflareId
-      ? `https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg/${photo.albumCoverCloudflareId}/card`
+      ? getCloudflareImageUrl(photo.albumCoverCloudflareId, "card")
       : previewSrc;
 
     if (!albumMap.has(photo.albumId)) {

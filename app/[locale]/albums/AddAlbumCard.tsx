@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
+
 type AlbumOption = {
     name: string;
     slug: string;
@@ -137,8 +139,7 @@ export default function AddAlbumCard({ categories }: AddAlbumCardProps) {
             throw new Error("Failed to upload cover image");
         }
 
-        const DELIVERY_BASE = "https://imagedelivery.net/nGg_6H5MpzveW4sWn4-OFg";
-        return `${DELIVERY_BASE}/${id}/detail`;
+        return getCloudflareImageUrl(id, "detail");
     }
 
     async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
