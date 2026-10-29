@@ -159,7 +159,11 @@ checks. Unlike pages, these routes aren't locale-prefixed.
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_IMAGES_API_TOKEN`, `GMAIL_USER`,
 `GMAIL_PASS` (contact form email delivery via nodemailer), `CRON_SECRET`
 (bearer token checked by
-`app/api/cron/delete-expired-final-deliveries`). Final photo delivery
+`app/api/cron/delete-expired-final-deliveries`), `NEXT_PUBLIC_SITE_URL`
+(the deployed site's base URL, e.g. `https://example.com` — used by
+robots/sitemap and for the admin link in selection-submitted emails, which
+points at the default locale since there's no stored admin locale; the
+email falls back to the request's origin when unset). Final photo delivery
 (`app/lib/r2-client.ts`) additionally needs `R2_ACCOUNT_ID`,
 `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_ENDPOINT`
 (Cloudflare R2, S3-compatible — stores full-quality final photos),

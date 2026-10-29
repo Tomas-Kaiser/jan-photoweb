@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm";
 import nodemailer from "nodemailer";
 import { db } from "@/app/db";
 import { proofOrders, proofPhotos } from "@/app/db/schema";
+import { routing } from "@/app/i18n/routing";
+import { getAdminProofGalleryUrl } from "@/app/lib/admin-link";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import {
   clientGalleryNotFound,
@@ -24,6 +26,7 @@ type PhotoSelection = {
 
 const MAX_COMMENT_LENGTH = 500;
 const VALID_RATINGS = new Set(["rather_no", "rather_yes"]);
+const ALREADY_SUBMITTED = "This gallery's selection has already been submitted.";
 
 function normalizeLocale(body: unknown): "en" | "cs" {
   const rawLocale = (body as { locale?: unknown } | null)?.locale;
@@ -84,9 +87,12 @@ async function notifyAdminOfSubmission(options: {
     currency,
   } = options;
 
-  const host = req.headers.get("host") ?? "";
-  const protocol = host.startsWith("localhost") ? "http" : "https";
-  const adminUrl = `${protocol}://${host}/en/admin/proof-galleries/${galleryId}`;
+  // There's no stored admin locale, so the link uses the site's default.
+  const adminUrl = getAdminProofGalleryUrl(
+    process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin,
+    routing.defaultLocale,
+    galleryId,
+  );
 
   const total = includedCount + extraCount;
   const totalLabel = formatMoneyFromCents(totalCents, currency);
@@ -148,7 +154,7 @@ export async function POST(req: Request, { params }: Params) {
         {
           error: gallery.skipProof
             ? "This gallery has no proof selection."
-            : "This gallery's selection has already been submitted.",
+            : ALREADY_SUBMITTED,
         },
         { status: 409 },
       );
@@ -190,7 +196,24 @@ export async function POST(req: Request, { params }: Params) {
     const totalCents =
       gallery.baseCostCents + extraCount * gallery.extraPhotoPriceCents;
 
-    await db.transaction(async (tx) => {
+    const submitted = await db.transaction(async (tx) => {
+      // Insert the order first: a concurrent submit (e.g. a double-click)
+      // waits on the unique index here, then inserts nothing and bails out
+      // before touching the photos.
+      const [order] = await tx
+        .insert(proofOrders)
+        .values({
+          galleryId: gallery.id,
+          selectedPhotoIds: selectedIds,
+          includedCount,
+          extraCount,
+          totalCents,
+        })
+        .onConflictDoNothing({ target: proofOrders.galleryId })
+        .returning({ id: proofOrders.id });
+
+      if (!order) return false;
+
       const now = new Date();
 
       for (const selection of selections) {
@@ -205,14 +228,12 @@ export async function POST(req: Request, { params }: Params) {
           .where(eq(proofPhotos.id, selection.photoId));
       }
 
-      await tx.insert(proofOrders).values({
-        galleryId: gallery.id,
-        selectedPhotoIds: selectedIds,
-        includedCount,
-        extraCount,
-        totalCents,
-      });
+      return true;
     });
+
+    if (!submitted) {
+      return NextResponse.json({ error: ALREADY_SUBMITTED }, { status: 409 });
+    }
 
     try {
       await notifyAdminOfSubmission({
