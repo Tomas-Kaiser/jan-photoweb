@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/app/db";
 import { finalPhotos } from "@/app/db/schema";
-import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
+import {
+  clientGalleryNotFound,
+  loadClientGallery,
+} from "@/app/lib/client-gallery";
 import { createPresignedDownloadUrl } from "@/app/lib/r2-client";
 
 type Params = {
@@ -15,22 +18,22 @@ type Params = {
 export async function GET(_req: Request, { params }: Params) {
   const { token, photoId } = await params;
 
-  const lifecycle = await loadGalleryLifecycle({ token });
+  const clientGallery = await loadClientGallery(token);
 
-  if (!lifecycle?.permissions.canClientDownload) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!clientGallery?.permissions.canClientDownload) {
+    return clientGalleryNotFound();
   }
 
   const photoRows = await db
     .select({ r2Key: finalPhotos.r2Key, fileName: finalPhotos.fileName })
     .from(finalPhotos)
     .where(
-      and(eq(finalPhotos.id, photoId), eq(finalPhotos.galleryId, lifecycle.gallery.id)),
+      and(eq(finalPhotos.id, photoId), eq(finalPhotos.galleryId, clientGallery.gallery.id)),
     )
     .limit(1);
 
   if (!photoRows.length) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return clientGalleryNotFound();
   }
 
   try {

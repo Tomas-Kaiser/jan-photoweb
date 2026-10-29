@@ -27,7 +27,7 @@ export async function loadGalleryLifecycle(
   const gallery = galleryRows[0];
 
   const orderRows = await db
-    .select({ id: proofOrders.id, status: proofOrders.status })
+    .select()
     .from(proofOrders)
     .where(eq(proofOrders.galleryId, gallery.id))
     .limit(1);

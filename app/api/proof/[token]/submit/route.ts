@@ -4,7 +4,10 @@ import nodemailer from "nodemailer";
 import { db } from "@/app/db";
 import { proofOrders, proofPhotos } from "@/app/db/schema";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
-import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
+import {
+  clientGalleryNotFound,
+  loadClientGallery,
+} from "@/app/lib/client-gallery";
 
 type Params = {
   params: Promise<{ token: string }>;
@@ -132,15 +135,15 @@ export async function POST(req: Request, { params }: Params) {
   try {
     const { token } = await params;
 
-    const lifecycle = await loadGalleryLifecycle({ token });
+    const clientGallery = await loadClientGallery(token);
 
-    if (!lifecycle) {
-      return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
+    if (!clientGallery) {
+      return clientGalleryNotFound();
     }
 
-    const { gallery } = lifecycle;
+    const { gallery } = clientGallery;
 
-    if (!lifecycle.permissions.canClientSubmit) {
+    if (!clientGallery.permissions.canClientSubmit) {
       return NextResponse.json(
         {
           error: gallery.skipProof

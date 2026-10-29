@@ -1,5 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -8,18 +9,13 @@ import {
   faGoogle,
 } from "@fortawesome/free-brands-svg-icons";
 import { db } from "@/app/db";
-import {
-  finalPhotos,
-  proofGalleries,
-  proofOrders,
-  proofPhotos,
-} from "@/app/db/schema";
+import { finalPhotos, proofPhotos } from "@/app/db/schema";
 import {
   getCloudflareImageUrl,
   getWatermarkedProofImageUrl,
 } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
-import { getClientView } from "@/app/lib/gallery-lifecycle";
+import { loadClientGallery } from "@/app/lib/client-gallery";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
 import FinalsGalleryClient from "./FinalsGalleryClient";
@@ -39,45 +35,21 @@ export default async function ProofGalleryPage({ params }: Props) {
   const { locale, token } = await params;
   const t = await getTranslations("proof");
 
-  const galleryRows = await db
-    .select()
-    .from(proofGalleries)
-    .where(eq(proofGalleries.token, token))
-    .limit(1);
+  const clientGallery = await loadClientGallery(token);
 
-  if (!galleryRows.length) {
-    return (
-      <div className="mx-auto max-w-xl px-6 py-24 text-center">
-        <div className="rounded-3xl bg-white p-10 shadow-[0_10px_40px_-12px_rgba(1,68,33,0.18)]">
-          <h1 className="font-display text-3xl font-semibold text-brand-green">
-            {t("notFoundTitle")}
-          </h1>
-          <p className="mt-3 text-gray-600">{t("notFoundMessage")}</p>
-        </div>
-      </div>
-    );
+  // Rendered by ./not-found.tsx with a 404 status, matching the
+  // /api/proof/[token]/* routes for an unknown token.
+  if (!clientGallery) {
+    notFound();
   }
 
-  const gallery = galleryRows[0];
+  const { gallery, order, view } = clientGallery;
 
   const photoRows = await db
     .select()
     .from(proofPhotos)
     .where(eq(proofPhotos.galleryId, gallery.id))
     .orderBy(asc(proofPhotos.sortOrder), asc(proofPhotos.createdAt));
-
-  const orderRows = await db
-    .select()
-    .from(proofOrders)
-    .where(eq(proofOrders.galleryId, gallery.id))
-    .limit(1);
-
-  const order = orderRows[0];
-  const view = getClientView({
-    skipProof: gallery.skipProof,
-    finalsPublishedAt: gallery.finalsPublishedAt,
-    order: order ?? null,
-  });
 
   if (view === "finals") {
     const finalPhotoRows = await db

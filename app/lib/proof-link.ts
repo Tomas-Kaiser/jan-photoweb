@@ -1,6 +1,6 @@
 // Localized path segment for client-facing proof links. Rewritten onto
-// /[locale]/proof/[token] in next.config.ts; the legacy "proof" segment
-// still works for links sent before this existed.
+// /[locale]/proof/[token] by next.config.ts (via getProofLinkRewrites); the
+// legacy "proof" segment still works for links sent before this existed.
 export const PROOF_LINK_SEGMENTS = {
   en: "photos",
   cs: "fotky",
@@ -15,6 +15,17 @@ export const PROOF_PATH_SEGMENTS = [
 
 export function getProofLinkPath(locale: ProofLinkLocale, token: string) {
   return `/${locale}/${PROOF_LINK_SEGMENTS[locale]}/${token}`;
+}
+
+// One rewrite per locale, so each locale only accepts its own segment
+// (/en/photos/…, /cs/fotky/…) and not a mismatched pair like /en/fotky/….
+export function getProofLinkRewrites() {
+  return (Object.keys(PROOF_LINK_SEGMENTS) as ProofLinkLocale[]).map(
+    (locale) => ({
+      source: getProofLinkPath(locale, ":token"),
+      destination: `/${locale}/proof/:token`,
+    }),
+  );
 }
 
 // Locale-less pathname (as next-intl's usePathname returns it).
