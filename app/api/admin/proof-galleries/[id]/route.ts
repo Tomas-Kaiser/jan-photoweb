@@ -5,6 +5,7 @@ import { db } from "@/app/db";
 import { finalPhotos, proofGalleries, proofPhotos } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
 import { deleteR2Object } from "@/app/lib/r2-client";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -62,17 +63,8 @@ export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
           : null;
     }
 
-    const hasSettingsFields =
-      "clientName" in body ||
-      "baseCostCents" in body ||
-      "freePhotoCount" in body ||
-      "extraPhotoPriceCents" in body;
-
-    if (hasSettingsFields) {
+    if ("clientName" in body) {
       const clientName = String(body?.clientName || "").trim();
-      const baseCostCents = Number(body?.baseCostCents ?? 0);
-      const freePhotoCount = Number(body?.freePhotoCount);
-      const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
 
       if (!clientName) {
         return NextResponse.json(
@@ -80,6 +72,37 @@ export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
           { status: 400 },
         );
       }
+
+      updates.clientName = clientName;
+    }
+
+    const hasPricingFields =
+      "baseCostCents" in body ||
+      "freePhotoCount" in body ||
+      "extraPhotoPriceCents" in body;
+
+    if (hasPricingFields) {
+      const lifecycle = await loadGalleryLifecycle({ id });
+
+      if (!lifecycle) {
+        return NextResponse.json(
+          { error: "Proof gallery not found." },
+          { status: 404 },
+        );
+      }
+
+      // The order's total was computed from these prices when the client
+      // submitted — changing them afterwards would desync the two.
+      if (!lifecycle.permissions.canEditPricing) {
+        return NextResponse.json(
+          { error: "Pricing can't be changed after the client has submitted." },
+          { status: 409 },
+        );
+      }
+
+      const baseCostCents = Number(body?.baseCostCents ?? 0);
+      const freePhotoCount = Number(body?.freePhotoCount);
+      const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
 
       if (!Number.isInteger(baseCostCents) || baseCostCents < 0) {
         return NextResponse.json(
@@ -102,7 +125,6 @@ export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
         );
       }
 
-      updates.clientName = clientName;
       updates.baseCostCents = baseCostCents;
       updates.freePhotoCount = freePhotoCount;
       updates.extraPhotoPriceCents = extraPhotoPriceCents;

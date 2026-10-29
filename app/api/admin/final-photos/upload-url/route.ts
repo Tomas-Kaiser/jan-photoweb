@@ -1,10 +1,8 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
-import { db } from "@/app/db";
-import { proofGalleries } from "@/app/db/schema";
 import { createPresignedUploadUrl } from "@/app/lib/r2-client";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 function sanitizeFileName(fileName: string): string {
   return fileName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
@@ -26,14 +24,20 @@ export const POST = withAdmin(async (req: Request) => {
     );
   }
 
-  const galleryRows = await db
-    .select({ id: proofGalleries.id })
-    .from(proofGalleries)
-    .where(eq(proofGalleries.id, galleryId))
-    .limit(1);
+  const lifecycle = await loadGalleryLifecycle({ id: galleryId });
 
-  if (!galleryRows.length) {
+  if (!lifecycle) {
     return NextResponse.json({ error: "Gallery not found" }, { status: 404 });
+  }
+
+  // Before payment (unless it's direct delivery) there's nothing to deliver
+  // yet. Adding finals after publishing stays allowed — they appear for the
+  // client right away.
+  if (!lifecycle.permissions.canUploadFinals) {
+    return NextResponse.json(
+      { error: "Final photos can't be uploaded until the client has paid." },
+      { status: 409 },
+    );
   }
 
   const r2Key = `finals/${galleryId}/${randomUUID()}-${sanitizeFileName(fileName)}`;

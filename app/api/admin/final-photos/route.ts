@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
-import { finalPhotos, proofGalleries } from "@/app/db/schema";
+import { finalPhotos } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
 import { deleteR2Object } from "@/app/lib/r2-client";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 export const GET = withAdmin(async (req: Request) => {
   const galleryId = new URL(req.url).searchParams.get("galleryId");
@@ -48,14 +49,20 @@ export const POST = withAdmin(async (req: Request) => {
     return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   }
 
-  const galleryRows = await db
-    .select({ id: proofGalleries.id })
-    .from(proofGalleries)
-    .where(eq(proofGalleries.id, galleryId))
-    .limit(1);
+  const lifecycle = await loadGalleryLifecycle({ id: galleryId });
 
-  if (!galleryRows.length) {
+  if (!lifecycle) {
     return NextResponse.json({ error: "Gallery not found" }, { status: 404 });
+  }
+
+  // Before payment (unless it's direct delivery) there's nothing to deliver
+  // yet. Adding finals after publishing stays allowed — they appear for the
+  // client right away.
+  if (!lifecycle.permissions.canUploadFinals) {
+    return NextResponse.json(
+      { error: "Final photos can't be uploaded until the client has paid." },
+      { status: 409 },
+    );
   }
 
   const [inserted] = await db
@@ -98,13 +105,9 @@ export const DELETE = withAdmin(async (req: Request) => {
 
   const photo = rows[0];
 
-  const galleryRows = await db
-    .select({ finalsPublishedAt: proofGalleries.finalsPublishedAt })
-    .from(proofGalleries)
-    .where(eq(proofGalleries.id, photo.galleryId))
-    .limit(1);
+  const lifecycle = await loadGalleryLifecycle({ id: photo.galleryId });
 
-  if (galleryRows[0]?.finalsPublishedAt) {
+  if (!lifecycle?.permissions.canDeleteFinals) {
     return NextResponse.json(
       { error: "Final photos can't be deleted after publishing." },
       { status: 409 },

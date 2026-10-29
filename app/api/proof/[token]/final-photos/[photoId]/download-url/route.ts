@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/app/db";
-import { finalPhotos, proofGalleries } from "@/app/db/schema";
+import { finalPhotos } from "@/app/db/schema";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 import { createPresignedDownloadUrl } from "@/app/lib/r2-client";
 
 type Params = {
@@ -14,13 +15,9 @@ type Params = {
 export async function GET(_req: Request, { params }: Params) {
   const { token, photoId } = await params;
 
-  const galleryRows = await db
-    .select({ id: proofGalleries.id, finalsPublishedAt: proofGalleries.finalsPublishedAt })
-    .from(proofGalleries)
-    .where(eq(proofGalleries.token, token))
-    .limit(1);
+  const lifecycle = await loadGalleryLifecycle({ token });
 
-  if (!galleryRows.length || !galleryRows[0].finalsPublishedAt) {
+  if (!lifecycle?.permissions.canClientDownload) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -28,7 +25,7 @@ export async function GET(_req: Request, { params }: Params) {
     .select({ r2Key: finalPhotos.r2Key, fileName: finalPhotos.fileName })
     .from(finalPhotos)
     .where(
-      and(eq(finalPhotos.id, photoId), eq(finalPhotos.galleryId, galleryRows[0].id)),
+      and(eq(finalPhotos.id, photoId), eq(finalPhotos.galleryId, lifecycle.gallery.id)),
     )
     .limit(1);
 

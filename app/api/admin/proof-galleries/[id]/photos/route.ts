@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
-import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
+import { proofPhotos } from "@/app/db/schema";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -24,30 +25,20 @@ export const POST = withAdmin(async (req: Request, { params }: Params) => {
       );
     }
 
-    const galleryRows = await db
-      .select({ id: proofGalleries.id })
-      .from(proofGalleries)
-      .where(eq(proofGalleries.id, galleryId))
-      .limit(1);
+    const lifecycle = await loadGalleryLifecycle({ id: galleryId });
 
-    if (!galleryRows.length) {
+    if (!lifecycle) {
       return NextResponse.json(
         { error: "Proof gallery not found." },
         { status: 404 },
       );
     }
 
-    const submittedOrder = await db
-      .select({ id: proofOrders.id })
-      .from(proofOrders)
-      .where(eq(proofOrders.galleryId, galleryId))
-      .limit(1);
-
     // Blocked once the client has submitted a selection at all (pending
     // payment or paid) — their decision was based on the current photo set,
     // same as the DELETE handler below. Only "Allow reselection" (which
     // removes the order) unlocks this again.
-    if (submittedOrder.length) {
+    if (!lifecycle.permissions.canEditProofPhotos) {
       return NextResponse.json(
         { error: "Photos can't be added after the client has submitted." },
         { status: 409 },
@@ -100,13 +91,11 @@ export const DELETE = withAdmin(async (req: Request) => {
       return NextResponse.json({ error: "Photo not found" }, { status: 404 });
     }
 
-    const submittedOrder = await db
-      .select({ id: proofOrders.id })
-      .from(proofOrders)
-      .where(eq(proofOrders.galleryId, photoRows[0].galleryId))
-      .limit(1);
+    const lifecycle = await loadGalleryLifecycle({
+      id: photoRows[0].galleryId,
+    });
 
-    if (submittedOrder.length) {
+    if (!lifecycle?.permissions.canEditProofPhotos) {
       return NextResponse.json(
         { error: "Photos can't be deleted after the client has submitted." },
         { status: 409 },

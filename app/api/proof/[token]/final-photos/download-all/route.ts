@@ -2,7 +2,8 @@ import { createHash, createHmac } from "crypto";
 import { NextResponse } from "next/server";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/app/db";
-import { finalPhotos, proofGalleries } from "@/app/db/schema";
+import { finalPhotos } from "@/app/db/schema";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 const ZIP_URL_EXPIRY_SECONDS = 5 * 60;
 
@@ -28,17 +29,13 @@ type Params = {
 export async function GET(_req: Request, { params }: Params) {
   const { token } = await params;
 
-  const galleryRows = await db
-    .select({ id: proofGalleries.id, finalsPublishedAt: proofGalleries.finalsPublishedAt })
-    .from(proofGalleries)
-    .where(eq(proofGalleries.token, token))
-    .limit(1);
+  const lifecycle = await loadGalleryLifecycle({ token });
 
-  if (!galleryRows.length || !galleryRows[0].finalsPublishedAt) {
+  if (!lifecycle?.permissions.canClientDownload) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const galleryId = galleryRows[0].id;
+  const galleryId = lifecycle.gallery.id;
 
   const photoRows = await db
     .select({ r2Key: finalPhotos.r2Key, fileName: finalPhotos.fileName })

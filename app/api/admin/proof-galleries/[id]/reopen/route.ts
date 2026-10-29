@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { proofOrders } from "@/app/db/schema";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -12,29 +13,28 @@ export const POST = withAdmin(async (_req: Request, { params }: Params) => {
   try {
     const { id } = await params;
 
-    const orderRows = await db
-      .select({ id: proofOrders.id, status: proofOrders.status })
-      .from(proofOrders)
-      .where(eq(proofOrders.galleryId, id))
-      .limit(1);
+    const lifecycle = await loadGalleryLifecycle({ id });
 
-    if (!orderRows.length) {
-      return NextResponse.json(
-        { error: "The client hasn't submitted a selection yet." },
-        { status: 409 },
-      );
+    if (!lifecycle) {
+      return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
     }
 
-    if (orderRows[0].status === "paid") {
+    const { order, permissions } = lifecycle;
+
+    if (!permissions.canReopen || !order) {
       return NextResponse.json(
-        { error: "A paid selection can't be reopened." },
+        {
+          error: order
+            ? "A paid selection can't be reopened."
+            : "The client hasn't submitted a selection yet.",
+        },
         { status: 409 },
       );
     }
 
     // The previous per-photo choices and comments stay on proof_photos, so
     // the client sees their earlier selection pre-filled when it reopens.
-    await db.delete(proofOrders).where(eq(proofOrders.id, orderRows[0].id));
+    await db.delete(proofOrders).where(eq(proofOrders.id, order.id));
 
     return NextResponse.json({ success: true });
   } catch (error) {

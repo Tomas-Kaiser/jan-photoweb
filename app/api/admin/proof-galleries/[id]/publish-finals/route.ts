@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
-import { finalPhotos, proofGalleries, proofOrders } from "@/app/db/schema";
+import { finalPhotos, proofGalleries } from "@/app/db/schema";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -12,36 +13,22 @@ export const POST = withAdmin(async (_req: Request, { params }: Params) => {
   try {
     const { id } = await params;
 
-    const galleryRows = await db
-      .select({
-        finalsPublishedAt: proofGalleries.finalsPublishedAt,
-        skipProof: proofGalleries.skipProof,
-      })
-      .from(proofGalleries)
-      .where(eq(proofGalleries.id, id))
-      .limit(1);
+    const lifecycle = await loadGalleryLifecycle({ id });
 
-    if (!galleryRows.length) {
+    if (!lifecycle) {
       return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
     }
 
-    if (galleryRows[0].finalsPublishedAt) {
+    // Already published — a repeated click is a no-op, not an error.
+    if (lifecycle.stage === "delivered") {
       return NextResponse.json({ success: true });
     }
 
-    if (!galleryRows[0].skipProof) {
-      const orderRows = await db
-        .select({ status: proofOrders.status })
-        .from(proofOrders)
-        .where(eq(proofOrders.galleryId, id))
-        .limit(1);
-
-      if (!orderRows.length || orderRows[0].status !== "paid") {
-        return NextResponse.json(
-          { error: "The client hasn't paid for this gallery yet." },
-          { status: 409 },
-        );
-      }
+    if (!lifecycle.permissions.canPublishFinals) {
+      return NextResponse.json(
+        { error: "The client hasn't paid for this gallery yet." },
+        { status: 409 },
+      );
     }
 
     const photoCount = await db

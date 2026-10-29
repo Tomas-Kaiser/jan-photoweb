@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import nodemailer from "nodemailer";
 import { db } from "@/app/db";
-import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
+import { proofOrders, proofPhotos } from "@/app/db/schema";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
+import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
 type Params = {
   params: Promise<{ token: string }>;
@@ -131,34 +132,21 @@ export async function POST(req: Request, { params }: Params) {
   try {
     const { token } = await params;
 
-    const galleryRows = await db
-      .select()
-      .from(proofGalleries)
-      .where(eq(proofGalleries.token, token))
-      .limit(1);
+    const lifecycle = await loadGalleryLifecycle({ token });
 
-    if (!galleryRows.length) {
+    if (!lifecycle) {
       return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
     }
 
-    const gallery = galleryRows[0];
+    const { gallery } = lifecycle;
 
-    if (gallery.skipProof) {
+    if (!lifecycle.permissions.canClientSubmit) {
       return NextResponse.json(
-        { error: "This gallery has no proof selection." },
-        { status: 409 },
-      );
-    }
-
-    const existingOrder = await db
-      .select({ id: proofOrders.id })
-      .from(proofOrders)
-      .where(eq(proofOrders.galleryId, gallery.id))
-      .limit(1);
-
-    if (existingOrder.length) {
-      return NextResponse.json(
-        { error: "This gallery's selection has already been submitted." },
+        {
+          error: gallery.skipProof
+            ? "This gallery has no proof selection."
+            : "This gallery's selection has already been submitted.",
+        },
         { status: 409 },
       );
     }
