@@ -72,10 +72,8 @@ const ContactPage = () => {
 
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
                 <input type="hidden" name="ts" value={renderedAt} />
-                <div
-                    style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
-                    aria-hidden="true"
-                >
+                {/* display: none (not off-screen positioning) so browser autofill skips it. */}
+                <div style={{ display: "none" }} aria-hidden="true">
                     <label htmlFor="website">Leave this field blank</label>
                     <input
                         type="text"
