@@ -1,18 +1,15 @@
 import { downloadZip } from "client-zip";
+// Shared with the Next.js app, which signs these requests — see that file
+// before changing the signing format.
+import { verifyZipRequest, type SignedZipRequest } from "../../../app/lib/zip-signature";
+import { uniqueEntryNames } from "./unique-entry-names";
 
 export interface Env {
   FINALS_BUCKET: R2Bucket;
   FINAL_DELIVERY_ZIP_SECRET: string;
 }
 
-type FileEntry = { key: string; fileName: string };
-
-type RequestBody = {
-  galleryId: string;
-  expires: number;
-  sig: string;
-  files: FileEntry[];
-};
+type RequestBody = SignedZipRequest;
 
 // CORS is intentionally permissive — the real access control is the HMAC
 // signature below, not the calling origin.
@@ -21,49 +18,6 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
-
-function toHex(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function sha256Hex(text: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return toHex(digest);
-}
-
-async function hmacSha256Hex(secret: string, text: string): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(text));
-  return toHex(signature);
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return result === 0;
-}
-
-async function verifySignature(body: RequestBody, secret: string): Promise<boolean> {
-  const filesHash = await sha256Hex(
-    body.files.map((f) => `${f.key}:${f.fileName}`).join("\n"),
-  );
-  const expectedSig = await hmacSha256Hex(
-    secret,
-    `${body.galleryId}:${body.expires}:${filesHash}`,
-  );
-  return timingSafeEqual(expectedSig, body.sig);
-}
 
 const worker = {
   async fetch(req: Request, env: Env): Promise<Response> {
@@ -111,30 +65,32 @@ async function handleRequest(req: Request, env: Env): Promise<Response> {
       return new Response("Worker misconfigured", { status: 500, headers: CORS_HEADERS });
     }
 
-    if (Math.floor(Date.now() / 1000) > body.expires) {
+    const verification = await verifyZipRequest(body, env.FINAL_DELIVERY_ZIP_SECRET);
+    if (verification === "expired") {
       return new Response("Expired", { status: 403, headers: CORS_HEADERS });
     }
-
-    const valid = await verifySignature(body, env.FINAL_DELIVERY_ZIP_SECRET);
-    if (!valid) {
+    if (verification !== "valid") {
       return new Response("Invalid signature", { status: 403, headers: CORS_HEADERS });
     }
 
-    const inputs = [];
+    const presentFiles: { fileName: string; object: R2ObjectBody }[] = [];
     for (const file of body.files) {
       const object = await env.FINALS_BUCKET.get(file.key);
       if (!object) {
         console.error("Skipping missing R2 object:", file.key);
         continue;
       }
-      inputs.push({ name: file.fileName, input: object.body, size: object.size });
+      presentFiles.push({ fileName: file.fileName, object });
     }
 
-    if (!inputs.length) {
+    if (!presentFiles.length) {
       return new Response("No files found", { status: 404, headers: CORS_HEADERS });
     }
 
-    const zipResponse = downloadZip(inputs);
+    const entryNames = uniqueEntryNames(presentFiles.map((f) => f.fileName));
+    const zipResponse = downloadZip(
+      presentFiles.map((f, i) => ({ name: entryNames[i], input: f.object.body, size: f.object.size })),
+    );
 
     const headers = new Headers(zipResponse.headers);
     for (const [key, value] of Object.entries(CORS_HEADERS)) {

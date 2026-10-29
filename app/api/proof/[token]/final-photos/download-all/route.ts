@@ -1,4 +1,3 @@
-import { createHash, createHmac } from "crypto";
 import { NextResponse } from "next/server";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/app/db";
@@ -7,19 +6,9 @@ import {
   clientGalleryNotFound,
   loadClientGallery,
 } from "@/app/lib/client-gallery";
+import { signZipRequest } from "@/app/lib/zip-signature";
 
 const ZIP_URL_EXPIRY_SECONDS = 5 * 60;
-
-function hashFileList(files: { key: string; fileName: string }[]): string {
-  const serialized = files.map((f) => `${f.key}:${f.fileName}`).join("\n");
-  return createHash("sha256").update(serialized).digest("hex");
-}
-
-function signRequest(galleryId: string, expires: number, filesHash: string): string {
-  return createHmac("sha256", process.env.FINAL_DELIVERY_ZIP_SECRET!)
-    .update(`${galleryId}:${expires}:${filesHash}`)
-    .digest("hex");
-}
 
 type Params = {
   params: Promise<{ token: string }>;
@@ -52,7 +41,10 @@ export async function GET(_req: Request, { params }: Params) {
 
   const files = photoRows.map((p) => ({ key: p.r2Key, fileName: p.fileName }));
   const expires = Math.floor(Date.now() / 1000) + ZIP_URL_EXPIRY_SECONDS;
-  const sig = signRequest(galleryId, expires, hashFileList(files));
+  const sig = await signZipRequest(
+    { galleryId, expires, files },
+    process.env.FINAL_DELIVERY_ZIP_SECRET!,
+  );
 
   return NextResponse.json({
     workerUrl: process.env.FINAL_DELIVERY_WORKER_URL,

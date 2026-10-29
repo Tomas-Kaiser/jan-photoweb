@@ -122,6 +122,11 @@ by a standalone Cloudflare Worker ([workers/delivery-zip](workers/delivery-zip))
 that has its own R2 bucket binding — kept out of the Next.js app to avoid
 Vercel's function duration/memory limits for bulk zips of large files; it's
 deployed independently via `wrangler deploy`, not part of `pnpm build`.
+The app and the Worker share one signing module for the "download all"
+request, [app/lib/zip-signature.ts](app/lib/zip-signature.ts), which the
+Worker imports by relative path and wrangler bundles — so it must stay
+Web-Crypto-only (no Node or Next.js imports, no `@/` alias), and changing
+its signing format needs both the app and the Worker redeployed.
 **Retention**: a proof gallery is never auto-deleted while paid but
 undelivered — the photographer may need an unbounded amount of time to
 edit and upload finals, so there's no deletion countdown at all until
