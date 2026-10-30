@@ -29,6 +29,9 @@ type Props = {
   clientName: string;
   eventDateLabel: string | null;
   finalsMessage: string | null;
+  // Formatted on the server, like eventDateLabel, so hydration can't
+  // reformat it in the browser's locale or time zone.
+  deletionDateLabel: string | null;
   photos: Photo[];
   // Dedicated hero banner photos, set by the photographer separately from
   // the final photos themselves (see FinalsPageContentSection in admin).
@@ -43,6 +46,7 @@ export default function FinalsGalleryClient({
   clientName,
   eventDateLabel,
   finalsMessage,
+  deletionDateLabel,
   photos,
   heroMobileSrc,
   heroDesktopSrc,
@@ -261,6 +265,11 @@ export default function FinalsGalleryClient({
             {finalsMessage ? (
               <p className="mx-auto mt-6 max-w-xl whitespace-pre-wrap text-lg leading-8 text-gray-600">
                 {finalsMessage}
+              </p>
+            ) : null}
+            {deletionDateLabel ? (
+              <p className="mx-auto mt-6 max-w-xl text-sm text-gray-500">
+                {t("deletionNotice", { date: deletionDateLabel })}
               </p>
             ) : null}
           </Reveal>

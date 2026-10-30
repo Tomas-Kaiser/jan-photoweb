@@ -211,7 +211,8 @@
     "downloadAllButton": "Download all",
     "downloadingAll": "Downloading…",
     "downloadButton": "Download",
-    "downloadFailed": "Download failed. Please try again."
+    "downloadFailed": "Download failed. Please try again.",
+    "deletionNotice": "These photos will be available here until {date}. Please download them before then."
   },
   "admin": {
     "common": {

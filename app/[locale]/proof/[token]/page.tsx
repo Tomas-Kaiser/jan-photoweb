@@ -16,6 +16,7 @@ import {
 } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import { finalPhotoOrder } from "@/app/lib/final-photo-order";
+import { getFinalDeliveryDeletionDate } from "@/app/lib/final-delivery-retention";
 import { loadClientGallery } from "@/app/lib/client-gallery";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
@@ -92,6 +93,16 @@ export default async function ProofGalleryPage({ params }: Props) {
               : null
           }
           finalsMessage={gallery.finalsMessage}
+          deletionDateLabel={
+            gallery.finalsPublishedAt
+              ? getFinalDeliveryDeletionDate(
+                  gallery.finalsPublishedAt,
+                ).toLocaleDateString(locale, {
+                  dateStyle: "long",
+                  timeZone: "Europe/Prague",
+                })
+              : null
+          }
           photos={finals}
           heroMobileSrc={
             gallery.heroMobileCloudflareId

@@ -211,7 +211,8 @@
     "downloadAllButton": "Stáhnout vše",
     "downloadingAll": "Stahování…",
     "downloadButton": "Stáhnout",
-    "downloadFailed": "Stahování se nezdařilo. Zkuste to prosím znovu."
+    "downloadFailed": "Stahování se nezdařilo. Zkuste to prosím znovu.",
+    "deletionNotice": "Fotky zde budou k dispozici do {date}. Stáhněte si je prosím do té doby."
   },
   "admin": {
     "common": {

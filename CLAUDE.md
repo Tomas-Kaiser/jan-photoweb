@@ -132,7 +132,7 @@ undelivered — the photographer may need an unbounded amount of time to
 edit and upload finals, so there's no deletion countdown at all until
 finals are actually published. Once published,
 [app/lib/final-delivery-retention.ts](app/lib/final-delivery-retention.ts)
-(`FINAL_DELIVERY_RETENTION_DAYS` = 356 days from `finalsPublishedAt`) and a
+(`FINAL_DELIVERY_RETENTION_DAYS` = 365 days from `finalsPublishedAt`, also shown to the client as a deletion date on the finals page) and a
 daily Vercel cron ([vercel.json](vercel.json) →
 [app/api/cron/delete-expired-final-deliveries](app/api/cron/delete-expired-final-deliveries/route.ts),
 auth'd via `CRON_SECRET`) take over the gallery's entire lifecycle — it

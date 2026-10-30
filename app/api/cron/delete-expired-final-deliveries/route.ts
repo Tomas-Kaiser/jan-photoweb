@@ -3,13 +3,13 @@ import { lte } from "drizzle-orm";
 import { db } from "@/app/db";
 import { proofGalleries } from "@/app/db/schema";
 import { deleteGalleryById } from "@/app/lib/delete-gallery-by-id";
-import { FINAL_DELIVERY_RETENTION_DAYS } from "@/app/lib/final-delivery-retention";
+import { getFinalDeliveryExpiryCutoff } from "@/app/lib/final-delivery-retention";
 
 // This is now the only automatic deletion path for a proof gallery — a
 // gallery is never auto-deleted while paid but undelivered (finals not yet
 // published), since the photographer may still need time to edit and
 // upload them. Deletion only starts counting down once finals are
-// published, 356 days later. Each expired gallery goes through the same
+// published, 365 days later. Each expired gallery goes through the same
 // teardown as manual deletion (app/lib/gallery-teardown.ts). (Manual deletion via the admin UI's
 // "Delete gallery" button remains available at any time regardless.)
 export async function GET(req: Request) {
@@ -18,9 +18,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const cutoff = new Date(
-    Date.now() - FINAL_DELIVERY_RETENTION_DAYS * 24 * 60 * 60 * 1000,
-  );
+  const cutoff = getFinalDeliveryExpiryCutoff();
 
   const expiredGalleries = await db
     .select({ id: proofGalleries.id })
