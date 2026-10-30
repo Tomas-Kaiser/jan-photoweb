@@ -3,19 +3,20 @@ import {
   clientGalleryNotFound,
   loadClientGallery,
 } from "@/app/lib/client-gallery";
-import { completeOwnerRegistration } from "@/app/lib/owner-registration";
+import {
+  completeRegistration,
+  isVerificationId,
+} from "@/app/lib/client-registration";
 
 type Params = {
   params: Promise<{ token: string }>;
 };
 
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 // No admin session here — the proof token is the credential. Verifies the
 // emailed code or magic link and, on success, makes the person the
-// gallery's owner. "alreadyClaimed" is a success for the caller too: the
-// gallery is open to everyone either way.
+// gallery's owner or links them as a guest, depending on the form the
+// verification started from. "alreadyClaimed" is a success for the caller
+// too: the gallery is open to everyone either way.
 export async function POST(req: Request, { params }: Params) {
   const { token } = await params;
 
@@ -26,10 +27,9 @@ export async function POST(req: Request, { params }: Params) {
   }
 
   const body = await req.json().catch(() => null);
-  const verificationId =
-    typeof body?.verificationId === "string" ? body.verificationId : "";
+  const verificationId = body?.verificationId;
 
-  if (!UUID_PATTERN.test(verificationId)) {
+  if (!isVerificationId(verificationId)) {
     return clientGalleryNotFound();
   }
 
@@ -39,7 +39,7 @@ export async function POST(req: Request, { params }: Params) {
       : { code: typeof body?.code === "string" ? body.code : "" };
 
   try {
-    const result = await completeOwnerRegistration({
+    const result = await completeRegistration({
       galleryId: clientGallery.gallery.id,
       verificationId,
       proof,

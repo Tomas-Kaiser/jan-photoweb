@@ -11,13 +11,18 @@ import {
   createEmailVerification,
   type VerifyOutcome,
 } from "@/app/lib/email-verification";
-import { MARKETING_CONSENT_VERSION } from "@/app/lib/marketing-consent";
+import {
+  getRegistrationRole,
+  type RegistrationPurpose,
+} from "@/app/lib/gallery-lifecycle";
+import { MARKETING_CONSENT_VERSIONS } from "@/app/lib/marketing-consent";
 import { getProofLinkPath, type ProofLinkLocale } from "@/app/lib/proof-link";
 
-// Owner registration on a gated gallery: emails a magic link and a code,
-// and on verification makes the person the gallery's single owner. The
-// verification rules are in app/lib/email-verification.ts; this is the
-// database and email side of them.
+// Client registration on a gallery: emails a magic link and a code, and on
+// verification links the person to the gallery — as its single owner when
+// they claim a gated gallery, otherwise as a guest signing up for news &
+// offers. The verification rules are in app/lib/email-verification.ts; this
+// is the database and email side of them.
 
 // Created per call rather than at import, so a missing secret fails the
 // registration request instead of every module that imports this one.
@@ -29,7 +34,8 @@ export type StartResult =
   | { kind: "sent" | "pending"; verificationId: string }
   | { kind: "rateLimited"; retryAfterSeconds: number };
 
-export async function startOwnerRegistration({
+export async function startRegistration({
+  purpose,
   gallery,
   name,
   email,
@@ -38,6 +44,7 @@ export async function startOwnerRegistration({
   resend,
   siteUrl,
 }: {
+  purpose: RegistrationPurpose;
   gallery: { id: string; token: string };
   name: string;
   // Already normalised.
@@ -56,6 +63,9 @@ export async function startOwnerRegistration({
       and(
         eq(emailVerifications.galleryId, gallery.id),
         eq(emailVerifications.email, email),
+        // An owner's and a guest's verification for the same email are
+        // separate, so neither one's code or consent leaks into the other.
+        eq(emailVerifications.purpose, purpose),
       ),
     )
     .orderBy(desc(emailVerifications.createdAt))
@@ -73,7 +83,9 @@ export async function startOwnerRegistration({
   const entered = {
     name,
     locale,
-    marketingConsentVersion: marketingConsent ? MARKETING_CONSENT_VERSION : null,
+    marketingConsentVersion: marketingConsent
+      ? MARKETING_CONSENT_VERSIONS[purpose]
+      : null,
   };
 
   if (outcome.kind === "pending") {
@@ -95,7 +107,7 @@ export async function startOwnerRegistration({
           .returning({ id: emailVerifications.id })
       : await db
           .insert(emailVerifications)
-          .values({ galleryId: gallery.id, email, ...details })
+          .values({ galleryId: gallery.id, email, purpose, ...details })
           .returning({ id: emailVerifications.id });
 
   const link = `${siteUrl.replace(/\/$/, "")}${getProofLinkPath(
@@ -104,6 +116,7 @@ export async function startOwnerRegistration({
   )}?verify=${saved.id}.${outcome.secrets.linkToken}`;
 
   await sendVerificationEmail({
+    purpose,
     to: email,
     name,
     locale,
@@ -115,14 +128,18 @@ export async function startOwnerRegistration({
 }
 
 export type CompleteResult =
-  | { kind: "claimed" | "alreadyClaimed" | "notFound" }
+  // "joined": linked as a guest with news & offers consent.
+  | { kind: "claimed" | "joined" | "alreadyClaimed" | "notFound" }
   | Exclude<VerifyOutcome, { ok: true }>;
 
-// Verifies by code or link and claims the gallery. Runs under row locks on
-// the gallery and the verification, so concurrent attempts are serialised:
-// a verification is used once, and a gallery gets one owner (the partial
-// unique index on gallery_clients backs this up).
-export async function completeOwnerRegistration({
+// Verifies by code or link, then registers the person for the form the
+// verification started from: the owner form claims the gallery if it's
+// still gated and unclaimed, a guest signup links them as a guest (see
+// getRegistrationRole). Runs under row locks on the gallery and the
+// verification, so concurrent attempts are serialised: a verification is
+// used once, and a gallery gets one owner (the partial unique index on
+// gallery_clients backs this up).
+export async function completeRegistration({
   galleryId,
   verificationId,
   proof,
@@ -134,8 +151,8 @@ export async function completeOwnerRegistration({
   return db.transaction(async (tx) => {
     const now = new Date();
 
-    await tx
-      .select({ id: proofGalleries.id })
+    const [gallery] = await tx
+      .select({ requiresRegistration: proofGalleries.requiresRegistration })
       .from(proofGalleries)
       .where(eq(proofGalleries.id, galleryId))
       .for("update");
@@ -151,7 +168,7 @@ export async function completeOwnerRegistration({
       )
       .for("update");
 
-    if (!verification) return { kind: "notFound" as const };
+    if (!gallery || !verification) return { kind: "notFound" as const };
 
     const { verifyCode, verifyLinkToken } = emailVerification();
     const outcome =
@@ -185,9 +202,19 @@ export async function completeOwnerRegistration({
       )
       .limit(1);
 
-    // Someone else claimed it first. The gallery is open to everyone now,
-    // so there's nothing left to register for.
-    if (existingOwner) return { kind: "alreadyClaimed" as const };
+    const role = getRegistrationRole({
+      purpose: verification.purpose,
+      gate: {
+        required: gallery.requiresRegistration,
+        claimed: Boolean(existingOwner),
+      },
+    });
+
+    // A guest is only ever recorded with consent, which the start route
+    // requires; without it there's nothing to sign up for.
+    if (!role || (role === "guest" && !verification.marketingConsentVersion)) {
+      return { kind: "alreadyClaimed" as const };
+    }
 
     const consent = verification.marketingConsentVersion
       ? {
@@ -196,7 +223,9 @@ export async function completeOwnerRegistration({
         }
       : {};
 
-    // One client per email: an unticked box never clears earlier consent.
+    // One client per email: an unticked box never clears earlier consent,
+    // and a guest signup never renames an existing client — anyone with
+    // the link can sign up with any address they can verify.
     const [client] = await tx
       .insert(clients)
       .values({
@@ -207,29 +236,83 @@ export async function completeOwnerRegistration({
       })
       .onConflictDoUpdate({
         target: clients.email,
-        set: {
-          name: verification.name,
-          locale: verification.locale,
-          ...consent,
-        },
+        set:
+          role === "owner"
+            ? {
+                name: verification.name,
+                locale: verification.locale,
+                ...consent,
+              }
+            : consent,
       })
       .returning({ id: clients.id });
 
-    await tx
+    const membership = tx
       .insert(galleryClients)
-      .values({ galleryId, clientId: client.id, role: "owner" });
+      .values({ galleryId, clientId: client.id, role });
+    const membershipTarget = [
+      galleryClients.galleryId,
+      galleryClients.clientId,
+    ];
 
-    return { kind: "claimed" as const };
+    // Already linked: a guest claiming the gallery becomes its owner, and
+    // an owner signing up as a guest stays the owner.
+    if (role === "owner") {
+      await membership.onConflictDoUpdate({
+        target: membershipTarget,
+        set: { role },
+      });
+      return { kind: "claimed" as const };
+    }
+
+    await membership.onConflictDoNothing({ target: membershipTarget });
+    return { kind: "joined" as const };
   });
 }
 
+const VERIFICATION_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isVerificationId(value: unknown): value is string {
+  return typeof value === "string" && VERIFICATION_ID_PATTERN.test(value);
+}
+
+// Which form an emailed link belongs to, so the page hands it to that
+// form's screen only: an owner's link opened on the finals (the gallery's
+// open by then) or a guest's on the registration screen is left alone.
+// Null for an unknown id.
+export async function findLinkVerificationPurpose({
+  galleryId,
+  verificationId,
+}: {
+  galleryId: string;
+  verificationId: string;
+}): Promise<RegistrationPurpose | null> {
+  if (!isVerificationId(verificationId)) return null;
+
+  const [verification] = await db
+    .select({ purpose: emailVerifications.purpose })
+    .from(emailVerifications)
+    .where(
+      and(
+        eq(emailVerifications.id, verificationId),
+        eq(emailVerifications.galleryId, galleryId),
+      ),
+    )
+    .limit(1);
+
+  return verification?.purpose ?? null;
+}
+
 async function sendVerificationEmail({
+  purpose,
   to,
   name,
   locale,
   code,
   link,
 }: {
+  purpose: RegistrationPurpose;
   to: string;
   name: string;
   locale: ProofLinkLocale;
@@ -246,7 +329,9 @@ async function sendVerificationEmail({
       ? [
           `Dobrý den, ${name},`,
           "",
-          "pro zobrazení vašich fotek potvrďte svůj e-mail. Klikněte na odkaz:",
+          purpose === "owner"
+            ? "pro zobrazení vašich fotek potvrďte svůj e-mail. Klikněte na odkaz:"
+            : "pro odběr novinek a nabídek potvrďte svůj e-mail. Klikněte na odkaz:",
           link,
           "",
           `nebo zadejte tento kód na stránce galerie: ${code}`,
@@ -259,7 +344,9 @@ async function sendVerificationEmail({
       : [
           `Hi ${name},`,
           "",
-          "Please confirm your email to see your photos. Click this link:",
+          purpose === "owner"
+            ? "Please confirm your email to see your photos. Click this link:"
+            : "Please confirm your email to get news and offers. Click this link:",
           link,
           "",
           `or enter this code on the gallery page: ${code}`,

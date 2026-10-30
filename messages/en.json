@@ -276,11 +276,22 @@
       "verifyingLink": "Confirming your email…",
       "errorName": "Please enter your name.",
       "errorEmail": "Please enter a valid email address.",
+      "errorConsent": "Please tick the box to agree to news and offers.",
       "errorWrongCode": "That code isn't right. {count, plural, =0 {No attempts left — please ask for a new code.} one {# attempt left.} other {# attempts left.}}",
       "errorExpired": "This code or link is no longer valid. Please ask for a new one.",
       "errorUsed": "This code or link has already been used. Please ask for a new one.",
       "errorRetryAfter": "Please wait {seconds} seconds before asking for another code.",
       "errorGeneric": "Something went wrong. Please try again."
+    },
+    "guestSignup": {
+      "title": "Get news & offers",
+      "intro": "Enjoying the photos? Leave your name and email to hear about new work and special offers from Jan Hájek Photography.",
+      "marketingConsent": "Send me occasional news and offers from Jan Hájek Photography by email. I can unsubscribe at any time.",
+      "submit": "Sign me up",
+      "privacyNotice": "We'll use your email only to send you news and offers. See our <link>privacy policy</link>.",
+      "verify": "Confirm my email",
+      "thanks": "Thank you, you're signed up for news and offers.",
+      "dismiss": "Close"
     }
   },
   "finalDelivery": {

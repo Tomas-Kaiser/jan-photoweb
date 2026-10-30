@@ -18,6 +18,7 @@ import { formatMoneyFromCents } from "@/app/lib/format-money";
 import { finalPhotoOrder } from "@/app/lib/final-photo-order";
 import { getFinalDeliveryDeletionDate } from "@/app/lib/final-delivery-retention";
 import { loadClientGallery } from "@/app/lib/client-gallery";
+import { findLinkVerificationPurpose } from "@/app/lib/client-registration";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
 import FinalsGalleryClient from "./FinalsGalleryClient";
@@ -59,6 +60,16 @@ export default async function ProofGalleryPage({
 
   const { gallery, order, view } = clientGallery;
 
+  // Each screen only acts on links from its own form: the registration
+  // screen on the owner's, the finals' news & offers box on a guest's.
+  const linkVerification = parseLinkVerification((await searchParams).verify);
+  const linkPurpose = linkVerification
+    ? await findLinkVerificationPurpose({
+        galleryId: gallery.id,
+        verificationId: linkVerification.verificationId,
+      })
+    : null;
+
   // Finals behind the owner registration gate — nothing about the photos
   // is loaded or sent to the browser until the gallery is claimed.
   if (view === "registration") {
@@ -67,7 +78,7 @@ export default async function ProofGalleryPage({
         token={token}
         locale={locale}
         clientName={gallery.clientName}
-        linkVerification={parseLinkVerification((await searchParams).verify)}
+        linkVerification={linkPurpose === "owner" ? linkVerification : null}
       />
     );
   }
@@ -139,6 +150,7 @@ export default async function ProofGalleryPage({
               ? getCloudflareImageUrl(gallery.heroDesktopCloudflareId, "full")
               : null
           }
+          linkVerification={linkPurpose === "guest" ? linkVerification : null}
         />
       </>
     );

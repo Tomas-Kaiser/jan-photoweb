@@ -276,11 +276,22 @@
       "verifyingLink": "Ověřuji váš e-mail…",
       "errorName": "Zadejte prosím své jméno.",
       "errorEmail": "Zadejte prosím platnou e-mailovou adresu.",
+      "errorConsent": "Pro odběr novinek a nabídek prosím zaškrtněte souhlas.",
       "errorWrongCode": "Kód nesouhlasí. {count, plural, =0 {Nezbývá žádný pokus — nechte si prosím poslat nový kód.} one {Zbývá # pokus.} few {Zbývají # pokusy.} other {Zbývá # pokusů.}}",
       "errorExpired": "Tento kód nebo odkaz už neplatí. Nechte si prosím poslat nový.",
       "errorUsed": "Tento kód nebo odkaz už byl použit. Nechte si prosím poslat nový.",
       "errorRetryAfter": "Před dalším kódem prosím počkejte {seconds} s.",
       "errorGeneric": "Něco se pokazilo. Zkuste to prosím znovu."
+    },
+    "guestSignup": {
+      "title": "Novinky a nabídky",
+      "intro": "Líbí se vám fotky? Nechte nám jméno a e-mail a dáme vám vědět o nových fotkách a speciálních nabídkách od Jana Hájka.",
+      "marketingConsent": "Chci občas e-mailem dostávat novinky a nabídky od Jana Hájka. Odhlásit se můžu kdykoli.",
+      "submit": "Přihlásit se k odběru",
+      "privacyNotice": "Váš e-mail použijeme jen k zasílání novinek a nabídek. Více v <link>zásadách ochrany osobních údajů</link>.",
+      "verify": "Potvrdit e-mail",
+      "thanks": "Děkujeme, novinky a nabídky vám budeme posílat.",
+      "dismiss": "Zavřít"
     }
   },
   "finalDelivery": {

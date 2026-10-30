@@ -40,6 +40,13 @@ export const galleryClientRoleEnum = pgEnum("gallery_client_role", [
   "guest",
 ]);
 
+// Which form a registration started from (RegistrationPurpose in
+// app/lib/gallery-lifecycle.ts).
+export const registrationPurposeEnum = pgEnum("registration_purpose", [
+  "owner",
+  "guest",
+]);
+
 export const albums = pgTable(
   "albums",
   {
@@ -312,6 +319,9 @@ export const emailVerifications = pgTable(
     // The news & offers wording version shown when the box was ticked;
     // null when it wasn't. Copied onto the client once verified.
     marketingConsentVersion: text("marketing_consent_version"),
+    // The form it started from, which decides the role on verification.
+    // Defaults to owner for verifications from before guest signup.
+    purpose: registrationPurposeEnum("purpose").default("owner").notNull(),
     codeHash: text("code_hash").notNull(),
     linkTokenHash: text("link_token_hash").notNull(),
     expiresAt: timestamp("expires_at").notNull(),

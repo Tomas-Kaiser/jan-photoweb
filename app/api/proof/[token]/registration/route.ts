@@ -4,7 +4,7 @@ import {
   loadClientGallery,
 } from "@/app/lib/client-gallery";
 import { normaliseEmail } from "@/app/lib/email-verification";
-import { startOwnerRegistration } from "@/app/lib/owner-registration";
+import { startRegistration } from "@/app/lib/client-registration";
 
 type Params = {
   params: Promise<{ token: string }>;
@@ -13,14 +13,22 @@ type Params = {
 const MAX_NAME_LENGTH = 200;
 
 // No admin session here — the proof token is the credential. Starts (or,
-// with `resend`, re-sends) the owner verification email for a gallery
-// showing the registration screen.
+// with `resend`, re-sends) the verification email: an owner's on a gallery
+// showing the registration screen, a guest's from the news & offers box on
+// the finals.
 export async function POST(req: Request, { params }: Params) {
   const { token } = await params;
 
   const clientGallery = await loadClientGallery(token);
 
-  if (clientGallery?.view !== "registration") {
+  const purpose =
+    clientGallery?.view === "registration"
+      ? "owner"
+      : clientGallery?.view === "finals"
+        ? "guest"
+        : null;
+
+  if (!clientGallery || !purpose) {
     return clientGalleryNotFound();
   }
 
@@ -30,6 +38,7 @@ export async function POST(req: Request, { params }: Params) {
       ? body.name.trim().slice(0, MAX_NAME_LENGTH)
       : "";
   const email = normaliseEmail(body?.email);
+  const marketingConsent = body?.marketingConsent === true;
 
   if (!name) {
     return NextResponse.json({ error: "invalidName" }, { status: 400 });
@@ -37,14 +46,19 @@ export async function POST(req: Request, { params }: Params) {
   if (!email) {
     return NextResponse.json({ error: "invalidEmail" }, { status: 400 });
   }
+  // The guest box is a newsletter signup, so its consent is required.
+  if (purpose === "guest" && !marketingConsent) {
+    return NextResponse.json({ error: "consentRequired" }, { status: 400 });
+  }
 
   try {
-    const result = await startOwnerRegistration({
+    const result = await startRegistration({
+      purpose,
       gallery: clientGallery.gallery,
       name,
       email,
       locale: body?.locale === "cs" ? "cs" : "en",
-      marketingConsent: body?.marketingConsent === true,
+      marketingConsent,
       resend: body?.resend === true,
       siteUrl: process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin,
     });

@@ -102,3 +102,24 @@ export function getClientView(
         : "finals";
   }
 }
+
+// Which form a registration started from: the registration screen of a
+// gated, unclaimed gallery, or the guest news & offers box on the finals.
+export type RegistrationPurpose = "owner" | "guest";
+
+// What a person who has just verified their email on a gallery becomes.
+// The owner form claims the gallery only while there's still something to
+// claim; verified later (someone else claimed first, or the gallery isn't
+// gated any more) it registers nothing, consent or not, since the gallery
+// is open to everyone by then. A guest signup is always a guest, never the
+// owner, even if the gallery has become gated and unclaimed meanwhile.
+export function getRegistrationRole({
+  purpose,
+  gate,
+}: {
+  purpose: RegistrationPurpose;
+  gate: RegistrationGate;
+}): "owner" | "guest" | null {
+  if (purpose === "guest") return "guest";
+  return gate.required && !gate.claimed ? "owner" : null;
+}

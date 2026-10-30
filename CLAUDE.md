@@ -170,9 +170,18 @@ with `canDownload`. Proof selection is never gated.
 - **Clients:** `clients` (one row per normalised email) links to galleries
   through `galleryClients` with role `owner` | `guest`. A partial unique
   index allows one owner per gallery, and the claim in
-  [app/lib/owner-registration.ts](app/lib/owner-registration.ts) runs under
-  row locks. There is no client login or session cookie; NextAuth stays
-  admin-only.
+  [app/lib/client-registration.ts](app/lib/client-registration.ts) runs
+  under row locks. There is no client login or session cookie; NextAuth
+  stays admin-only.
+- **Guests:** the finals view shows an optional, dismissible "Get news &
+  offers" box (consent required) that uses the same routes and
+  verification. Each verification stores the form it started from
+  (`emailVerifications.purpose`), and `getRegistrationRole` in the
+  lifecycle module turns that into a role: a guest signup is always a
+  guest, never the owner; the owner form claims only while the gallery is
+  gated and unclaimed, and registers nothing after that. The page hands an
+  emailed link only to its own form's screen. A guest signup never renames
+  an existing client.
 - **Verification:** emailed magic link or 6-digit code, either one works.
   The rules (15-minute expiry, single use, attempts, resend cooldown) are
   the pure, tested
@@ -182,9 +191,10 @@ with `canDownload`. Proof selection is never gated.
   email only: a gallery-wide limit would let anyone holding the link lock
   the real owner out.
 - **Consent:** news & offers consent is stored only when ticked, with a
-  timestamp and `MARKETING_CONSENT_VERSION`
-  ([app/lib/marketing-consent.ts](app/lib/marketing-consent.ts)). Bump that
-  version whenever the checkbox wording in `messages/*.json` changes.
+  timestamp and the version of that box's wording,
+  `MARKETING_CONSENT_VERSIONS.owner` or `.guest`
+  ([app/lib/marketing-consent.ts](app/lib/marketing-consent.ts)). Bump a
+  box's version whenever its wording in `messages/*.json` changes.
 
 ### Admin API routes (`app/api/admin/`)
 

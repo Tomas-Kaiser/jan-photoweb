@@ -3,6 +3,7 @@ import {
   getClientView,
   getGalleryPermissions,
   getGalleryStage,
+  getRegistrationRole,
 } from "@/app/lib/gallery-lifecycle";
 
 const published = new Date("2026-05-01T10:00:00Z");
@@ -253,5 +254,28 @@ describe("getClientView with the registration gate", () => {
         gate,
       ),
     ).toBe("finalsComingSoon");
+  });
+});
+
+describe("getRegistrationRole", () => {
+  const unclaimed = { required: true, claimed: false };
+  const claimed = { required: true, claimed: true };
+
+  it("makes the first verified person from the owner form on a gated, unclaimed gallery its owner", () => {
+    expect(getRegistrationRole({ purpose: "owner", gate: unclaimed })).toBe(
+      "owner",
+    );
+  });
+
+  it("registers nothing for an owner form verified once there's nothing to claim, even with consent", () => {
+    // e.g. an owner's link verified after someone else claimed it.
+    expect(getRegistrationRole({ purpose: "owner", gate: claimed })).toBe(null);
+    expect(getRegistrationRole({ purpose: "owner", gate: ungated })).toBe(null);
+  });
+
+  it("always links a guest signup as a guest, never as the owner", () => {
+    for (const gate of [unclaimed, claimed, ungated]) {
+      expect(getRegistrationRole({ purpose: "guest", gate })).toBe("guest");
+    }
   });
 });

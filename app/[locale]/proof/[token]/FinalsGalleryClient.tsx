@@ -12,6 +12,8 @@ import { useToast } from "@/app/components/Toast";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { Link } from "@/app/i18n/routing";
 import { useHideProofChrome } from "../../ProofChromeContext";
+import type { LinkVerification } from "./EmailVerification";
+import GuestSignupClient from "./GuestSignupClient";
 import Reveal from "./Reveal";
 
 type Photo = {
@@ -39,6 +41,8 @@ type Props = {
   // galleries created before this existed keep working unchanged.
   heroMobileSrc: string | null;
   heroDesktopSrc: string | null;
+  // A guest signup's emailed link, opened on the finals.
+  linkVerification: LinkVerification | null;
 };
 
 export default function FinalsGalleryClient({
@@ -50,6 +54,7 @@ export default function FinalsGalleryClient({
   photos,
   heroMobileSrc,
   heroDesktopSrc,
+  linkVerification,
 }: Props) {
   const t = useTranslations("finalDelivery");
   const toast = useToast();
@@ -319,6 +324,8 @@ export default function FinalsGalleryClient({
             />
           </div>
         </div>
+
+        <GuestSignupClient token={token} linkVerification={linkVerification} />
       </div>
 
       {/* Blocks right-click/save on the lightbox's zoomed preview — a
