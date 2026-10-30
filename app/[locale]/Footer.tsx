@@ -150,13 +150,21 @@ const Footer = () => {
               {t("creditName")}
             </a>
           </span>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("open-cookie-consent"))}
-            className="cursor-pointer underline underline-offset-4 transition hover:text-black"
-          >
-            {t("cookieSettings")}
-          </button>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/privacy"
+              className="underline underline-offset-4 transition hover:text-black"
+            >
+              {t("privacyPolicy")}
+            </Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("open-cookie-consent"))}
+              className="cursor-pointer underline underline-offset-4 transition hover:text-black"
+            >
+              {t("cookieSettings")}
+            </button>
+          </div>
         </div>
       </div>
     </footer>

@@ -14,6 +14,7 @@ const intlMiddleware = createMiddleware(routing);
 const publicPages = [
   "/",
   "/admin/login",
+  "/privacy",
   `/(${PROOF_PATH_SEGMENTS.join("|")})/[^/]+`,
 ];
 

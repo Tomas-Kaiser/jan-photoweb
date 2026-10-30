@@ -10,7 +10,7 @@ const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"
 ).replace(/\/$/, "");
 
-const staticPaths = ["", "/about", "/services", "/contact", "/albums"];
+const staticPaths = ["", "/about", "/services", "/contact", "/albums", "/privacy"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const allAlbums = await db

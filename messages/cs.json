@@ -136,7 +136,60 @@
     "copyrightPrefix": "©",
     "copyrightText": "Jan Hájek | vytvořil",
     "creditName": "Kaiser Web Studio",
-    "cookieSettings": "Nastavení souborů cookie"
+    "cookieSettings": "Nastavení souborů cookie",
+    "privacyPolicy": "Ochrana osobních údajů"
+  },
+  "privacy": {
+    "heading": "Zásady ochrany osobních údajů",
+    "updated": "Poslední aktualizace: 30. října 2026",
+    "intro": "Na této stránce vysvětluji, jaké osobní údaje shromažďuji, když používáte tento web nebo ode mě dostáváte fotky, proč je shromažďuji, jak dlouho je uchovávám a jak mě můžete požádat, abych vám je ukázal nebo je smazal.",
+    "sections": {
+      "controller": {
+        "heading": "Kdo se o vaše údaje stará",
+        "text": "Jsem Jan Hájek, fotograf, a za osobní údaje popsané na této stránce odpovídám. Kdykoli mě můžete kontaktovat přes <contact>kontaktní formulář</contact>."
+      },
+      "collected": {
+        "heading": "Jaké údaje shromažďuji",
+        "items": [
+          "Když vybíráte fotky v náhledové galerii: vaše jméno, vybrané fotky a případná hodnocení či komentáře.\",\n        \"Když se zaregistrujete pro získání finálních fotek: vaše jméno, e-mailovou adresu a preferovaný jazyk.",
+          "Když se přihlásíte k odběru novinek a nabídek: vaše jméno, e-mailovou adresu, preferovaný jazyk, čas udělení souhlasu a znění souhlasu, se kterým jste souhlasili.",
+          "Když mi napíšete přes kontaktní formulář: vaše jméno, e-mailovou adresu a vaši zprávu.",
+          "Fotky z vašeho focení uložené ve vaší galerii."
+        ]
+      },
+      "purposes": {
+        "heading": "Proč je shromažďuji",
+        "items": [
+          "Abyste si mohli vybrat fotky, abych vám mohl předat finální fotky a ověřit, že e-mailová adresa opravdu patří vám. Je to nutné ke splnění naší dohody.",
+          "Abych osobě, která galerii převzala, připomněl blížící se smazání galerie, aby měla čas si fotky stáhnout. Je to součást předání fotek.",
+          "Abych vám posílal novinky a nabídky, a to výhradně na základě vašeho souhlasu. Prohlížení ani stahování fotek na tomto souhlasu nikdy nezávisí.",
+          "Abych mohl odpovědět na zprávy, které mi pošlete, což je v zájmu nás obou."
+        ]
+      },
+      "retention": {
+        "heading": "Jak dlouho je uchovávám",
+        "items": [
+          "Vaši galerii, fotky a váš výběr uchovávám po dobu, kdy fotky upravuji, a smažou se jeden rok po předání finálních fotek. Přesné datum smazání najdete na stránce galerie. Pokud o to požádáte, smažu ji dříve.",
+          "Vaše jméno a e-mailová adresa, které uchovávám kvůli předání fotek, se smažou, jakmile u mě už nemáte žádnou galerii, pokud jste nesouhlasili s odběrem novinek a nabídek.",
+          "Pokud jste souhlasili s odběrem novinek a nabídek, uchovávám vaše jméno a e-mailovou adresu, dokud souhlas neodvoláte.",
+          "Zprávy z kontaktního formuláře mi přicházejí do e-mailové schránky a uchovávám je jen po dobu, kterou potřebuji k vyřízení vašeho dotazu."
+        ]
+      },
+      "sharing": {
+        "heading": "Kdo další s nimi pracuje",
+        "text": "Vaše údaje neprodávám. Využívám několik poskytovatelů služeb, kteří je pro mě ukládají nebo doručují: Vercel (hosting webu a anonymní statistiky návštěvnosti bez cookies), Cloudflare (ukládání a doručování fotek) a Google (odesílání e-mailů). Pokud jste souhlasili s odběrem novinek a nabídek, předávám vaše jméno a e-mailovou adresu také službě, přes kterou je rozesílám."
+      },
+      "cookies": {
+        "heading": "Cookies",
+        "text": "Web používá jen cookies nezbytné pro své fungování. Widget Google Reviews od společnosti Elfsight může nastavit vlastní cookies a načte se jen tehdy, když povolíte volitelný obsah. Svou volbu můžete kdykoli změnit pod odkazem „Nastavení souborů cookie“ v patičce každé stránky."
+      },
+      "rights": {
+        "heading": "Vaše práva",
+        "text": "Můžete mě požádat, abych vám ukázal údaje, které o vás mám, opravil je, smazal je, omezil jejich zpracování nebo vám je předal v přenositelném formátu. Můžete také vznést námitku proti jejich zpracování a kdykoli odvolat souhlas s odběrem novinek a nabídek, a to odkazem „Spravovat e-mailové preference“ v e-mailech odeslaných z tohoto webu nebo tím, že mě kontaktujete.",
+        "how": "Žádost mi pošlete přes <contact>kontaktní formulář</contact> z e-mailové adresy, které se týká. Odpovím vám nejpozději do jednoho měsíce.",
+        "complaint": "Pokud si myslíte, že s vašimi údaji nakládám v rozporu se zákonem, můžete podat stížnost u <uoou>Úřadu pro ochranu osobních údajů</uoou>."
+      }
+    }
   },
   "christmasBanner": {
     "message": "Voucher na focení - dárek, který zůstane.",

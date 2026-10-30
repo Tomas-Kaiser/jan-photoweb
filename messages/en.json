@@ -136,7 +136,60 @@
     "copyrightPrefix": "©",
     "copyrightText": "Jan Hajek | created by",
     "creditName": "Kaiser Web Studio",
-    "cookieSettings": "Cookie settings"
+    "cookieSettings": "Cookie settings",
+    "privacyPolicy": "Privacy policy"
+  },
+  "privacy": {
+    "heading": "Privacy policy",
+    "updated": "Last updated: 30 October 2026",
+    "intro": "This page explains what personal data I collect when you use this website or receive photos from me, why I collect it, how long I keep it, and how you can ask me to show it to you or delete it.",
+    "sections": {
+      "controller": {
+        "heading": "Who looks after your data",
+        "text": "I'm Jan Hájek, a photographer, and I'm responsible for the personal data described here. You can reach me any time through the <contact>contact form</contact>."
+      },
+      "collected": {
+        "heading": "What I collect",
+        "items": [
+          "When you choose photos in your proof gallery: your name, the photos you pick and any ratings or comments you add.\",\n        \"When you register to receive your final photos: your name, your email address and your preferred language.",
+          "When you sign up for news and offers: your name, your email address, your preferred language, the time you gave consent and the wording of the consent you agreed to.",
+          "When you send me a message through the contact form: your name, your email address and your message.",
+          "The photos from your shoot, stored in your gallery."
+        ]
+      },
+      "purposes": {
+        "heading": "Why I collect it",
+        "items": [
+          "To let you choose your photos, deliver your final photos and confirm that the email address really belongs to you. This is needed to carry out our agreement.",
+          "To remind the person who received the gallery before it is deleted, so they have time to download their photos. This is part of delivering the photos.",
+          "To send you news and offers, based only on your consent. Viewing or downloading your photos never depends on this consent.",
+          "To reply to messages you send me, which is in both our interests."
+        ]
+      },
+      "retention": {
+        "heading": "How long I keep it",
+        "items": [
+          "Your gallery, its photos and your choices are kept while I edit your photos, and deleted one year after your final photos are delivered. The exact deletion date is shown on the gallery page. I can delete it sooner if you ask.",
+          "Your name and email address, kept for delivering your photos, are deleted once you no longer have any gallery with me, unless you agreed to news and offers.",
+          "If you agreed to news and offers, I keep your name and email address until you withdraw your consent.",
+          "Messages from the contact form arrive in my email inbox and are kept only as long as I need them to deal with your enquiry."
+        ]
+      },
+      "sharing": {
+        "heading": "Who else handles it",
+        "text": "I don't sell your data. I use a few service providers who store or deliver it on my behalf: Vercel (website hosting and anonymous visit statistics without cookies), Cloudflare (photo storage and delivery) and Google (sending email). If you agreed to news and offers, your name and email address are also passed to the newsletter service I use to send them."
+      },
+      "cookies": {
+        "heading": "Cookies",
+        "text": "The website uses only the cookies it needs to work. The Google Reviews widget, provided by Elfsight, may set its own cookies and loads only if you accept optional content. You can change your choice any time under \"Cookie settings\" at the bottom of every page."
+      },
+      "rights": {
+        "heading": "Your rights",
+        "text": "You can ask me to show you the data I hold about you, correct it, delete it, limit how I use it, or give it to you in a portable format. You can also object to how I use it, and withdraw your consent to news and offers at any time, using the \"Manage email preferences\" link in emails sent from this website or by contacting me.",
+        "how": "To make a request, send me a message through the <contact>contact form</contact> from the email address the request is about. I will reply within one month.",
+        "complaint": "If you think I'm handling your data unlawfully, you can complain to the Czech data protection authority, the <uoou>Office for Personal Data Protection</uoou>."
+      }
+    }
   },
   "christmasBanner": {
     "message": "A photoshoot voucher - a gift that lasts.",
