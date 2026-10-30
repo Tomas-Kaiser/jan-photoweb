@@ -1,6 +1,7 @@
-// Browser client for the admin proof-gallery endpoints (and deleting a
-// final photo from the gallery screen). Final photo uploads have their own
-// multi-step helper, upload-final-photo.ts.
+// Browser client for the admin proof-gallery endpoints (plus deleting a
+// final photo from the gallery screen, and the contacts screen's actions).
+// Final photo uploads have their own multi-step helper,
+// upload-final-photo.ts.
 
 import type { GalleryEventType } from "@/app/lib/gallery-event-type";
 
@@ -147,5 +148,19 @@ export async function publishFinals(galleryId: string): Promise<ApiResult> {
 export async function deleteFinalPhoto(photoId: string): Promise<ApiResult> {
   return withoutData(
     await request("/api/admin/final-photos", "DELETE", { photoId }),
+  );
+}
+
+export async function clearContactConsent(
+  clientId: string,
+): Promise<ApiResult> {
+  return withoutData(
+    await request(`/api/admin/contacts/${clientId}/clear-consent`, "POST"),
+  );
+}
+
+export async function deleteContact(clientId: string): Promise<ApiResult> {
+  return withoutData(
+    await request(`/api/admin/contacts/${clientId}`, "DELETE"),
   );
 }

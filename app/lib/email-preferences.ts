@@ -2,7 +2,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@/app/db";
 import { clients } from "@/app/db/schema";
 import { createEmailPreferencesLink } from "@/app/lib/email-preferences-link";
-import { MARKETING_CONSENT_VERSIONS } from "@/app/lib/marketing-consent";
+import {
+  MARKETING_CONSENT_VERSIONS,
+  NO_MARKETING_CONSENT,
+} from "@/app/lib/marketing-consent";
 import type { ProofLinkLocale } from "@/app/lib/proof-link";
 
 // The no-login "Manage email preferences" page behind the signed link in
@@ -68,7 +71,7 @@ export async function setMarketingConsent(
             marketingConsentAt: new Date(),
             marketingConsentVersion: MARKETING_CONSENT_VERSIONS.preferences,
           }
-        : { marketingConsentAt: null, marketingConsentVersion: null },
+        : NO_MARKETING_CONSENT,
     )
     .where(eq(clients.email, email));
 

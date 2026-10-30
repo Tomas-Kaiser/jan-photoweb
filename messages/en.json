@@ -356,7 +356,9 @@
       "highlightsDescription": "Choose which photos appear in the homepage highlights slider.",
       "proofGalleriesTitle": "Proof galleries",
       "proofGalleriesDescription": "Create shareable galleries for clients to select and pay for photos.",
-      "defaultUserName": "Admin"
+      "defaultUserName": "Admin",
+      "contactsTitle": "Contacts",
+      "contactsDescription": "Clients and newsletter contacts: their galleries, consent, CSV export and deletion."
     },
     "proofGalleries": {
       "skipProofLabel": "Skip proof — deliver final photos directly",
@@ -626,6 +628,31 @@
       "pageContentSave": "Save",
       "pageContentSaved": "Saved.",
       "pageContentSaveFailed": "Failed to save."
+    },
+    "contacts": {
+      "pageTitle": "Contacts",
+      "exportTitle": "Export for the newsletter",
+      "exportResyncReminder": "Before exporting, re-sync unsubscribes from your newsletter tool and clear consent here for anyone who unsubscribed there, so they're not added back.",
+      "exportButton": "Download CSV",
+      "consentingCount": "{count, plural, =0 {No contacts with news & offers consent yet} one {# contact with news & offers consent} other {# contacts with news & offers consent}}",
+      "noContactsYet": "No contacts yet. People appear here once they register on a gallery.",
+      "consentGiven": "News & offers since {date}",
+      "noConsent": "No news & offers",
+      "eventTypesLabel": "Event types",
+      "roles": {
+        "owner": "Owner",
+        "guest": "Guest"
+      },
+      "noGalleries": "Not linked to any gallery any more.",
+      "clearConsent": "Clear consent",
+      "clearConsentConfirmTitle": "Clear consent?",
+      "clearConsentConfirmMessage": "{name} will no longer be included in the newsletter export. Their gallery links stay.",
+      "clearConsentFailed": "Failed to clear consent.",
+      "delete": "Delete person",
+      "deleteConfirmTitle": "Delete this person?",
+      "deleteConfirmMessage": "This permanently deletes {name}'s contact details and their links to galleries. The galleries themselves stay. This can't be undone.",
+      "deleteConfirmOwnerNote": "They own a gallery: it becomes unclaimed, so if it requires registration, the next person to open the link will have to register again.",
+      "deleteFailed": "Failed to delete the contact."
     }
   }
 }

@@ -356,7 +356,9 @@
       "highlightsDescription": "Vyberte, které fotky se zobrazí v karuselu na hlavní stránce.",
       "proofGalleriesTitle": "Náhledovky",
       "proofGalleriesDescription": "Vytvářejte sdílené galerie, ve kterých si klienti vyberou a zaplatí fotky.",
-      "defaultUserName": "Administrátor"
+      "defaultUserName": "Administrátor",
+      "contactsTitle": "Kontakty",
+      "contactsDescription": "Klienti a kontakty pro newsletter: jejich galerie, souhlas, export do CSV a smazání."
     },
     "proofGalleries": {
       "skipProofLabel": "Přeskočit náhledy — rovnou předat finální fotky",
@@ -626,6 +628,31 @@
       "pageContentSave": "Uložit",
       "pageContentSaved": "Uloženo.",
       "pageContentSaveFailed": "Uložení se nezdařilo."
+    },
+    "contacts": {
+      "pageTitle": "Kontakty",
+      "exportTitle": "Export pro newsletter",
+      "exportResyncReminder": "Před exportem si z nástroje pro newsletter stáhněte odhlášené kontakty a těm, kdo se tam odhlásili, zde zrušte souhlas, aby se do něj znovu nepřidali.",
+      "exportButton": "Stáhnout CSV",
+      "consentingCount": "{count, plural, =0 {Zatím žádný kontakt se souhlasem s novinkami a nabídkami} one {# kontakt se souhlasem s novinkami a nabídkami} few {# kontakty se souhlasem s novinkami a nabídkami} other {# kontaktů se souhlasem s novinkami a nabídkami}}",
+      "noContactsYet": "Zatím žádné kontakty. Lidé se tu objeví, jakmile se zaregistrují u galerie.",
+      "consentGiven": "Novinky a nabídky od {date}",
+      "noConsent": "Bez novinek a nabídek",
+      "eventTypesLabel": "Typy akcí",
+      "roles": {
+        "owner": "Vlastník",
+        "guest": "Host"
+      },
+      "noGalleries": "Už není propojen s žádnou galerií.",
+      "clearConsent": "Zrušit souhlas",
+      "clearConsentConfirmTitle": "Zrušit souhlas?",
+      "clearConsentConfirmMessage": "Kontakt {name} už nebude v exportu pro newsletter. Propojení s galeriemi zůstanou.",
+      "clearConsentFailed": "Souhlas se nepodařilo zrušit.",
+      "delete": "Smazat osobu",
+      "deleteConfirmTitle": "Smazat tuto osobu?",
+      "deleteConfirmMessage": "Trvale smaže kontaktní údaje osoby {name} a její propojení s galeriemi. Galerie samotné zůstanou. Nelze vrátit zpět.",
+      "deleteConfirmOwnerNote": "Tato osoba vlastní galerii: galerie přestane mít vlastníka, takže pokud vyžaduje registraci, další člověk, který otevře odkaz, se bude muset znovu zaregistrovat.",
+      "deleteFailed": "Kontakt se nepodařilo smazat."
     }
   }
 }

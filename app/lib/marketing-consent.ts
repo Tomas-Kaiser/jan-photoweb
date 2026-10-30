@@ -10,3 +10,10 @@ export const MARKETING_CONSENT_VERSIONS = {
   // from the "Manage email preferences" page.
   preferences: "preferences-2026-10-30",
 } as const;
+
+// What a client's consent fields are set to when news & offers is turned
+// off, by the client or by the admin.
+export const NO_MARKETING_CONSENT = {
+  marketingConsentAt: null,
+  marketingConsentVersion: null,
+} as const;

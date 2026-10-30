@@ -25,6 +25,11 @@ export default async function AdminPage({ params }: Props) {
             href: "/admin/proof-galleries",
         },
         {
+            title: t("dashboard.contactsTitle"),
+            description: t("dashboard.contactsDescription"),
+            href: "/admin/contacts",
+        },
+        {
             title: t("dashboard.albumsTitle"),
             description: t("dashboard.albumsDescription"),
             href: "/albums",
