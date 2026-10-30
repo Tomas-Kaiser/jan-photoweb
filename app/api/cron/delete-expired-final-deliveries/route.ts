@@ -4,6 +4,7 @@ import { db } from "@/app/db";
 import { proofGalleries } from "@/app/db/schema";
 import { deleteGalleryById } from "@/app/lib/delete-gallery-by-id";
 import { getFinalDeliveryExpiryCutoff } from "@/app/lib/final-delivery-retention";
+import { sendDueDeletionReminders } from "@/app/lib/send-deletion-reminders";
 
 // This is now the only automatic deletion path for a proof gallery — a
 // gallery is never auto-deleted while paid but undelivered (finals not yet
@@ -12,6 +13,8 @@ import { getFinalDeliveryExpiryCutoff } from "@/app/lib/final-delivery-retention
 // published, 365 days later. Each expired gallery goes through the same
 // teardown as manual deletion (app/lib/gallery-teardown.ts). (Manual deletion via the admin UI's
 // "Delete gallery" button remains available at any time regardless.)
+// After deleting, the same run emails owners their 30- and 7-day deletion
+// reminders (app/lib/send-deletion-reminders.ts).
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -41,5 +44,17 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({ deleted, failed });
+  // Reminders run after deletions, so a reminder failure can't hold up a
+  // deletion.
+  let reminders: { sent: string[]; failed: string[] } | { error: true };
+  try {
+    reminders = await sendDueDeletionReminders({
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin,
+    });
+  } catch (error) {
+    console.error("Failed to send deletion reminders:", error);
+    reminders = { error: true };
+  }
+
+  return NextResponse.json({ deleted, failed, reminders });
 }

@@ -162,6 +162,10 @@ export const proofGalleries = pgTable(
     requiresRegistration: boolean("requires_registration")
       .default(false)
       .notNull(),
+    // When the owner was sent each deletion reminder (see
+    // app/lib/deletion-reminders.ts), so each goes out once.
+    deletionReminder30SentAt: timestamp("deletion_reminder_30_sent_at"),
+    deletionReminder7SentAt: timestamp("deletion_reminder_7_sent_at"),
   },
   (table) => [uniqueIndex("proof_galleries_token_unique").on(table.token)],
 );

@@ -140,7 +140,13 @@ auth'd via `CRON_SECRET`) take over the gallery's entire lifecycle — it
 deletes the hero images, the proof photos' Cloudflare images, the final
 photos' R2/Cloudflare assets, and then the `proofGalleries` row itself
 (cascading `proofPhotos`/`proofOrders`/`finalPhotos`/`galleryClients`/
-`emailVerifications`; `clients` rows outlive it). This is the *only*
+`emailVerifications`; `clients` rows outlive it). The same cron, after
+deleting, emails a claimed gallery's owner 30 and 7 days before its
+deletion date — never guests or unclaimed galleries. Which reminder is due
+is the pure, tested
+[app/lib/deletion-reminders.ts](app/lib/deletion-reminders.ts); each send
+is recorded on the gallery (`deletionReminder30SentAt`/`deletionReminder7SentAt`)
+so it goes out once and is caught up if the cron missed a day. This is the *only*
 automatic deletion path in the app — manual deletion via the admin UI's
 "Delete gallery" button is always available regardless of state. Both
 paths (and single-final delete) go through one teardown module,
@@ -223,8 +229,8 @@ checks. Unlike pages, these routes aren't locale-prefixed.
 
 `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` / `POSTGRES_URL`,
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_IMAGES_API_TOKEN`, `GMAIL_USER`,
-`GMAIL_PASS` (contact form, admin notifications and client verification
-emails via nodemailer), `EMAIL_VERIFICATION_SECRET` (keys the stored
+`GMAIL_PASS` (contact form, admin notifications, client verification
+and deletion reminder emails via nodemailer), `EMAIL_VERIFICATION_SECRET` (keys the stored
 verification hashes; registration requests fail without it),
 `EMAIL_PREFERENCES_SECRET` (signs the "Manage email preferences" links;
 rotating it breaks every link already emailed, and registration requests
@@ -232,9 +238,10 @@ fail without it), `CRON_SECRET`
 (bearer token checked by
 `app/api/cron/delete-expired-final-deliveries`), `NEXT_PUBLIC_SITE_URL`
 (the deployed site's base URL, e.g. `https://example.com` — used by
-robots/sitemap and for the admin link in selection-submitted emails, which
-points at the default locale since there's no stored admin locale; the
-email falls back to the request's origin when unset). Final photo delivery
+robots/sitemap, for the gallery links in deletion reminders, and for the
+admin link in selection-submitted emails, which points at the default
+locale since there's no stored admin locale; the emails fall back to the
+request's origin when unset). Final photo delivery
 (`app/lib/r2-client.ts`) additionally needs `R2_ACCOUNT_ID`,
 `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_ENDPOINT`
 (Cloudflare R2, S3-compatible — stores full-quality final photos),
