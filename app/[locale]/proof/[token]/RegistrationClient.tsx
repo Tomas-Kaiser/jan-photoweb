@@ -45,7 +45,7 @@ export default function RegistrationClient({
     const { error: reason, attemptsLeft, retryAfterSeconds } = (data ?? {}) as {
       error?: string;
       attemptsLeft?: number;
-      retryAfterSeconds?: number | null;
+      retryAfterSeconds?: number;
     };
 
     switch (reason) {
@@ -61,9 +61,7 @@ export default function RegistrationClient({
       case "used":
         return t("errorUsed");
       case "rateLimited":
-        return retryAfterSeconds
-          ? t("errorRetryAfter", { seconds: retryAfterSeconds })
-          : t("errorTryLater");
+        return t("errorRetryAfter", { seconds: retryAfterSeconds ?? 60 });
       default:
         return t("errorGeneric");
     }

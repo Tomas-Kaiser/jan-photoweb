@@ -280,7 +280,6 @@
       "errorExpired": "This code or link is no longer valid. Please ask for a new one.",
       "errorUsed": "This code or link has already been used. Please ask for a new one.",
       "errorRetryAfter": "Please wait {seconds} seconds before asking for another code.",
-      "errorTryLater": "Too many requests. Please try again later.",
       "errorGeneric": "Something went wrong. Please try again."
     }
   },

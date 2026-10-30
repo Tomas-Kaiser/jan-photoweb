@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  createEmailVerification,
   normaliseEmail,
-  requestVerification,
-  verifyCode,
-  verifyLinkToken,
 } from "./email-verification";
+
+const { requestVerification, verifyCode, verifyLinkToken } =
+  createEmailVerification("test-secret");
 
 const now = new Date("2026-10-30T10:00:00Z");
 
@@ -14,7 +15,7 @@ function minutesLater(minutes: number) {
 
 function issue() {
   const outcome = requestVerification(
-    { pending: null, startsInLastHour: 0, resend: false },
+    { pending: null, resend: false },
     now,
   );
   if (outcome.kind !== "send") throw new Error("expected a send");
@@ -82,7 +83,7 @@ describe("rejecting a wrong code", () => {
 describe("requesting a verification", () => {
   it("sends a fresh one when nothing is pending", () => {
     const outcome = requestVerification(
-      { pending: null, startsInLastHour: 3, resend: false },
+      { pending: null, resend: false },
       now,
     );
 
@@ -98,7 +99,7 @@ describe("requesting a verification", () => {
 
     expect(
       requestVerification(
-        { pending: record, startsInLastHour: 1, resend: false },
+        { pending: record, resend: false },
         minutesLater(5),
       ),
     ).toEqual({ kind: "pending" });
@@ -114,20 +115,11 @@ describe("requesting a verification", () => {
     ] as const) {
       expect(
         requestVerification(
-          { pending, startsInLastHour: 1, resend: false },
+          { pending, resend: false },
           at,
         ),
       ).toMatchObject({ kind: "send", replacesPending: false });
     }
-  });
-
-  it("limits how many verifications a gallery can start per hour", () => {
-    expect(
-      requestVerification(
-        { pending: null, startsInLastHour: 10, resend: false },
-        now,
-      ),
-    ).toEqual({ kind: "rateLimited", retryAfterSeconds: null });
   });
 });
 
@@ -137,7 +129,7 @@ describe("resending", () => {
 
     expect(
       requestVerification(
-        { pending: record, startsInLastHour: 1, resend: true },
+        { pending: record, resend: true },
         new Date(now.getTime() + 20_000),
       ),
     ).toEqual({ kind: "rateLimited", retryAfterSeconds: 40 });
@@ -148,7 +140,6 @@ describe("resending", () => {
     const outcome = requestVerification(
       {
         pending: { ...first.record, attempts: 3 },
-        startsInLastHour: 1,
         resend: true,
       },
       minutesLater(2),
@@ -177,7 +168,7 @@ describe("resending", () => {
 
     expect(
       requestVerification(
-        { pending: { ...record, sendCount: 5 }, startsInLastHour: 1, resend: true },
+        { pending: { ...record, sendCount: 5 }, resend: true },
         minutesLater(10),
       ),
     ).toEqual({ kind: "rateLimited", retryAfterSeconds: 300 });
@@ -211,6 +202,24 @@ describe("expiry and single use", () => {
     expect(verifyLinkToken(used, secrets.linkToken, minutesLater(2))).toEqual(
       { ok: false, reason: "used" },
     );
+  });
+});
+
+describe("keying the stored hashes", () => {
+  it("only verifies with the server secret the verification was issued under", () => {
+    const { secrets, record } = issue();
+    const other = createEmailVerification("another-secret");
+
+    expect(
+      other.verifyCode(record, secrets.code, minutesLater(1)),
+    ).toMatchObject({ ok: false, reason: "wrong" });
+    expect(
+      other.verifyLinkToken(record, secrets.linkToken, minutesLater(1)),
+    ).toMatchObject({ ok: false, reason: "wrong" });
+  });
+
+  it("refuses to work without a secret", () => {
+    expect(() => createEmailVerification("")).toThrow();
   });
 });
 

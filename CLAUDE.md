@@ -74,7 +74,8 @@ assume one when working on auth-adjacent code.
 
 ### Data model ([app/db/schema.ts](app/db/schema.ts))
 
-Three tables, Drizzle ORM/Postgres:
+Drizzle ORM/Postgres. The portfolio tables are below; the proof-gallery
+tables are described under "Final photo delivery" and "Owner registration".
 
 - **`albums`** — self-referential via `parentId` (`onDelete: cascade`),
   forming a tree. `path` is unique and represents the full slug path;
@@ -138,7 +139,8 @@ daily Vercel cron ([vercel.json](vercel.json) →
 auth'd via `CRON_SECRET`) take over the gallery's entire lifecycle — it
 deletes the hero images, the proof photos' Cloudflare images, the final
 photos' R2/Cloudflare assets, and then the `proofGalleries` row itself
-(cascading `proofPhotos`/`proofOrders`/`finalPhotos`). This is the *only*
+(cascading `proofPhotos`/`proofOrders`/`finalPhotos`/`galleryClients`/
+`emailVerifications`; `clients` rows outlive it). This is the *only*
 automatic deletion path in the app — manual deletion via the admin UI's
 "Delete gallery" button is always available regardless of state. Both
 paths (and single-final delete) go through one teardown module,
@@ -151,6 +153,38 @@ place to retry. There used to be a separate 15-day post-payment cron for
 proof-only galleries; it was retired because it could delete a paid
 gallery's proof photos before the photographer had a chance to deliver
 finals through this same system.
+
+### Owner registration
+
+A gallery with `proofGalleries.requiresRegistration` shows a registration
+screen instead of its published finals until someone claims it; the first
+person to verify their email becomes its single owner, and from then on
+anyone with the link sees and downloads everything. The column defaults to
+false so pre-existing links keep working; the create route turns it on for
+new galleries. The rule is `getClientView`'s second argument in
+[app/lib/gallery-lifecycle.ts](app/lib/gallery-lifecycle.ts), and
+`loadClientGallery` derives `canDownload` from the view, so the finals page
+and the download routes gate together — guard any new client finals route
+with `canDownload`. Proof selection is never gated.
+
+- **Clients:** `clients` (one row per normalised email) links to galleries
+  through `galleryClients` with role `owner` | `guest`. A partial unique
+  index allows one owner per gallery, and the claim in
+  [app/lib/owner-registration.ts](app/lib/owner-registration.ts) runs under
+  row locks. There is no client login or session cookie; NextAuth stays
+  admin-only.
+- **Verification:** emailed magic link or 6-digit code, either one works.
+  The rules (15-minute expiry, single use, attempts, resend cooldown) are
+  the pure, tested
+  [app/lib/email-verification.ts](app/lib/email-verification.ts). Stored
+  hashes are HMACs keyed by `EMAIL_VERIFICATION_SECRET`, because a plain
+  hash of a 6-digit code is reversible. Rate limits are per gallery and
+  email only: a gallery-wide limit would let anyone holding the link lock
+  the real owner out.
+- **Consent:** news & offers consent is stored only when ticked, with a
+  timestamp and `MARKETING_CONSENT_VERSION`
+  ([app/lib/marketing-consent.ts](app/lib/marketing-consent.ts)). Bump that
+  version whenever the checkbox wording in `messages/*.json` changes.
 
 ### Admin API routes (`app/api/admin/`)
 
@@ -168,7 +202,9 @@ checks. Unlike pages, these routes aren't locale-prefixed.
 
 `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` / `POSTGRES_URL`,
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_IMAGES_API_TOKEN`, `GMAIL_USER`,
-`GMAIL_PASS` (contact form email delivery via nodemailer), `CRON_SECRET`
+`GMAIL_PASS` (contact form, admin notifications and client verification
+emails via nodemailer), `EMAIL_VERIFICATION_SECRET` (keys the stored
+verification hashes; registration requests fail without it), `CRON_SECRET`
 (bearer token checked by
 `app/api/cron/delete-expired-final-deliveries`), `NEXT_PUBLIC_SITE_URL`
 (the deployed site's base URL, e.g. `https://example.com` — used by

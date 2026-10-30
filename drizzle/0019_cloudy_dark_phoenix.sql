@@ -1,0 +1,1 @@
+DROP INDEX "email_verifications_gallery_created_at_idx";

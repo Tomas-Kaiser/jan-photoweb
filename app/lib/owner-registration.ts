@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import nodemailer from "nodemailer";
 import { db } from "@/app/db";
 import {
@@ -8,9 +8,7 @@ import {
   proofGalleries,
 } from "@/app/db/schema";
 import {
-  requestVerification,
-  verifyCode,
-  verifyLinkToken,
+  createEmailVerification,
   type VerifyOutcome,
 } from "@/app/lib/email-verification";
 import { MARKETING_CONSENT_VERSION } from "@/app/lib/marketing-consent";
@@ -21,9 +19,15 @@ import { getProofLinkPath, type ProofLinkLocale } from "@/app/lib/proof-link";
 // verification rules are in app/lib/email-verification.ts; this is the
 // database and email side of them.
 
+// Created per call rather than at import, so a missing secret fails the
+// registration request instead of every module that imports this one.
+function emailVerification() {
+  return createEmailVerification(process.env.EMAIL_VERIFICATION_SECRET ?? "");
+}
+
 export type StartResult =
   | { kind: "sent" | "pending"; verificationId: string }
-  | { kind: "rateLimited"; retryAfterSeconds: number | null };
+  | { kind: "rateLimited"; retryAfterSeconds: number };
 
 export async function startOwnerRegistration({
   gallery,
@@ -57,21 +61,8 @@ export async function startOwnerRegistration({
     .orderBy(desc(emailVerifications.createdAt))
     .limit(1);
 
-  const [{ startsInLastHour }] = await db
-    .select({ startsInLastHour: sql<number>`count(*)::int` })
-    .from(emailVerifications)
-    .where(
-      and(
-        eq(emailVerifications.galleryId, gallery.id),
-        gt(
-          emailVerifications.createdAt,
-          new Date(now.getTime() - 60 * 60_000),
-        ),
-      ),
-    );
-
-  const outcome = requestVerification(
-    { pending: pending ?? null, startsInLastHour, resend },
+  const outcome = emailVerification().requestVerification(
+    { pending: pending ?? null, resend },
     now,
   );
 
@@ -162,6 +153,7 @@ export async function completeOwnerRegistration({
 
     if (!verification) return { kind: "notFound" as const };
 
+    const { verifyCode, verifyLinkToken } = emailVerification();
     const outcome =
       "code" in proof
         ? verifyCode(verification, proof.code, now)

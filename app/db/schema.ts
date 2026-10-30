@@ -332,10 +332,6 @@ export const emailVerifications = pgTable(
       table.galleryId,
       table.email,
     ),
-    index("email_verifications_gallery_created_at_idx").on(
-      table.galleryId,
-      table.createdAt,
-    ),
   ],
 );
 

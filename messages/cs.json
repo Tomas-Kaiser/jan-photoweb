@@ -280,7 +280,6 @@
       "errorExpired": "Tento kód nebo odkaz už neplatí. Nechte si prosím poslat nový.",
       "errorUsed": "Tento kód nebo odkaz už byl použit. Nechte si prosím poslat nový.",
       "errorRetryAfter": "Před dalším kódem prosím počkejte {seconds} s.",
-      "errorTryLater": "Příliš mnoho požadavků. Zkuste to prosím později.",
       "errorGeneric": "Něco se pokazilo. Zkuste to prosím znovu."
     }
   },
