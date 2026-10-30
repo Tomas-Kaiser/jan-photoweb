@@ -127,6 +127,13 @@
       "when": 1793374518435,
       "tag": "0017_goofy_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793376845351,
+      "tag": "0018_careless_power_pack",
+      "breakpoints": true
     }
   ]
 }

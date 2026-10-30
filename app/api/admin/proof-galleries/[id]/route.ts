@@ -70,6 +70,16 @@ export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
       updates.eventType = eventType.eventType;
     }
 
+    if ("requiresRegistration" in body) {
+      if (typeof body.requiresRegistration !== "boolean") {
+        return NextResponse.json(
+          { error: "Invalid registration setting." },
+          { status: 400 },
+        );
+      }
+      updates.requiresRegistration = body.requiresRegistration;
+    }
+
     if ("heroMobileCloudflareId" in body) {
       updates.heroMobileCloudflareId =
         typeof body.heroMobileCloudflareId === "string" &&

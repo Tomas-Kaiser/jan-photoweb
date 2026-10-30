@@ -21,6 +21,7 @@ import { loadClientGallery } from "@/app/lib/client-gallery";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
 import FinalsGalleryClient from "./FinalsGalleryClient";
+import RegistrationClient from "./RegistrationClient";
 import Reveal from "./Reveal";
 
 const INSTAGRAM_URL =
@@ -31,9 +32,20 @@ const GOOGLE_REVIEW_URL =
 
 type Props = {
   params: Promise<{ locale: string; token: string }>;
+  searchParams: Promise<{ verify?: string | string[] }>;
 };
 
-export default async function ProofGalleryPage({ params }: Props) {
+// The emailed magic link carries "?verify=<verificationId>.<linkToken>".
+function parseLinkVerification(verify: string | string[] | undefined) {
+  if (typeof verify !== "string") return null;
+  const [verificationId, linkToken] = verify.split(".");
+  return verificationId && linkToken ? { verificationId, linkToken } : null;
+}
+
+export default async function ProofGalleryPage({
+  params,
+  searchParams,
+}: Props) {
   const { locale, token } = await params;
   const t = await getTranslations("proof");
 
@@ -46,6 +58,19 @@ export default async function ProofGalleryPage({ params }: Props) {
   }
 
   const { gallery, order, view } = clientGallery;
+
+  // Finals behind the owner registration gate — nothing about the photos
+  // is loaded or sent to the browser until the gallery is claimed.
+  if (view === "registration") {
+    return (
+      <RegistrationClient
+        token={token}
+        locale={locale}
+        clientName={gallery.clientName}
+        linkVerification={parseLinkVerification((await searchParams).verify)}
+      />
+    );
+  }
 
   const photoRows = await db
     .select()

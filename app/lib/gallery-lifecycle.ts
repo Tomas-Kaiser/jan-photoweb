@@ -41,9 +41,9 @@ export type GalleryPermissions = {
   // Event date, finals message and hero photos — editable from the moment
   // finals can be delivered, including after publishing.
   canEditFinalsPage: boolean;
-  // Client
+  // Client. Downloading finals also depends on the registration gate, so
+  // it comes from getClientView instead.
   canClientSubmit: boolean;
-  canClientDownload: boolean;
 };
 
 export function getGalleryPermissions(
@@ -62,7 +62,6 @@ export function getGalleryPermissions(
     canPublishFinals: stage === "awaitingFinals",
     canEditFinalsPage: stage === "awaitingFinals" || stage === "delivered",
     canClientSubmit: stage === "proof",
-    canClientDownload: stage === "delivered",
   };
 }
 
@@ -71,9 +70,23 @@ export type ClientView =
   | "selection"
   | "submitted"
   | "finalsComingSoon"
+  // Published finals behind the owner registration gate: the first person
+  // to verify their email claims the gallery, then it opens to everyone.
+  | "registration"
   | "finals";
 
-export function getClientView(input: GalleryLifecycleInput): ClientView {
+export type RegistrationGate = {
+  // The gallery's requires-registration flag.
+  required: boolean;
+  // Whether someone has claimed the gallery as its owner.
+  claimed: boolean;
+};
+
+// Only the finals are gated — proof selection never is.
+export function getClientView(
+  input: GalleryLifecycleInput,
+  registration: RegistrationGate,
+): ClientView {
   switch (getGalleryStage(input)) {
     case "proof":
       return "selection";
@@ -84,6 +97,8 @@ export function getClientView(input: GalleryLifecycleInput): ClientView {
       // are published; direct delivery has no selection to show.
       return input.skipProof ? "finalsComingSoon" : "submitted";
     case "delivered":
-      return "finals";
+      return registration.required && !registration.claimed
+        ? "registration"
+        : "finals";
   }
 }

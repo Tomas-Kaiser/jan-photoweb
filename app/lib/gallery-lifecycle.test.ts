@@ -6,6 +6,7 @@ import {
 } from "@/app/lib/gallery-lifecycle";
 
 const published = new Date("2026-05-01T10:00:00Z");
+const ungated = { required: false, claimed: false };
 
 describe("getGalleryStage", () => {
   it("walks a proof gallery through proof → submitted → awaiting finals → delivered", () => {
@@ -80,7 +81,6 @@ describe("getGalleryPermissions by stage", () => {
     canPublishFinals: false,
     canEditFinalsPage: false,
     canClientSubmit: false,
-    canClientDownload: false,
   };
 
   it.each([
@@ -128,7 +128,6 @@ describe("getGalleryPermissions by stage", () => {
       allowed: {
         canUploadFinals: true,
         canEditFinalsPage: true,
-        canClientDownload: true,
       },
     },
     {
@@ -148,7 +147,6 @@ describe("getGalleryPermissions by stage", () => {
       allowed: {
         canUploadFinals: true,
         canEditFinalsPage: true,
-        canClientDownload: true,
       },
     },
   ])("$name", ({ input, allowed }) => {
@@ -201,6 +199,59 @@ describe("getClientView", () => {
       view: "finals",
     },
   ])("$name", ({ input, view }) => {
-    expect(getClientView(input)).toBe(view);
+    expect(getClientView(input, ungated)).toBe(view);
+  });
+});
+
+describe("getClientView with the registration gate", () => {
+  const delivered = {
+    skipProof: false,
+    finalsPublishedAt: published,
+    order: { status: "paid" as const },
+  };
+
+  it("shows the registration screen instead of the finals until the gallery is claimed", () => {
+    expect(
+      getClientView(delivered, { required: true, claimed: false }),
+    ).toBe("registration");
+    expect(
+      getClientView(
+        { skipProof: true, finalsPublishedAt: published, order: null },
+        { required: true, claimed: false },
+      ),
+    ).toBe("registration");
+  });
+
+  it("opens the finals to anyone with the link once claimed", () => {
+    expect(getClientView(delivered, { required: true, claimed: true })).toBe(
+      "finals",
+    );
+  });
+
+  it("never gates proof selection or anything before finals are published", () => {
+    const gate = { required: true, claimed: false };
+
+    expect(
+      getClientView(
+        { skipProof: false, finalsPublishedAt: null, order: null },
+        gate,
+      ),
+    ).toBe("selection");
+    expect(
+      getClientView(
+        {
+          skipProof: false,
+          finalsPublishedAt: null,
+          order: { status: "paid" as const },
+        },
+        gate,
+      ),
+    ).toBe("submitted");
+    expect(
+      getClientView(
+        { skipProof: true, finalsPublishedAt: null, order: null },
+        gate,
+      ),
+    ).toBe("finalsComingSoon");
   });
 });

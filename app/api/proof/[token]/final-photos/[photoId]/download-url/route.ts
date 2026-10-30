@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: Params) {
 
   const clientGallery = await loadClientGallery(token);
 
-  if (!clientGallery?.permissions.canClientDownload) {
+  if (!clientGallery?.canDownload) {
     return clientGalleryNotFound();
   }
 

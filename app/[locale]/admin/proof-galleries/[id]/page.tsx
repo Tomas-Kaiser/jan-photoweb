@@ -137,6 +137,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
               : ""
           }
           initialEventType={gallery.eventType}
+          initialRequiresRegistration={gallery.requiresRegistration}
           initialFinalsMessage={gallery.finalsMessage ?? ""}
           initialHeroMobileCloudflareId={gallery.heroMobileCloudflareId}
           initialHeroDesktopCloudflareId={gallery.heroDesktopCloudflareId}

@@ -255,7 +255,34 @@
     "socialCtaMessage": "Follow me on Instagram or Facebook and leave a quick Google review — it means the world and helps me grow and find other amazing people like you.",
     "followInstagram": "Follow on Instagram",
     "followFacebook": "Follow on Facebook",
-    "leaveReview": "Leave a Google review"
+    "leaveReview": "Leave a Google review",
+    "registration": {
+      "title": "Your photos are ready",
+      "intro": "Enter your name and email to open the gallery. We'll send you a link and a code to confirm it's you. The first person to confirm becomes the gallery's owner, and after that anyone with this link can see the photos.",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "marketingConsent": "Send me occasional news and offers from Jan Hájek Photography by email. Optional, and you can unsubscribe at any time.",
+      "submit": "Send me a code",
+      "sending": "Sending…",
+      "privacyNotice": "We use your email to confirm your gallery and remind you before it's deleted. See our <link>privacy policy</link>.",
+      "codeSent": "We've emailed a link and a 6-digit code to {email}. Click the link, or enter the code here. Both are valid for 15 minutes.",
+      "codeAlreadySent": "We've already emailed a link and a code to {email}. Click the link, or enter the code here — or ask for a new one.",
+      "codeLabel": "6-digit code",
+      "verify": "Open my photos",
+      "verifying": "Checking…",
+      "resend": "Send a new code",
+      "resent": "We've sent you a new link and code.",
+      "changeEmail": "Use a different email",
+      "verifyingLink": "Confirming your email…",
+      "errorName": "Please enter your name.",
+      "errorEmail": "Please enter a valid email address.",
+      "errorWrongCode": "That code isn't right. {count, plural, =0 {No attempts left — please ask for a new code.} one {# attempt left.} other {# attempts left.}}",
+      "errorExpired": "This code or link is no longer valid. Please ask for a new one.",
+      "errorUsed": "This code or link has already been used. Please ask for a new one.",
+      "errorRetryAfter": "Please wait {seconds} seconds before asking for another code.",
+      "errorTryLater": "Too many requests. Please try again later.",
+      "errorGeneric": "Something went wrong. Please try again."
+    }
   },
   "finalDelivery": {
     "heading": "Your photos are ready",
@@ -405,7 +432,11 @@
       "statusClosed": "Closed",
       "sectionPublished": "Published",
       "noneInSection": "None yet.",
-      "photoCount": "{count, plural, one {# photo} other {# photos}}"
+      "photoCount": "{count, plural, one {# photo} other {# photos}}",
+      "requiresRegistrationLabel": "Require registration to see the finals",
+      "requiresRegistrationHint": "The first person to open the finals enters their name and email and confirms it; after that, anyone with the link sees the photos. Selecting proofs is never gated.",
+      "requiresRegistrationSaved": "Registration setting saved.",
+      "requiresRegistrationSaveFailed": "Failed to save the registration setting."
     },
     "highlights": {
       "pageTitle": "Portfolio highlights",

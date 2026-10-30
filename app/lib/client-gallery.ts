@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { and, eq } from "drizzle-orm";
+import { db } from "@/app/db";
+import { galleryClients } from "@/app/db/schema";
 import { getClientView } from "@/app/lib/gallery-lifecycle";
 import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
 
@@ -12,13 +15,32 @@ export async function loadClientGallery(token: string) {
 
   const { gallery, order } = lifecycle;
 
-  return {
-    ...lifecycle,
-    view: getClientView({
+  const ownerRows = await db
+    .select({ id: galleryClients.id })
+    .from(galleryClients)
+    .where(
+      and(
+        eq(galleryClients.galleryId, gallery.id),
+        eq(galleryClients.role, "owner"),
+      ),
+    )
+    .limit(1);
+
+  const view = getClientView(
+    {
       skipProof: gallery.skipProof,
       finalsPublishedAt: gallery.finalsPublishedAt,
       order,
-    }),
+    },
+    { required: gallery.requiresRegistration, claimed: ownerRows.length > 0 },
+  );
+
+  return {
+    ...lifecycle,
+    view,
+    // Downloads follow what the page shows: none behind the registration
+    // gate, the same as before finals are published.
+    canDownload: view === "finals",
   };
 }
 

@@ -14,6 +14,9 @@ export const POST = withAdmin(async (req: Request) => {
     const freePhotoCount = Number(body?.freePhotoCount);
     const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
     const skipProof = body?.skipProof === true;
+    // On unless explicitly turned off — the column itself defaults to off
+    // only so that galleries from before the gate stay open.
+    const requiresRegistration = body?.requiresRegistration !== false;
     const eventType = parseGalleryEventType(body?.eventType);
 
     if (!clientName) {
@@ -60,6 +63,7 @@ export const POST = withAdmin(async (req: Request) => {
         freePhotoCount,
         extraPhotoPriceCents,
         skipProof,
+        requiresRegistration,
         eventType: eventType.eventType,
       })
       .returning({ id: proofGalleries.id });

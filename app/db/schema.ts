@@ -12,7 +12,7 @@ import {
   index,
   foreignKey,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { GALLERY_EVENT_TYPES } from "../lib/gallery-event-type";
 
 export const photoVisibilityEnum = pgEnum("photo_visibility", [
@@ -34,6 +34,11 @@ export const galleryEventTypeEnum = pgEnum(
   "gallery_event_type",
   GALLERY_EVENT_TYPES,
 );
+
+export const galleryClientRoleEnum = pgEnum("gallery_client_role", [
+  "owner",
+  "guest",
+]);
 
 export const albums = pgTable(
   "albums",
@@ -143,6 +148,13 @@ export const proofGalleries = pgTable(
     // first final photo for both when unset.
     heroMobileCloudflareId: text("hero_mobile_cloudflare_id"),
     heroDesktopCloudflareId: text("hero_desktop_cloudflare_id"),
+    // Gates the published finals behind owner registration until someone
+    // claims the gallery (see getClientView). Defaults to off so galleries
+    // that existed before the gate keep their links working; new galleries
+    // are created with it on by the create route.
+    requiresRegistration: boolean("requires_registration")
+      .default(false)
+      .notNull(),
   },
   (table) => [uniqueIndex("proof_galleries_token_unique").on(table.token)],
 );
@@ -229,6 +241,100 @@ export const finalPhotos = pgTable(
     index("final_photos_gallery_sort_order_idx").on(
       table.galleryId,
       table.sortOrder,
+    ),
+  ],
+);
+
+// People who registered on a gallery's finals page. One row per person
+// (by normalised email) however many galleries they're linked to.
+export const clients = pgTable(
+  "clients",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: text("email").notNull(),
+    name: text("name").notNull(),
+    locale: text("locale").notNull(),
+    // Null means no news & offers consent. Set only when the person ticks
+    // the checkbox, together with the version of the wording they saw.
+    marketingConsentAt: timestamp("marketing_consent_at"),
+    marketingConsentVersion: text("marketing_consent_version"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("clients_email_unique").on(table.email)],
+);
+
+export const galleryClients = pgTable(
+  "gallery_clients",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    galleryId: uuid("gallery_id").notNull(),
+    clientId: uuid("client_id").notNull(),
+    role: galleryClientRoleEnum("role").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.galleryId],
+      foreignColumns: [proofGalleries.id],
+      name: "gallery_clients_gallery_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.clientId],
+      foreignColumns: [clients.id],
+      name: "gallery_clients_client_id_fkey",
+    }).onDelete("cascade"),
+
+    uniqueIndex("gallery_clients_gallery_client_unique").on(
+      table.galleryId,
+      table.clientId,
+    ),
+    // At most one owner per gallery, enforced by the database so two
+    // concurrent claims can't both succeed.
+    uniqueIndex("gallery_clients_one_owner_unique")
+      .on(table.galleryId)
+      .where(sql`${table.role} = 'owner'`),
+    index("gallery_clients_client_id_idx").on(table.clientId),
+  ],
+);
+
+// A pending (or finished) email verification for registering on a gallery,
+// holding what the person entered until they prove the address. Only
+// hashes of the emailed code and link are stored; the rules for using them
+// live in app/lib/email-verification.ts.
+export const emailVerifications = pgTable(
+  "email_verifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    galleryId: uuid("gallery_id").notNull(),
+    email: text("email").notNull(),
+    name: text("name").notNull(),
+    locale: text("locale").notNull(),
+    // The news & offers wording version shown when the box was ticked;
+    // null when it wasn't. Copied onto the client once verified.
+    marketingConsentVersion: text("marketing_consent_version"),
+    codeHash: text("code_hash").notNull(),
+    linkTokenHash: text("link_token_hash").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    consumedAt: timestamp("consumed_at"),
+    attempts: integer("attempts").default(0).notNull(),
+    sendCount: integer("send_count").default(1).notNull(),
+    lastSentAt: timestamp("last_sent_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.galleryId],
+      foreignColumns: [proofGalleries.id],
+      name: "email_verifications_gallery_id_fkey",
+    }).onDelete("cascade"),
+
+    index("email_verifications_gallery_email_idx").on(
+      table.galleryId,
+      table.email,
+    ),
+    index("email_verifications_gallery_created_at_idx").on(
+      table.galleryId,
+      table.createdAt,
     ),
   ],
 );

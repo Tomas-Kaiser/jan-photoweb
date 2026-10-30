@@ -255,7 +255,34 @@
     "socialCtaMessage": "Pokud ano, budu moc rád, když mě budete sledovat na Instagramu nebo Facebooku a necháte mi krátkou recenzi na Googlu. Moc mi to pomůže a rád díky tomu poznám další skvělé lidi, jako jste vy.",
     "followInstagram": "Sledovat na Instagramu",
     "followFacebook": "Sledovat na Facebooku",
-    "leaveReview": "Napsat recenzi na Googlu"
+    "leaveReview": "Napsat recenzi na Googlu",
+    "registration": {
+      "title": "Vaše fotky jsou připravené",
+      "intro": "Pro otevření galerie zadejte své jméno a e-mail. Pošleme vám odkaz a kód, kterým potvrdíte, že jste to vy. Kdo potvrdí jako první, stane se vlastníkem galerie, a pak už fotky uvidí každý, kdo má tento odkaz.",
+      "nameLabel": "Jméno",
+      "emailLabel": "E-mail",
+      "marketingConsent": "Chci občas e-mailem dostávat novinky a nabídky od Jana Hájka. Nepovinné a odhlásit se můžete kdykoli.",
+      "submit": "Poslat kód",
+      "sending": "Odesílám…",
+      "privacyNotice": "Váš e-mail použijeme k potvrzení galerie a k připomenutí před jejím smazáním. Více v <link>zásadách ochrany osobních údajů</link>.",
+      "codeSent": "Na {email} jsme poslali odkaz a šestimístný kód. Klikněte na odkaz, nebo kód zadejte sem. Obojí platí 15 minut.",
+      "codeAlreadySent": "Na {email} jsme už poslali odkaz a kód. Klikněte na odkaz, nebo kód zadejte sem — případně si nechte poslat nový.",
+      "codeLabel": "Šestimístný kód",
+      "verify": "Zobrazit fotky",
+      "verifying": "Ověřuji…",
+      "resend": "Poslat nový kód",
+      "resent": "Poslali jsme vám nový odkaz a kód.",
+      "changeEmail": "Použít jiný e-mail",
+      "verifyingLink": "Ověřuji váš e-mail…",
+      "errorName": "Zadejte prosím své jméno.",
+      "errorEmail": "Zadejte prosím platnou e-mailovou adresu.",
+      "errorWrongCode": "Kód nesouhlasí. {count, plural, =0 {Nezbývá žádný pokus — nechte si prosím poslat nový kód.} one {Zbývá # pokus.} few {Zbývají # pokusy.} other {Zbývá # pokusů.}}",
+      "errorExpired": "Tento kód nebo odkaz už neplatí. Nechte si prosím poslat nový.",
+      "errorUsed": "Tento kód nebo odkaz už byl použit. Nechte si prosím poslat nový.",
+      "errorRetryAfter": "Před dalším kódem prosím počkejte {seconds} s.",
+      "errorTryLater": "Příliš mnoho požadavků. Zkuste to prosím později.",
+      "errorGeneric": "Něco se pokazilo. Zkuste to prosím znovu."
+    }
   },
   "finalDelivery": {
     "heading": "Vaše fotky jsou připravené",
@@ -405,7 +432,11 @@
       "statusClosed": "Uzavřeno",
       "sectionPublished": "Zveřejněno",
       "noneInSection": "Zatím žádné.",
-      "photoCount": "{count, plural, one {# fotka} few {# fotky} other {# fotek}}"
+      "photoCount": "{count, plural, one {# fotka} few {# fotky} other {# fotek}}",
+      "requiresRegistrationLabel": "Vyžadovat registraci pro zobrazení finálních fotek",
+      "requiresRegistrationHint": "Kdo první otevře finální fotky, zadá jméno a e-mail a potvrdí ho; poté fotky uvidí každý s odkazem. Výběr náhledů se nikdy neomezuje.",
+      "requiresRegistrationSaved": "Nastavení registrace uloženo.",
+      "requiresRegistrationSaveFailed": "Uložení nastavení registrace se nezdařilo."
     },
     "highlights": {
       "pageTitle": "Výběr na hlavní stránku",

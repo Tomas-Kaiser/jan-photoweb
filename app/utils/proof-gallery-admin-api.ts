@@ -13,6 +13,7 @@ export type ProofGalleryPatch = {
   eventDate?: string;
   // null clears it.
   eventType?: GalleryEventType | null;
+  requiresRegistration?: boolean;
   finalsMessage?: string;
   // "" clears the slot.
   heroMobileCloudflareId?: string;
