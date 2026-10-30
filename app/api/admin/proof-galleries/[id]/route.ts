@@ -10,6 +10,7 @@ import {
   type AssetKind,
 } from "@/app/lib/gallery-teardown";
 import { loadGalleryLifecycle } from "@/app/lib/load-gallery-lifecycle";
+import { parseGalleryEventType } from "@/app/lib/gallery-event-type";
 
 const ASSET_DELETION_ERRORS: Record<AssetKind, string> = {
   hero: "Failed to delete one or more hero photos from Cloudflare.",
@@ -56,6 +57,17 @@ export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
         }
         updates.eventDate = parsed;
       }
+    }
+
+    if ("eventType" in body) {
+      const eventType = parseGalleryEventType(body.eventType);
+      if (!eventType.ok) {
+        return NextResponse.json(
+          { error: "Invalid event type." },
+          { status: 400 },
+        );
+      }
+      updates.eventType = eventType.eventType;
     }
 
     if ("heroMobileCloudflareId" in body) {

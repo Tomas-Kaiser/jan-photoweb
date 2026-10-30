@@ -277,6 +277,18 @@
       "backToList": "Zpět na náhledovky",
       "clientNameLabel": "Jméno klienta",
       "clientNamePlaceholder": "např. Svatba Novákovi",
+      "eventTypeLabel": "Typ focení",
+      "eventTypeHint": "Druh focení, podle kterého si později můžete roztřídit kontakty. Nepovinné a můžete ho kdykoli změnit.",
+      "eventTypeNone": "Nevybráno",
+      "eventTypes": {
+        "wedding": "Svatba",
+        "couple": "Párové",
+        "family": "Rodinné",
+        "portrait": "Portrét",
+        "other": "Jiné"
+      },
+      "eventTypeSaved": "Typ focení uložen.",
+      "eventTypeSaveFailed": "Uložení typu focení se nezdařilo.",
       "baseCostLabel": "Cena fotografování",
       "baseCostHint": "V celých {currency} (např. 150 za 150 Kč), ne v haléřích.",
       "freePhotoCountLabel": "Počet fotek zdarma",

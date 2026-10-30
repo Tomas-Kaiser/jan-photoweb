@@ -15,6 +15,8 @@ import {
   getProofLinkPath,
   type ProofLinkLocale,
 } from "@/app/lib/proof-link";
+import type { GalleryEventType } from "@/app/lib/gallery-event-type";
+import EventTypeSection from "./EventTypeSection";
 import FinalsStagePanel from "./FinalsStagePanel";
 import OrderStagePanel from "./OrderStagePanel";
 import ProofStagePanel from "./ProofStagePanel";
@@ -30,6 +32,7 @@ type Props = {
   finalsPublishedAt: string | null;
   finalsPublishedAtLabel: string | null;
   initialEventDate: string;
+  initialEventType: GalleryEventType | null;
   initialFinalsMessage: string;
   initialHeroMobileCloudflareId: string | null;
   initialHeroDesktopCloudflareId: string | null;
@@ -73,6 +76,7 @@ export default function ProofGalleryDetailClient({
   finalsPublishedAt,
   finalsPublishedAtLabel,
   initialEventDate,
+  initialEventType,
   initialFinalsMessage,
   initialHeroMobileCloudflareId,
   initialHeroDesktopCloudflareId,
@@ -206,6 +210,11 @@ export default function ProofGalleryDetailClient({
           </button>
         </div>
       </section>
+
+      <EventTypeSection
+        galleryId={gallery.id}
+        initialEventType={initialEventType}
+      />
 
       <section className="rounded-3xl border border-brand-gold/15 bg-white p-7 pb-5 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)]">
         <div className="relative flex justify-between px-1">

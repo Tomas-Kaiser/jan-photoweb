@@ -13,6 +13,7 @@ import {
   foreignKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { GALLERY_EVENT_TYPES } from "../lib/gallery-event-type";
 
 export const photoVisibilityEnum = pgEnum("photo_visibility", [
   "public",
@@ -28,6 +29,11 @@ export const proofPhotoRatingEnum = pgEnum("proof_photo_rating", [
   "rather_no",
   "rather_yes",
 ]);
+
+export const galleryEventTypeEnum = pgEnum(
+  "gallery_event_type",
+  GALLERY_EVENT_TYPES,
+);
 
 export const albums = pgTable(
   "albums",
@@ -126,6 +132,9 @@ export const proofGalleries = pgTable(
     // Shown on the client-facing finals page (hero + title section) —
     // settable by admin any time, independent of gallery/order status.
     eventDate: date("event_date", { mode: "date" }),
+    // The kind of shoot, for segmenting contacts — optional and settable by
+    // admin any time, like eventDate.
+    eventType: galleryEventTypeEnum("event_type"),
     finalsMessage: text("finals_message"),
     // Optional dedicated hero banner photos for the finals page,
     // separate from the final photos themselves — lets the

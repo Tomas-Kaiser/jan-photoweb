@@ -136,6 +136,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
               ? gallery.eventDate.toISOString().slice(0, 10)
               : ""
           }
+          initialEventType={gallery.eventType}
           initialFinalsMessage={gallery.finalsMessage ?? ""}
           initialHeroMobileCloudflareId={gallery.heroMobileCloudflareId}
           initialHeroDesktopCloudflareId={gallery.heroDesktopCloudflareId}

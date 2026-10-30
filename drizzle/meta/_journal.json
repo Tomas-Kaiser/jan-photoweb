@@ -120,6 +120,13 @@
       "when": 1793222334777,
       "tag": "0016_unknown_makkari",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793374518435,
+      "tag": "0017_goofy_the_captain",
+      "breakpoints": true
     }
   ]
 }

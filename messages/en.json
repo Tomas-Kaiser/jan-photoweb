@@ -277,6 +277,18 @@
       "backToList": "Back to proof galleries",
       "clientNameLabel": "Client name",
       "clientNamePlaceholder": "e.g. Novak wedding",
+      "eventTypeLabel": "Event type",
+      "eventTypeHint": "The kind of shoot, so you can group contacts by it later. Optional, and you can change it any time.",
+      "eventTypeNone": "Not set",
+      "eventTypes": {
+        "wedding": "Wedding",
+        "couple": "Couple",
+        "family": "Family",
+        "portrait": "Portrait",
+        "other": "Other"
+      },
+      "eventTypeSaved": "Event type saved.",
+      "eventTypeSaveFailed": "Failed to save the event type.",
       "baseCostLabel": "Photoshoot base cost",
       "baseCostHint": "In whole {currency} (e.g. 150 for 150 Kč), not cents.",
       "freePhotoCountLabel": "Free photos included",

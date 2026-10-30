@@ -8,6 +8,8 @@ import {
   addProofPhoto,
   createProofGallery,
 } from "@/app/utils/proof-gallery-admin-api";
+import type { GalleryEventType } from "@/app/lib/gallery-event-type";
+import EventTypeSelect from "../EventTypeSelect";
 
 type UploadFailure = {
   file: File;
@@ -22,6 +24,7 @@ export default function NewProofGalleryForm() {
 
   const [clientName, setClientName] = useState("");
   const [skipProof, setSkipProof] = useState(false);
+  const [eventType, setEventType] = useState<GalleryEventType | null>(null);
   const [baseCost, setBaseCost] = useState("");
   const [freePhotoCount, setFreePhotoCount] = useState("10");
   const [extraPhotoPrice, setExtraPhotoPrice] = useState("");
@@ -93,22 +96,22 @@ export default function NewProofGalleryForm() {
 
       // Pricing only applies to the proof selection, so a direct
       // delivery gallery stores zeros instead of whatever was typed.
-      const created = await createProofGallery(
-        skipProof
+      const created = await createProofGallery({
+        clientName: name,
+        eventType,
+        ...(skipProof
           ? {
-              clientName: name,
               baseCostCents: 0,
               freePhotoCount: 0,
               extraPhotoPriceCents: 0,
               skipProof: true,
             }
           : {
-              clientName: name,
               baseCostCents: Math.round(baseCostUnits * 100),
               freePhotoCount: Math.round(freeCount),
               extraPhotoPriceCents: Math.round(priceUnits * 100),
-            },
-      );
+            }),
+      });
 
       if (!created.ok) {
         setError(created.error ?? t("proofGalleries.createFailed"));
@@ -203,6 +206,25 @@ export default function NewProofGalleryForm() {
           placeholder={t("proofGalleries.clientNamePlaceholder")}
           required
         />
+      </div>
+
+      <div>
+        <label
+          htmlFor="eventType"
+          className="mb-2 block text-sm font-medium text-gray-700"
+        >
+          {t("proofGalleries.eventTypeLabel")}
+        </label>
+        <EventTypeSelect
+          id="eventType"
+          value={eventType}
+          onChange={setEventType}
+          disabled={saving || !!createdGalleryId}
+          className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 disabled:bg-gray-100 disabled:text-gray-500"
+        />
+        <p className="mt-1 text-sm text-gray-500">
+          {t("proofGalleries.eventTypeHint")}
+        </p>
       </div>
 
       {skipProof ? null : (

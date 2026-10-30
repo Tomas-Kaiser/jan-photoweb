@@ -1,0 +1,2 @@
+CREATE TYPE "public"."gallery_event_type" AS ENUM('wedding', 'couple', 'family', 'portrait', 'other');--> statement-breakpoint
+ALTER TABLE "proof_galleries" ADD COLUMN "event_type" "gallery_event_type";

@@ -3,6 +3,7 @@ import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
 import { proofGalleries } from "@/app/db/schema";
 import { generateProofToken } from "@/app/lib/proof-token";
+import { parseGalleryEventType } from "@/app/lib/gallery-event-type";
 
 export const POST = withAdmin(async (req: Request) => {
   try {
@@ -13,10 +14,18 @@ export const POST = withAdmin(async (req: Request) => {
     const freePhotoCount = Number(body?.freePhotoCount);
     const extraPhotoPriceCents = Number(body?.extraPhotoPriceCents);
     const skipProof = body?.skipProof === true;
+    const eventType = parseGalleryEventType(body?.eventType);
 
     if (!clientName) {
       return NextResponse.json(
         { error: "Client name is required." },
+        { status: 400 },
+      );
+    }
+
+    if (!eventType.ok) {
+      return NextResponse.json(
+        { error: "Invalid event type." },
         { status: 400 },
       );
     }
@@ -51,6 +60,7 @@ export const POST = withAdmin(async (req: Request) => {
         freePhotoCount,
         extraPhotoPriceCents,
         skipProof,
+        eventType: eventType.eventType,
       })
       .returning({ id: proofGalleries.id });
 

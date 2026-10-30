@@ -2,6 +2,8 @@
 // final photo from the gallery screen). Final photo uploads have their own
 // multi-step helper, upload-final-photo.ts.
 
+import type { GalleryEventType } from "@/app/lib/gallery-event-type";
+
 export type ProofGalleryPatch = {
   clientName?: string;
   baseCostCents?: number;
@@ -9,6 +11,8 @@ export type ProofGalleryPatch = {
   extraPhotoPriceCents?: number;
   message?: string;
   eventDate?: string;
+  // null clears it.
+  eventType?: GalleryEventType | null;
   finalsMessage?: string;
   // "" clears the slot.
   heroMobileCloudflareId?: string;
@@ -64,6 +68,7 @@ export async function createProofGallery(input: {
   freePhotoCount: number;
   extraPhotoPriceCents: number;
   skipProof?: boolean;
+  eventType?: GalleryEventType | null;
 }): Promise<ApiResult<{ galleryId: string }>> {
   const result = await request("/api/admin/proof-galleries", "POST", input);
   if (!result.ok) return result;
