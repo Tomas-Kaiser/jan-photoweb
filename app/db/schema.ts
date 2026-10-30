@@ -262,7 +262,8 @@ export const clients = pgTable(
     name: text("name").notNull(),
     locale: text("locale").notNull(),
     // Null means no news & offers consent. Set only when the person ticks
-    // the checkbox, together with the version of the wording they saw.
+    // the checkbox or turns news & offers on from the email preferences
+    // page, together with the version of the wording they saw.
     marketingConsentAt: timestamp("marketing_consent_at"),
     marketingConsentVersion: text("marketing_consent_version"),
     createdAt: timestamp("created_at").defaultNow().notNull(),

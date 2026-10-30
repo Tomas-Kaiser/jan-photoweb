@@ -15,6 +15,7 @@ import {
   getRegistrationRole,
   type RegistrationPurpose,
 } from "@/app/lib/gallery-lifecycle";
+import { getEmailPreferencesUrl } from "@/app/lib/email-preferences";
 import { MARKETING_CONSENT_VERSIONS } from "@/app/lib/marketing-consent";
 import { getProofLinkPath, type ProofLinkLocale } from "@/app/lib/proof-link";
 
@@ -55,6 +56,8 @@ export async function startRegistration({
   siteUrl: string;
 }): Promise<StartResult> {
   const now = new Date();
+  // Built first, so a missing secret fails before anything is stored.
+  const preferencesLink = getEmailPreferencesUrl({ siteUrl, locale, email });
 
   const [pending] = await db
     .select()
@@ -122,6 +125,7 @@ export async function startRegistration({
     locale,
     code: outcome.secrets.code,
     link,
+    preferencesLink,
   });
 
   return { kind: "sent", verificationId: saved.id };
@@ -311,6 +315,7 @@ async function sendVerificationEmail({
   locale,
   code,
   link,
+  preferencesLink,
 }: {
   purpose: RegistrationPurpose;
   to: string;
@@ -318,6 +323,7 @@ async function sendVerificationEmail({
   locale: ProofLinkLocale;
   code: string;
   link: string;
+  preferencesLink: string;
 }) {
   const subject =
     locale === "cs"
@@ -340,6 +346,8 @@ async function sendVerificationEmail({
           "Pokud jste o nic nežádali, tento e-mail můžete ignorovat.",
           "",
           "Jan Hájek",
+          "",
+          `Nastavení e-mailů: ${preferencesLink}`,
         ].join("\n")
       : [
           `Hi ${name},`,
@@ -355,6 +363,8 @@ async function sendVerificationEmail({
           "If you didn't ask for this, you can ignore this email.",
           "",
           "Jan Hájek",
+          "",
+          `Manage email preferences: ${preferencesLink}`,
         ].join("\n");
 
   const transporter = nodemailer.createTransport({

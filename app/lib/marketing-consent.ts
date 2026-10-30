@@ -6,4 +6,7 @@ export const MARKETING_CONSENT_VERSIONS = {
   owner: "2026-10-30",
   // proof.guestSignup.marketingConsent — required, on the guest box.
   guest: "guest-2026-10-30",
+  // emailPreferences.consent — shown when turning news & offers back on
+  // from the "Manage email preferences" page.
+  preferences: "preferences-2026-10-30",
 } as const;

@@ -195,6 +195,17 @@ with `canDownload`. Proof selection is never gated.
   `MARKETING_CONSENT_VERSIONS.owner` or `.guest`
   ([app/lib/marketing-consent.ts](app/lib/marketing-consent.ts)). Bump a
   box's version whenever its wording in `messages/*.json` changes.
+- **Email preferences:** every email the app sends a client carries a
+  signed "Manage email preferences" link to the public, no-login
+  `/[locale]/email-preferences` page, where the client turns news & offers
+  on (recording `MARKETING_CONSENT_VERSIONS.preferences`) or off (clearing
+  consent). The token is the normalised email plus its HMAC, keyed by
+  `EMAIL_PREFERENCES_SECRET`: no stored state, so it works before a
+  `clients` row exists, and it never expires. Signing is the pure, tested
+  [app/lib/email-preferences-link.ts](app/lib/email-preferences-link.ts);
+  build the URL with `getEmailPreferencesUrl` in
+  [app/lib/email-preferences.ts](app/lib/email-preferences.ts), and add
+  it to any new client email.
 
 ### Admin API routes (`app/api/admin/`)
 
@@ -214,7 +225,10 @@ checks. Unlike pages, these routes aren't locale-prefixed.
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_IMAGES_API_TOKEN`, `GMAIL_USER`,
 `GMAIL_PASS` (contact form, admin notifications and client verification
 emails via nodemailer), `EMAIL_VERIFICATION_SECRET` (keys the stored
-verification hashes; registration requests fail without it), `CRON_SECRET`
+verification hashes; registration requests fail without it),
+`EMAIL_PREFERENCES_SECRET` (signs the "Manage email preferences" links;
+rotating it breaks every link already emailed, and registration requests
+fail without it), `CRON_SECRET`
 (bearer token checked by
 `app/api/cron/delete-expired-final-deliveries`), `NEXT_PUBLIC_SITE_URL`
 (the deployed site's base URL, e.g. `https://example.com` — used by

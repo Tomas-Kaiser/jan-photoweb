@@ -139,6 +139,17 @@
     "cookieSettings": "Nastavení souborů cookie",
     "privacyPolicy": "Ochrana osobních údajů"
   },
+  "emailPreferences": {
+    "title": "Nastavení e-mailů",
+    "invalidLink": "Tento odkaz není platný. Otevřete ho prosím znovu z e-mailu, který jsme vám poslali.",
+    "noClient": "K adrese {email} nemáme uložené žádné údaje, takže tu není co měnit.",
+    "subscribed": "Adresa {email} odebírá novinky a nabídky.",
+    "notSubscribed": "Adresa {email} neodebírá novinky a nabídky.",
+    "consent": "Chci občas e-mailem dostávat novinky a nabídky od Jana Hájka. Odhlásit se můžu kdykoli.",
+    "subscribe": "Přihlásit se k odběru",
+    "unsubscribe": "Odhlásit se z odběru",
+    "otherEmails": "E-maily o vašich galeriích, například upozornění před smazáním galerie, se tím nemění."
+  },
   "privacy": {
     "heading": "Zásady ochrany osobních údajů",
     "updated": "Poslední aktualizace: 30. října 2026",

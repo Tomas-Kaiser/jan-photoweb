@@ -139,6 +139,17 @@
     "cookieSettings": "Cookie settings",
     "privacyPolicy": "Privacy policy"
   },
+  "emailPreferences": {
+    "title": "Email preferences",
+    "invalidLink": "This link isn't valid. Please open it again from the email we sent you.",
+    "noClient": "We don't have any details stored for {email}, so there's nothing to change.",
+    "subscribed": "{email} is signed up for news and offers.",
+    "notSubscribed": "{email} isn't signed up for news and offers.",
+    "consent": "Send me occasional news and offers from Jan Hájek Photography by email. I can unsubscribe at any time.",
+    "subscribe": "Sign me up",
+    "unsubscribe": "Unsubscribe",
+    "otherEmails": "Emails about your galleries, such as a reminder before one is deleted, aren't affected."
+  },
   "privacy": {
     "heading": "Privacy policy",
     "updated": "Last updated: 30 October 2026",

@@ -15,6 +15,7 @@ const publicPages = [
   "/",
   "/admin/login",
   "/privacy",
+  "/email-preferences",
   `/(${PROOF_PATH_SEGMENTS.join("|")})/[^/]+`,
 ];
 
