@@ -1,16 +1,20 @@
-import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
-import { Link } from "@/app/i18n/routing";
+import { Link, redirect } from "@/app/i18n/routing";
 import NewProofGalleryForm from "./NewProofGalleryForm";
 
-export default async function NewProofGalleryPage() {
+export default async function NewProofGalleryPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const session = await auth();
   const isAdmin =
     !!session?.user && (session.user as { role?: string }).role === "admin";
 
   if (!isAdmin) {
-    redirect("/");
+    return redirect({ href: "/", locale });
   }
 
   const t = await getTranslations("admin");

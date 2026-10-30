@@ -1,8 +1,7 @@
-import { redirect } from "next/navigation";
 import { desc, eq, sql } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
-import { Link } from "@/app/i18n/routing";
+import { Link, redirect } from "@/app/i18n/routing";
 import { db } from "@/app/db";
 import { proofGalleries, proofOrders, proofPhotos } from "@/app/db/schema";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
@@ -53,13 +52,18 @@ function getStage(gallery: Gallery) {
   });
 }
 
-export default async function ProofGalleriesAdminPage() {
+export default async function ProofGalleriesAdminPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const session = await auth();
   const isAdmin =
     !!session?.user && (session.user as { role?: string }).role === "admin";
 
   if (!isAdmin) {
-    redirect("/");
+    return redirect({ href: "/", locale });
   }
 
   const t = await getTranslations("admin");

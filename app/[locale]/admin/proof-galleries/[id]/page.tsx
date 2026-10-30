@@ -1,9 +1,9 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { asc, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
-import { Link } from "@/app/i18n/routing";
+import { Link, redirect } from "@/app/i18n/routing";
 import { db } from "@/app/db";
 import {
   finalPhotos,
@@ -27,7 +27,7 @@ export default async function ProofGalleryDetailPage({ params }: Props) {
     !!session?.user && (session.user as { role?: string }).role === "admin";
 
   if (!isAdmin) {
-    redirect("/");
+    return redirect({ href: "/", locale });
   }
 
   const t = await getTranslations("admin");
