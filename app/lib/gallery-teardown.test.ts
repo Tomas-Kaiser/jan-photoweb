@@ -3,6 +3,8 @@ import {
   AssetDeletionError,
   type AssetStore,
   deleteFinalPhotoAssets,
+  type GalleryRecords,
+  type LinkedClient,
   tearDownGallery,
 } from "@/app/lib/gallery-teardown";
 
@@ -27,6 +29,22 @@ function createInMemoryAssetStore(
   };
 
   return { store, r2Keys, cloudflareIds };
+}
+
+// In-memory stand-in for the gallery's database rows: deleting the gallery
+// cascades its client links, and the clients chosen go with it.
+function createInMemoryGalleryRecords(linkedClients: LinkedClient[] = []) {
+  const clientIds = new Set(linkedClients.map((client) => client.id));
+  let rowDeleted = false;
+
+  const records: GalleryRecords = {
+    async deleteGallery(chooseClientsToDelete) {
+      for (const id of chooseClientsToDelete(linkedClients)) clientIds.delete(id);
+      rowDeleted = true;
+    },
+  };
+
+  return { records, clientIds, isRowDeleted: () => rowDeleted };
 }
 
 const gallery = {
@@ -54,16 +72,42 @@ const allAssets = {
 describe("tearDownGallery", () => {
   it("deletes the hero, proof and final assets, then the gallery row", async () => {
     const { store, r2Keys, cloudflareIds } = createInMemoryAssetStore(allAssets);
-    let rowDeleted = false;
+    const { records, isRowDeleted } = createInMemoryGalleryRecords();
 
-    await tearDownGallery(store, gallery, async () => {
-      expect(r2Keys.size + cloudflareIds.size).toBe(0);
-      rowDeleted = true;
+    await tearDownGallery(store, gallery, {
+      async deleteGallery(chooseClientsToDelete) {
+        expect(r2Keys.size + cloudflareIds.size).toBe(0);
+        await records.deleteGallery(chooseClientsToDelete);
+      },
     });
 
     expect(r2Keys.size).toBe(0);
     expect(cloudflareIds.size).toBe(0);
-    expect(rowDeleted).toBe(true);
+    expect(isRowDeleted()).toBe(true);
+  });
+
+  it("deletes a client left with no galleries and no marketing consent", async () => {
+    const { store } = createInMemoryAssetStore(allAssets);
+    const { records, clientIds } = createInMemoryGalleryRecords([
+      { id: "owner", hasOtherGalleries: false, hasMarketingConsent: false },
+    ]);
+
+    await tearDownGallery(store, gallery, records);
+
+    expect(clientIds.has("owner")).toBe(false);
+  });
+
+  it("keeps a client with marketing consent or another gallery", async () => {
+    const { store } = createInMemoryAssetStore(allAssets);
+    const { records, clientIds } = createInMemoryGalleryRecords([
+      { id: "consenting-owner", hasOtherGalleries: false, hasMarketingConsent: true },
+      { id: "repeat-guest", hasOtherGalleries: true, hasMarketingConsent: false },
+      { id: "one-off-guest", hasOtherGalleries: false, hasMarketingConsent: false },
+    ]);
+
+    await tearDownGallery(store, gallery, records);
+
+    expect([...clientIds]).toEqual(["consenting-owner", "repeat-guest"]);
   });
 
   it.each([
@@ -73,15 +117,16 @@ describe("tearDownGallery", () => {
     ["final preview", "preview-2"],
   ])("leaves the gallery row in place when a %s delete fails", async (_kind, failingId) => {
     const { store } = createInMemoryAssetStore(allAssets, [failingId]);
-    let rowDeleted = false;
+    const { records, clientIds, isRowDeleted } = createInMemoryGalleryRecords([
+      { id: "owner", hasOtherGalleries: false, hasMarketingConsent: false },
+    ]);
 
-    const teardown = tearDownGallery(store, gallery, async () => {
-      rowDeleted = true;
-    });
+    const teardown = tearDownGallery(store, gallery, records);
 
     await expect(teardown).rejects.toBeInstanceOf(AssetDeletionError);
     await expect(teardown).rejects.toMatchObject({ assetId: failingId });
-    expect(rowDeleted).toBe(false);
+    expect(isRowDeleted()).toBe(false);
+    expect(clientIds.has("owner")).toBe(true);
   });
 });
 

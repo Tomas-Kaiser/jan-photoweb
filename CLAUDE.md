@@ -140,7 +140,9 @@ auth'd via `CRON_SECRET`) take over the gallery's entire lifecycle — it
 deletes the hero images, the proof photos' Cloudflare images, the final
 photos' R2/Cloudflare assets, and then the `proofGalleries` row itself
 (cascading `proofPhotos`/`proofOrders`/`finalPhotos`/`galleryClients`/
-`emailVerifications`; `clients` rows outlive it). The same cron, after
+`emailVerifications`), deleting in the same transaction any linked
+`clients` row left with no galleries and no news & offers consent;
+consenting clients are kept as contacts. The same cron, after
 deleting, emails a claimed gallery's owner 30 and 7 days before its
 deletion date — never guests or unclaimed galleries. Which reminder is due
 is the pure, tested
@@ -152,7 +154,9 @@ automatic deletion path in the app — manual deletion via the admin UI's
 paths (and single-final delete) go through one teardown module,
 [app/lib/gallery-teardown.ts](app/lib/gallery-teardown.ts), behind an
 `AssetStore` interface (real adapter:
-[app/lib/asset-store.ts](app/lib/asset-store.ts); DB loading:
+[app/lib/asset-store.ts](app/lib/asset-store.ts)) and a `GalleryRecords`
+one (real adapter, with DB loading and the row-locked transaction that
+decides which clients go:
 [app/lib/delete-gallery-by-id.ts](app/lib/delete-gallery-by-id.ts)) —
 assets are deleted before the row, so a failure leaves the gallery in
 place to retry. There used to be a separate 15-day post-payment cron for

@@ -6,6 +6,25 @@ export type AssetStore = {
   deleteCloudflareImage(cloudflareId: string): Promise<void>;
 };
 
+// A client linked to the gallery being torn down.
+export type LinkedClient = {
+  id: string;
+  hasOtherGalleries: boolean;
+  hasMarketingConsent: boolean;
+};
+
+// The gallery's database rows. The real adapter is in
+// app/lib/delete-gallery-by-id.ts; tests use an in-memory one.
+export type GalleryRecords = {
+  // In one step, with the gallery's clients locked against concurrent
+  // changes: hands their current state to chooseClientsToDelete, then
+  // deletes the gallery row (cascading its proof photos, orders, final
+  // photos and client links) together with the clients it chose.
+  deleteGallery(
+    chooseClientsToDelete: (linkedClients: LinkedClient[]) => string[],
+  ): Promise<void>;
+};
+
 export type FinalPhotoAssets = {
   r2Key: string;
   previewCloudflareId: string;
@@ -54,12 +73,13 @@ async function deleteAsset(
 
 // The one teardown behind both manual "Delete gallery" and the retention
 // cron: deletes every asset the gallery owns, then the row (which cascades
-// proof photos, orders and final photos). Any asset failure throws before
-// the row is touched, so the gallery stays listed and can be retried.
+// proof photos, orders, final photos and client links) along with any
+// client it leaves with no galleries. Any asset failure throws before the
+// row is touched, so the gallery stays listed and can be retried.
 export async function tearDownGallery(
   store: AssetStore,
   gallery: GalleryAssets,
-  deleteRow: () => Promise<void>,
+  records: GalleryRecords,
 ) {
   for (const cloudflareId of [
     gallery.heroMobileCloudflareId,
@@ -82,7 +102,12 @@ export async function tearDownGallery(
     await deleteFinalPhotoAssets(store, photo);
   }
 
-  await deleteRow();
+  // Clients who consented to news & offers are kept as contacts.
+  await records.deleteGallery((linkedClients) =>
+    linkedClients
+      .filter((client) => !client.hasOtherGalleries && !client.hasMarketingConsent)
+      .map((client) => client.id),
+  );
 }
 
 // Deletes one final photo's R2 original and Cloudflare preview. Used by
