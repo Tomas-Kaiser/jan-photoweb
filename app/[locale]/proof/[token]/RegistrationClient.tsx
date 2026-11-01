@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/app/i18n/routing";
+import { Link } from "@/app/i18n/routing";
 import {
   buttonClass,
   inputClass,
@@ -29,7 +29,6 @@ export default function RegistrationClient({
   linkVerification,
 }: Props) {
   const t = useTranslations("proof.registration");
-  const router = useRouter();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,7 +41,9 @@ export default function RegistrationClient({
       // Whoever just claimed the gallery is its owner, not a guest to
       // offer the news & offers box to on the finals.
       if (status === "claimed") rememberGuestSignupDismissed();
-      router.refresh();
+      // A full reload: after a code, router.refresh() left this screen
+      // stuck on "verifying" even though the claim had succeeded.
+      window.location.reload();
     },
   });
   const { step, busy, requestCode } = verification;
@@ -114,16 +115,27 @@ export default function RegistrationClient({
               />
             </div>
 
-            <label className="flex items-start gap-3 text-sm text-gray-600">
-              <input
-                type="checkbox"
-                checked={marketingConsent}
-                onChange={(e) => setMarketingConsent(e.target.checked)}
-                disabled={busy}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-brand-green"
-              />
-              <span>{t("marketingConsent")}</span>
-            </label>
+            <div className="rounded-2xl border border-brand-gold/30 bg-brand-cream/40 p-5">
+              <h2 className="font-display text-xl font-semibold text-brand-green">
+                {t("marketingTitle")}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">
+                {t("marketingText")}
+              </p>
+              <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm font-semibold text-gray-900">
+                <input
+                  type="checkbox"
+                  checked={marketingConsent}
+                  onChange={(e) => setMarketingConsent(e.target.checked)}
+                  disabled={busy}
+                  className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-brand-green"
+                />
+                <span>{t("marketingConsent")}</span>
+              </label>
+              <p className="mt-2 pl-8 text-xs text-gray-500">
+                {t("marketingNote")}
+              </p>
+            </div>
 
             <button type="submit" disabled={busy} className={buttonClass}>
               {busy ? t("sending") : t("submit")}
