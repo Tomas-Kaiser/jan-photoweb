@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { revalidatePortfolio } from "@/app/lib/portfolio-cache";
 
 import { withAdmin } from "@/app/lib/with-admin";
 import { db } from "@/app/db";
@@ -157,6 +158,7 @@ export const PATCH = withAdmin(async (req: Request, { params }: Params) => {
             });
         }
 
+        revalidatePortfolio();
         revalidatePath("/albums");
         revalidatePath(`/albums/${oldPath}`);
         revalidatePath(`/albums/${newPath}`);
@@ -245,6 +247,7 @@ export const DELETE = withAdmin(async (_req: Request, { params }: Params) => {
             await tx.delete(albums).where(eq(albums.id, album.id));
         });
 
+        revalidatePortfolio();
         revalidatePath("/albums");
         revalidatePath(`/albums/${album.path}`);
 

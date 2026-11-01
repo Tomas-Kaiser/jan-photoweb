@@ -5,6 +5,7 @@ import { albums } from "@/app/db/schema";
 import { slugify } from "@/app/lib/slugify";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { revalidatePortfolio } from "@/app/lib/portfolio-cache";
 
 type DbLikeError = {
     code?: string;
@@ -81,6 +82,7 @@ export const POST = withAdmin(async (req: Request) => {
                 path: albums.path,
             });
 
+        revalidatePortfolio();
         revalidatePath("/albums");
         revalidatePath("/admin/albums");
 

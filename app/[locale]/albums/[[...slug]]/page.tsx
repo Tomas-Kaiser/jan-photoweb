@@ -1,12 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { asc, eq, isNull, exists, notExists, and, ne } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-
 import { auth } from "@/auth";
-import { db } from "@/app/db";
-import { albums, photos } from "@/app/db/schema";
 import PhotoGrid from "../PhotoGrid";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import AlbumHeaderActions from "@/app/components/AlbumHeaderActions";
@@ -14,6 +9,12 @@ import CreateAlbumButton from "@/app/components/CreateAlbumButton";
 import Breadcrumbs, { BreadcrumbItem } from "@/app/components/breadcrumbs";
 import { getTranslations } from "next-intl/server";
 import { HIGHLIGHTS_ALBUM_PATH } from "@/app/lib/highlights-album";
+import {
+  getAlbumContent,
+  getAlbumOptions,
+  getMovableLeafAlbums,
+  getRootAlbums,
+} from "@/app/lib/portfolio-cache";
 
 export const metadata: Metadata = {
   title: "Photo Albums | Jan Hájek",
@@ -48,24 +49,10 @@ const AlbumsPage = async ({ params }: Props) => {
   const isAdmin =
     !!session?.user && (session.user as { role?: string }).role === "admin";
 
-  const allAlbums = await db
-    .select({
-      id: albums.id,
-      name: albums.name,
-      path: albums.path,
-    })
-    .from(albums)
-    .where(ne(albums.path, HIGHLIGHTS_ALBUM_PATH))
-    .orderBy(asc(albums.path));
+  const allAlbums = await getAlbumOptions();
 
   if (!path) {
-    const rootAlbums = await db
-      .select()
-      .from(albums)
-      .where(
-        and(isNull(albums.parentId), ne(albums.path, HIGHLIGHTS_ALBUM_PATH)),
-      )
-      .orderBy(asc(albums.sortOrder), asc(albums.createdAt));
+    const rootAlbums = await getRootAlbums();
 
     const rootAlbumPhotos = rootAlbums.map((album) => ({
       id: album.id,
@@ -120,34 +107,13 @@ const AlbumsPage = async ({ params }: Props) => {
     );
   }
 
-  const albumResult = await db
-    .select()
-    .from(albums)
-    .where(eq(albums.path, path))
-    .limit(1);
+  const albumContent = await getAlbumContent(path);
 
-  if (!albumResult.length) {
+  if (!albumContent) {
     notFound();
   }
 
-  const album = albumResult[0];
-
-  const childAlbums = await db
-    .select()
-    .from(albums)
-    .where(eq(albums.parentId, album.id))
-    .orderBy(asc(albums.sortOrder), asc(albums.createdAt));
-
-  const albumPhotos = await db
-    .select()
-    .from(photos)
-    .where(
-      and(
-        eq(photos.albumId, album.id),
-        ne(photos.visibility, "highlights_only"),
-      ),
-    )
-    .orderBy(asc(photos.sortOrder), asc(photos.createdAt));
+  const { album, childAlbums, photos: albumPhotos } = albumContent;
 
   const childAlbumCards = childAlbums.map((child) => ({
     id: child.id,
@@ -194,33 +160,7 @@ const AlbumsPage = async ({ params }: Props) => {
 
   const currentAlbumPath = `/${locale}/albums/${album.path}`;
 
-  const childAlbumsAlias = alias(albums, "child_albums");
-
-  const movableLeafAlbums: MoveAlbumOption[] = await db
-    .select({
-      id: albums.id,
-      name: albums.name,
-      path: albums.path,
-    })
-    .from(albums)
-    .where(
-      and(
-        exists(
-          db
-            .select({ id: photos.id })
-            .from(photos)
-            .where(eq(photos.albumId, albums.id)),
-        ),
-        notExists(
-          db
-            .select({ id: childAlbumsAlias.id })
-            .from(childAlbumsAlias)
-            .where(eq(childAlbumsAlias.parentId, albums.id)),
-        ),
-        ne(albums.path, HIGHLIGHTS_ALBUM_PATH),
-      ),
-    )
-    .orderBy(asc(albums.path));
+  const movableLeafAlbums = await getMovableLeafAlbums();
 
   const moveAlbums: MoveAlbumOption[] = movableLeafAlbums
     .filter((candidate: MoveAlbumOption) => candidate.id !== album.id)

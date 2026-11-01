@@ -2,17 +2,15 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
-import { asc, eq } from "drizzle-orm";
 
 import HeroImage from "../components/HeroImage";
 import Reveal from "../components/Reveal";
 import SwiperWrapper from "../components/swiper/SwiperWrapper";
 
 
-import { portfolioHighlights, photos as photosTable } from "../db/schema";
-import { db } from "../db";
 import ConsentGate from "../components/consent/ConsentGate";
 import { getFeaturedHomepageAlbums } from "../lib/homepage-albums";
+import { getHighlights } from "../lib/portfolio-cache";
 import { getCloudflareImageUrl } from "../lib/cloudflare-images";
 import SocialPopup from "../components/SocialPopup";
 
@@ -71,18 +69,7 @@ export default async function Home() {
     },
   ];
 
-  const highlightRows = await db
-    .select({
-      highlightId: portfolioHighlights.id,
-      sortOrder: portfolioHighlights.sortOrder,
-      photoId: photosTable.id,
-      cloudflareId: photosTable.cloudflareId,
-      name: photosTable.name,
-      photoObjectPosition: photosTable.objectPosition,
-    })
-    .from(portfolioHighlights)
-    .innerJoin(photosTable, eq(portfolioHighlights.photoId, photosTable.id))
-    .orderBy(asc(portfolioHighlights.sortOrder));
+  const highlightRows = await getHighlights();
 
   const photos = highlightRows.map((row) => ({
     id: row.highlightId,

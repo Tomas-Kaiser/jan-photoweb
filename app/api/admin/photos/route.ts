@@ -4,6 +4,7 @@ import { db } from "@/app/db";
 import { albums, photos } from "@/app/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { revalidatePortfolio } from "@/app/lib/portfolio-cache";
 import { deleteCloudflareImage } from "@/app/lib/cloudflare-images";
 
 export const POST = withAdmin(async (req: Request) => {
@@ -47,6 +48,7 @@ export const POST = withAdmin(async (req: Request) => {
       })
       .returning({ id: photos.id });
 
+    revalidatePortfolio();
     revalidatePath(`/albums/${album.path}`);
     revalidatePath("/admin/albums");
 
@@ -113,6 +115,7 @@ export const DELETE = withAdmin(async (req: Request) => {
 
     await db.delete(photos).where(eq(photos.id, body.photoId));
 
+    revalidatePortfolio();
     revalidatePath(`/albums/${album.path}`);
     revalidatePath("/admin/albums");
 

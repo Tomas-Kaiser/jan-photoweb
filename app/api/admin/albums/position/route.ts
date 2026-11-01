@@ -4,6 +4,7 @@ import { db } from "@/app/db";
 import { albums } from "@/app/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { revalidatePortfolio } from "@/app/lib/portfolio-cache";
 
 export const POST = withAdmin(async (req: Request) => {
     try {
@@ -47,6 +48,7 @@ export const POST = withAdmin(async (req: Request) => {
             .set({ objectPosition })
             .where(eq(albums.id, albumId));
 
+        revalidatePortfolio();
         revalidatePath("/albums");
         for (const path of revalidatePaths) {
             revalidatePath(path);

@@ -1,9 +1,5 @@
-import { and, asc, isNull, ne } from "drizzle-orm";
-
-import { db } from "../db";
-import { albums } from "../db/schema";
 import { getCloudflareImageUrl } from "./cloudflare-images";
-import { HIGHLIGHTS_ALBUM_PATH } from "./highlights-album";
+import { getRootAlbums } from "./portfolio-cache";
 
 export type FeaturedHomepageAlbum = {
   id: string;
@@ -28,17 +24,7 @@ export async function getFeaturedHomepageAlbums(
   locale: string,
   limit = 2,
 ): Promise<FeaturedHomepageAlbum[]> {
-  const rootAlbumRows = await db
-    .select({
-      id: albums.id,
-      name: albums.name,
-      path: albums.path,
-      coverCloudflareId: albums.coverCloudflareId,
-      objectPosition: albums.objectPosition,
-    })
-    .from(albums)
-    .where(and(isNull(albums.parentId), ne(albums.path, HIGHLIGHTS_ALBUM_PATH)))
-    .orderBy(asc(albums.sortOrder), asc(albums.createdAt));
+  const rootAlbumRows = await getRootAlbums();
 
   const prioritized = HOMEPAGE_ALBUM_PRIORITY.map((path) =>
     rootAlbumRows.find((album) => album.path === path),

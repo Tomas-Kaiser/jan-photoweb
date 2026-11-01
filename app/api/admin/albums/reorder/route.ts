@@ -4,6 +4,7 @@ import { db } from "@/app/db";
 import { albums } from "@/app/db/schema";
 import { asc, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { revalidatePortfolio } from "@/app/lib/portfolio-cache";
 
 type ReorderItem = {
     id: string;
@@ -77,6 +78,7 @@ export const POST = withAdmin(async (req: Request) => {
             }
         });
 
+        revalidatePortfolio();
         revalidatePath("/albums");
         revalidatePath("/admin/albums");
         for (const path of revalidatePaths) {

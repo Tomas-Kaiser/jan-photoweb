@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { withAdmin } from "@/app/lib/with-admin";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { revalidatePortfolio } from "@/app/lib/portfolio-cache";
 import { db } from "@/app/db";
 import { photos } from "@/app/db/schema";
 
@@ -32,6 +33,7 @@ export const POST = withAdmin(async (req: Request) => {
                 )
             );
 
+        revalidatePortfolio();
         for (const path of revalidatePaths) {
             revalidatePath(path);
         }

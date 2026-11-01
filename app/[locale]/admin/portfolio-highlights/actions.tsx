@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidatePortfolio } from "@/app/lib/portfolio-cache";
 import { asc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/app/db";
@@ -68,6 +69,7 @@ export async function addPortfolioHighlight(photoId: string) {
 
   await insertHighlightPointer(photoId);
 
+  revalidatePortfolio();
   revalidatePath("/admin/portfolio-highlights");
   revalidatePath("/");
 }
@@ -98,6 +100,7 @@ export async function uploadPhotoToHighlights(
 
   await insertHighlightPointer(insertedPhoto.id);
 
+  revalidatePortfolio();
   revalidatePath("/admin/portfolio-highlights");
   revalidatePath("/");
 }
@@ -148,6 +151,7 @@ export async function deletePortfolioHighlight(highlightId: string) {
     }
   }
 
+  revalidatePortfolio();
   revalidatePath("/admin/portfolio-highlights");
   revalidatePath("/");
 }
@@ -169,6 +173,7 @@ export async function reorderPortfolioHighlights(
     }
   });
 
+  revalidatePortfolio();
   revalidatePath("/admin/portfolio-highlights");
   revalidatePath("/");
 }

@@ -93,6 +93,16 @@ them when touching album or photo features. Schema changes must go through
 `pnpm db:generate` (never hand-edit files in `drizzle/`), and should be
 deliberate, reviewed changes rather than incidental.
 
+### Portfolio read cache
+
+The public homepage and album pages read through
+[app/lib/portfolio-cache.ts](app/lib/portfolio-cache.ts) (`unstable_cache`
+under one tag), so visitors and crawlers don't wake the Neon compute. Call
+`revalidatePortfolio()` after any write to `albums`, `photos` or
+`portfolioHighlights`, or the public pages stay stale for up to a day. Cached
+reads must not select `Date` columns: entries are stored as JSON. Client
+gallery and admin data is deliberately not cached.
+
 ### Images
 
 All photo storage/delivery goes through Cloudflare Images. URLs are built by
