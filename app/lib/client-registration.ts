@@ -18,6 +18,10 @@ import {
 import { getEmailPreferencesUrl } from "@/app/lib/email-preferences";
 import { MARKETING_CONSENT_VERSIONS } from "@/app/lib/marketing-consent";
 import { getProofLinkPath, type ProofLinkLocale } from "@/app/lib/proof-link";
+import {
+  renderVerificationEmail,
+  type VerificationEmailInput,
+} from "@/app/lib/verification-email";
 
 // Client registration on a gallery: emails a magic link and a code, and on
 // verification links the person to the gallery — as its single owner when
@@ -309,63 +313,10 @@ export async function findLinkVerificationPurpose({
 }
 
 async function sendVerificationEmail({
-  purpose,
   to,
-  name,
-  locale,
-  code,
-  link,
-  preferencesLink,
-}: {
-  purpose: RegistrationPurpose;
-  to: string;
-  name: string;
-  locale: ProofLinkLocale;
-  code: string;
-  link: string;
-  preferencesLink: string;
-}) {
-  const subject =
-    locale === "cs"
-      ? `Váš ověřovací kód: ${code}`
-      : `Your verification code: ${code}`;
-
-  const text =
-    locale === "cs"
-      ? [
-          `Dobrý den, ${name},`,
-          "",
-          purpose === "owner"
-            ? "pro zobrazení vašich fotek potvrďte svůj e-mail. Klikněte na odkaz:"
-            : "pro odběr novinek a nabídek potvrďte svůj e-mail. Klikněte na odkaz:",
-          link,
-          "",
-          `nebo zadejte tento kód na stránce galerie: ${code}`,
-          "",
-          "Odkaz i kód platí 15 minut a lze je použít jen jednou.",
-          "Pokud jste o nic nežádali, tento e-mail můžete ignorovat.",
-          "",
-          "Jan Hájek",
-          "",
-          `Nastavení e-mailů: ${preferencesLink}`,
-        ].join("\n")
-      : [
-          `Hi ${name},`,
-          "",
-          purpose === "owner"
-            ? "Please confirm your email to see your photos. Click this link:"
-            : "Please confirm your email to get news and offers. Click this link:",
-          link,
-          "",
-          `or enter this code on the gallery page: ${code}`,
-          "",
-          "The link and the code are valid for 15 minutes and work once.",
-          "If you didn't ask for this, you can ignore this email.",
-          "",
-          "Jan Hájek",
-          "",
-          `Manage email preferences: ${preferencesLink}`,
-        ].join("\n");
+  ...email
+}: VerificationEmailInput & { to: string }) {
+  const { subject, text, html } = renderVerificationEmail(email);
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -380,5 +331,6 @@ async function sendVerificationEmail({
     to,
     subject,
     text,
+    html,
   });
 }
