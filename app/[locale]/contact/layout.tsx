@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { getPageMetadata } from "@/app/lib/page-metadata";
 
-export const metadata: Metadata = {
-    title: "Contact Jan Hájek | Photography",
-    description: "Get in touch with photographer Jan Hájek.",
-};
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    return getPageMetadata(locale, "contact", "/contact");
+}
 
 export default function ContactLayout({
     children,

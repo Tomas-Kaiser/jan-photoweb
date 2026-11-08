@@ -83,6 +83,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-gray-600">{t("tagline")}</p>
+            <p className="mt-2 max-w-xs text-gray-600">{t("location")}</p>
           </div>
 
           <nav aria-label={t("navigate")}>

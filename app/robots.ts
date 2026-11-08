@@ -1,10 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { routing } from "./i18n/routing";
-
-const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"
-).replace(/\/$/, "");
+import { siteUrl } from "./lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
   return {

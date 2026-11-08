@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
+import { getPageMetadata } from "@/app/lib/page-metadata";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/app/i18n/routing";
 
-export const metadata: Metadata = {
-    title: "Privacy Policy | Jan Hájek",
-    description:
-        "What personal data photographer Jan Hájek collects, why, how long it is kept, and how to ask for access or deletion.",
-};
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    return getPageMetadata(locale, "privacy", "/privacy");
+}
 
 const sectionIds = [
     "controller",

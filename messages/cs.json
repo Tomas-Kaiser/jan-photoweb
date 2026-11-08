@@ -100,9 +100,35 @@
       "btn": "Napište mi, co máte na mysli"
     }
   },
+  "seo": {
+    "home": {
+      "title": "Fotograf Ústecký kraj a celá ČR | Jan Hájek",
+      "description": "Jan Hájek – fotograf se sídlem v Ústeckém kraji. Svatby, portréty a focení párů po celé České republice."
+    },
+    "services": {
+      "title": "Svatební fotograf a focení párů | Ústecký kraj a celá ČR | Jan Hájek",
+      "description": "Svatební focení, focení párů a dárkové poukazy. Fotograf Jan Hájek sídlí v Ústeckém kraji a fotí po celé České republice."
+    },
+    "about": {
+      "title": "O mně | Jan Hájek, fotograf z Ústeckého kraje",
+      "description": "Jan Hájek je portrétní a módní fotograf se sídlem v Ústeckém kraji, který fotí po celé České republice."
+    },
+    "albums": {
+      "title": "Fotogalerie | Jan Hájek, fotograf",
+      "description": "Prohlédněte si fotografická alba Jana Hájka, fotografa z Ústeckého kraje."
+    },
+    "contact": {
+      "title": "Kontakt | Jan Hájek, fotograf z Ústeckého kraje",
+      "description": "Napište fotografovi Janu Hájkovi. Sídlí v Ústeckém kraji a fotí po celé České republice."
+    },
+    "privacy": {
+      "title": "Ochrana osobních údajů | Jan Hájek",
+      "description": "Jaké osobní údaje fotograf Jan Hájek shromažďuje, proč, jak dlouho je uchovává a jak požádat o jejich zpřístupnění nebo výmaz."
+    }
+  },
   "aboutMe": {
     "heading": "O mně",
-    "text-1": "Dobrý den, jsem Jan Hájek — fotograf, kterého pohání hluboká vášeň pro zachycení krásy, emocí a jedinečnosti lidí prostřednictvím módní a portrétní fotografie.",
+    "text-1": "Dobrý den, jsem Jan Hájek — fotograf, kterého pohání hluboká vášeň pro zachycení krásy, emocí a jedinečnosti lidí prostřednictvím módní a portrétní fotografie. Sídlím v Ústeckém kraji, ale fotím po celé České republice.",
     "text-2": "Od chvíle, kdy jsem poprvé vzal do ruky fotoaparát, jsem věděl, že fotografie pro mě bude víc než jen řemeslo — stane se mým způsobem vyprávění příběhů. Každá tvář, každý pohled i každý okamžik v sobě skrývají něco jedinečného a mým posláním je tuto podstatu odhalit skrze objektiv.",
     "text-3": "Specializuji se na portrétní a módní fotografii, ve které propojuji kreativitu s autenticitou, abych vytvořil vizuální díla, která ve vás zanechají dojem. Fotografie pro mě není jen momentka — je to živé vyjádření toho, jak vidím svět.",
     "text-4": "Pokud hledáte fotografie, které nejen zachytí vaši přítomnost, ale také oslaví vaši jedinečnost, jste na správném místě. Pojďme společně vytvořit něco nezapomenutelného.",
@@ -130,6 +156,7 @@
     "text": "Ať už jde o portréty, akce nebo kreativní focení – jsem tu, abych se postaral o nezapomenutelný zážitek.",
     "btn": "Napište mi",
     "tagline": "Fotografie, která zachycuje skutečné okamžiky.",
+    "location": "Sídlím v Ústeckém kraji, fotím po celé České republice.",
     "navigate": "Navigace",
     "getInTouch": "Kontakt",
     "sendMessage": "Napište mi zprávu",

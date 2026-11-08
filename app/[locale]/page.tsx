@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { getPageMetadata } from "@/app/lib/page-metadata";
 import { getTranslations, getLocale } from "next-intl/server";
 
 import HeroImage from "../components/HeroImage";
@@ -14,11 +15,14 @@ import { getHighlights } from "../lib/portfolio-cache";
 import { getCloudflareImageUrl } from "../lib/cloudflare-images";
 import SocialPopup from "../components/SocialPopup";
 
-export const metadata: Metadata = {
-  title: "Jan Hájek | Photography Portfolio & Workshops",
-  description:
-    "Photography that holds on to real moments. Explore the portfolio and workshops of Jan Hájek.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return getPageMetadata(locale, "home", "");
+}
 
 type ObjectPosition = {
   top: string;

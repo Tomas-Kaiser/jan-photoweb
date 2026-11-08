@@ -5,10 +5,7 @@ import { routing } from "./i18n/routing";
 import { db } from "./db";
 import { albums } from "./db/schema";
 import { HIGHLIGHTS_ALBUM_PATH } from "./lib/highlights-album";
-
-const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"
-).replace(/\/$/, "");
+import { siteUrl } from "./lib/site-url";
 
 const staticPaths = ["", "/about", "/services", "/contact", "/albums", "/privacy"];
 

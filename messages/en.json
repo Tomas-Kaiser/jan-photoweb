@@ -100,9 +100,35 @@
       "btn": "Tell Me What You Have in Mind"
     }
   },
+  "seo": {
+    "home": {
+      "title": "Photographer in Ústecký Region & Across Czechia | Jan Hájek",
+      "description": "Jan Hájek is a photographer based in the Ústecký Region, shooting weddings, portraits and couples across the entire Czech Republic."
+    },
+    "services": {
+      "title": "Wedding & Couples Photographer | Ústecký Region & All of Czechia | Jan Hájek",
+      "description": "Wedding photography, couples photoshoots and gift vouchers from Jan Hájek, based in the Ústecký Region and working across the entire Czech Republic."
+    },
+    "about": {
+      "title": "About Jan Hájek | Photographer in the Ústecký Region",
+      "description": "Jan Hájek is a portrait and fashion photographer based in the Ústecký Region, working across the entire Czech Republic."
+    },
+    "albums": {
+      "title": "Photo Albums | Jan Hájek, Photographer",
+      "description": "Explore photography albums by Jan Hájek, a photographer based in the Ústecký Region."
+    },
+    "contact": {
+      "title": "Contact | Jan Hájek, Photographer in the Ústecký Region",
+      "description": "Get in touch with photographer Jan Hájek, based in the Ústecký Region and working across the entire Czech Republic."
+    },
+    "privacy": {
+      "title": "Privacy Policy | Jan Hájek",
+      "description": "What personal data photographer Jan Hájek collects, why, how long it is kept, and how to ask for access or deletion."
+    }
+  },
   "aboutMe": {
     "heading": "About Me",
-    "text-1": "Hello, I’m Jan Hajek — a photographer driven by a deep passion for capturing the beauty, emotion, and individuality of people through fashion and portraiture.",
+    "text-1": "Hello, I’m Jan Hajek — a photographer driven by a deep passion for capturing the beauty, emotion, and individuality of people through fashion and portraiture. I’m based in the Ústecký Region, but I shoot across the entire Czech Republic.",
     "text-2": "From the moment I first held a camera, I knew photography would be more than a craft — it would be my way of telling stories. Every face, every glance, every moment holds something unique, and my mission is to reveal that essence through the lens.",
     "text-3": "I specialize in portrait and fashion photography, blending creativity with authenticity to craft visuals that resonate. For me, a photo isn’t just a snapshot — it’s a living expression of how I see the world.",
     "text-4": "If you’re looking for photographs that not only capture your presence but celebrate your uniqueness, you’re in the right place. Let’s create something unforgettable together.",
@@ -130,6 +156,7 @@
     "text": "Whether it's portraits, events, or creative shoots — I'm here to make it unforgettable.",
     "btn": "Contact me",
     "tagline": "Photography that holds on to real moments.",
+    "location": "Based in the Ústecký Region, shooting across the entire Czech Republic.",
     "navigate": "Navigate",
     "getInTouch": "Get in touch",
     "sendMessage": "Send me a message",

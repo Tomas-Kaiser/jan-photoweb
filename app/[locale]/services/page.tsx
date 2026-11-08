@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
+import { getPageMetadata } from "@/app/lib/page-metadata";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
 import { Link } from "@/app/i18n/routing";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 
-export const metadata: Metadata = {
-    title: "Photography Services | Jan Hájek",
-    description:
-        "Couples photoshoots, wedding photography, and gift vouchers from Jan Hájek.",
-};
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    return getPageMetadata(locale, "services", "/services");
+}
 
 export default async function ServicesPage() {
     const t = await getTranslations("services");

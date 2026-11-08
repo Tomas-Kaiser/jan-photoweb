@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import { getPageMetadata } from "@/app/lib/page-metadata";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import PhotoGrid from "../PhotoGrid";
@@ -16,17 +17,18 @@ import {
   getRootAlbums,
 } from "@/app/lib/portfolio-cache";
 
-export const metadata: Metadata = {
-  title: "Photo Albums | Jan Hájek",
-  description: "Explore photography albums by Jan Hájek.",
-};
-
 type Props = {
   params: Promise<{
     locale: string;
     slug?: string[];
   }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const path = slug ? `/albums/${slug.join("/")}` : "/albums";
+  return getPageMetadata(locale, "albums", path);
+}
 
 type MoveAlbumOption = {
   id: string;
