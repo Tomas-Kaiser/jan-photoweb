@@ -1,4 +1,6 @@
+import { cache } from "react";
 import { asc, eq } from "drizzle-orm";
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -12,6 +14,7 @@ import { db } from "@/app/db";
 import { finalPhotos, proofPhotos } from "@/app/db/schema";
 import {
   getCloudflareImageUrl,
+  getCloudflareImageUrlCapped,
   getWatermarkedProofImageUrl,
 } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
@@ -19,6 +22,7 @@ import { finalPhotoOrder } from "@/app/lib/final-photo-order";
 import { getFinalDeliveryDeletionDate } from "@/app/lib/final-delivery-retention";
 import { loadClientGallery } from "@/app/lib/client-gallery";
 import { findLinkVerificationPurpose } from "@/app/lib/client-registration";
+import { siteUrl } from "@/app/lib/site-url";
 import ProofSelectionClient from "./ProofSelectionClient";
 import ProofOrderPhotosClient from "./ProofOrderPhotosClient";
 import FinalsGalleryClient from "./FinalsGalleryClient";
@@ -43,6 +47,66 @@ function parseLinkVerification(verify: string | string[] | undefined) {
   return verificationId && linkToken ? { verificationId, linkToken } : null;
 }
 
+// Shared by generateMetadata and the page, so a render looks the gallery up once.
+const loadGallery = cache(loadClientGallery);
+
+type ClientGallery = NonNullable<Awaited<ReturnType<typeof loadClientGallery>>>;
+
+const SHARE_IMAGE_MAX_DIMENSION = 1200;
+
+// The link preview shows the finals' opening photo once they're published —
+// including behind the registration gate, so the link looks right when it's
+// first shared — and otherwise a proof photo, only ever watermarked. Null
+// falls back to the site's default image.
+async function getShareImageUrl({ gallery, view }: ClientGallery) {
+  if (view === "finals" || view === "registration") {
+    const [firstFinal] = await db
+      .select({ cloudflareId: finalPhotos.previewCloudflareId })
+      .from(finalPhotos)
+      .where(eq(finalPhotos.galleryId, gallery.id))
+      .orderBy(...finalPhotoOrder)
+      .limit(1);
+    const cloudflareId =
+      gallery.heroDesktopCloudflareId ?? firstFinal?.cloudflareId;
+
+    return cloudflareId
+      ? getCloudflareImageUrlCapped(
+          cloudflareId,
+          SHARE_IMAGE_MAX_DIMENSION,
+          SHARE_IMAGE_MAX_DIMENSION,
+        )
+      : null;
+  }
+
+  const [firstProof] = await db
+    .select({ cloudflareId: proofPhotos.cloudflareId })
+    .from(proofPhotos)
+    .where(eq(proofPhotos.galleryId, gallery.id))
+    .orderBy(asc(proofPhotos.sortOrder), asc(proofPhotos.createdAt))
+    .limit(1);
+
+  return firstProof
+    ? `${siteUrl}${getWatermarkedProofImageUrl(
+        firstProof.cloudflareId,
+        SHARE_IMAGE_MAX_DIMENSION,
+        SHARE_IMAGE_MAX_DIMENSION,
+      )}`
+    : null;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { token } = await params;
+  const clientGallery = await loadGallery(token);
+  const imageUrl = clientGallery && (await getShareImageUrl(clientGallery));
+
+  if (!imageUrl) return {};
+
+  return {
+    openGraph: { images: [imageUrl] },
+    twitter: { card: "summary_large_image", images: [imageUrl] },
+  };
+}
+
 export default async function ProofGalleryPage({
   params,
   searchParams,
@@ -50,7 +114,7 @@ export default async function ProofGalleryPage({
   const { locale, token } = await params;
   const t = await getTranslations("proof");
 
-  const clientGallery = await loadClientGallery(token);
+  const clientGallery = await loadGallery(token);
 
   // Rendered by ./not-found.tsx with a 404 status, matching the
   // /api/proof/[token]/* routes for an unknown token.
@@ -70,8 +134,9 @@ export default async function ProofGalleryPage({
       })
     : null;
 
-  // Finals behind the owner registration gate — nothing about the photos
-  // is loaded or sent to the browser until the gallery is claimed.
+  // Finals behind the owner registration gate — apart from the link
+  // preview image, nothing about the photos is loaded or sent to the
+  // browser until the gallery is claimed.
   if (view === "registration") {
     return (
       <RegistrationClient

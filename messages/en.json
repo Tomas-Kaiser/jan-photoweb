@@ -296,7 +296,7 @@
     "leaveReview": "Leave a Google review",
     "registration": {
       "title": "Your photos are ready",
-      "intro": "Enter your name and email to open the gallery. We'll send you a link and a code to confirm it's you. The first person to confirm becomes the gallery's owner, and after that anyone with this link can see the photos.",
+      "intro": "Enter your name and email to open the gallery. We'll send you a link and a code to confirm it's you.",
       "nameLabel": "Name",
       "emailLabel": "Email",
       "marketingTitle": "Let's stay in touch",

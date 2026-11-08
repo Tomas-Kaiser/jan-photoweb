@@ -7,7 +7,9 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
+      // Link-preview crawlers honour robots.txt when fetching a shared
+      // gallery's watermarked preview image.
+      allow: ["/", "/api/proof-image/"],
       disallow: [
         "/api",
         ...routing.locales.map((locale) => `/${locale}/admin`),

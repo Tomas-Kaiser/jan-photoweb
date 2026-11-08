@@ -296,7 +296,7 @@
     "leaveReview": "Napsat recenzi na Googlu",
     "registration": {
       "title": "Vaše fotky jsou připravené",
-      "intro": "Pro otevření galerie zadejte své jméno a e-mail. Pošleme vám odkaz a kód, kterým potvrdíte, že jste to vy. Kdo potvrdí jako první, stane se vlastníkem galerie, a pak už fotky uvidí každý, kdo má tento odkaz.",
+      "intro": "Pro otevření galerie zadejte své jméno a e-mail. Pošleme vám odkaz a kód, kterým potvrdíte, že jste to vy.",
       "nameLabel": "Jméno",
       "emailLabel": "E-mail",
       "marketingTitle": "Zůstaňme v kontaktu",
