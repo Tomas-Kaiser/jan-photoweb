@@ -142,9 +142,25 @@
       "name": "Jméno",
       "email": "E-mail",
       "message": "Zpráva",
-      "couplesMessage": "Mám zájem o párové focení.",
-      "weddingMessage": "Mám zájem o svatební focení.",
-      "voucherMessage": "Mám zájem o dárkový poukaz.",
+      "enquiryType": "O co máte zájem?",
+      "enquiryTypePlaceholder": "Vyberte možnost",
+      "enquiryTypes": {
+        "couples": "Párové focení",
+        "wedding": "Svatební focení",
+        "portrait": "Portrétní focení",
+        "personal-workshops": "Osobní workshop",
+        "voucher": "Dárkový poukaz",
+        "other": "Něco jiného"
+      },
+      "drafts": {
+        "couples": "Dobrý den,\n\nměli bychom zájem o párové focení.\n\nPreferovaný termín:\nMísto:\n\nDěkujeme!",
+        "wedding": "Dobrý den,\n\nbudeme se brát a chtěli bychom se zeptat na svatební focení.\n\nDatum svatby:\nMísto konání:\nPočet hostů:\n\nDěkujeme!",
+        "portrait": "Dobrý den,\n\nmám zájem o portrétní focení.\n\nPreferovaný termín:\nÚčel fotek:\n\nDěkuji!",
+        "personal-workshops": "Dobrý den,\n\nmám zájem o osobní fotografický workshop.\n\nMoje dosavadní zkušenosti:\nCo bych se chtěl/a naučit:\n\nDěkuji!",
+        "voucher": "Dobrý den,\n\nmám zájem o dárkový poukaz.\n\nTyp focení:\nPotřebuji do:\n\nDěkuji!",
+        "other": "Dobrý den,\n\nmám nápad na focení:\n\n\nDěkuji!"
+      },
+      "draftHint": "Tady je návrh zprávy. Doplňte podrobnosti nebo si ji upravte podle sebe.",
       "btn": "Odeslat zprávu",
       "sending": "Odesílání…",
       "success": "Děkuji za zprávu! Brzy se vám ozvu.",

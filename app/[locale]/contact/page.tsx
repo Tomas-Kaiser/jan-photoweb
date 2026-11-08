@@ -2,6 +2,11 @@
 import React, { useRef, useState } from 'react';
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import {
+    CONTACT_ENQUIRY_TYPES,
+    isContactEnquiryType,
+    type ContactEnquiryType,
+} from "@/app/lib/contact-enquiry";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -12,15 +17,24 @@ const ContactPage = () => {
     const [renderedAt] = useState(() => Date.now());
     const [status, setStatus] = useState<Status>("idle");
     const service = searchParams.get("service");
-    const serviceMessages = {
-        couples: t("form.couplesMessage"),
-        wedding: t("form.weddingMessage"),
-        voucher: t("form.voucherMessage"),
-    };
-    const initialMessage =
-        service && service in serviceMessages
-            ? serviceMessages[service as keyof typeof serviceMessages]
-            : "";
+    const initialType = isContactEnquiryType(service) ? service : "";
+    const draftFor = (type: ContactEnquiryType) => t(`form.drafts.${type}`);
+    const [enquiryType, setEnquiryType] = useState<ContactEnquiryType | "">(initialType);
+    const [message, setMessage] = useState(initialType ? draftFor(initialType) : "");
+    const isDraft = CONTACT_ENQUIRY_TYPES.some((type) => draftFor(type) === message);
+
+    // Swaps the draft for the new type's, but never overwrites anything the
+    // visitor has written themselves.
+    function handleTypeChange(value: string) {
+        if (!isContactEnquiryType(value)) {
+            setEnquiryType("");
+            return;
+        }
+        setEnquiryType(value);
+        if (!message.trim() || isDraft) {
+            setMessage(draftFor(value));
+        }
+    }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -36,6 +50,8 @@ const ContactPage = () => {
             if (response.ok) {
                 setStatus("success");
                 formRef.current?.reset();
+                setEnquiryType("");
+                setMessage("");
             } else {
                 setStatus("error");
             }
@@ -112,6 +128,30 @@ const ContactPage = () => {
                     />
                 </div>
 
+                {/* Enquiry type */}
+                <div>
+                    <label htmlFor="enquiryType" className="block text-sm font-medium text-gray-800 mb-1">
+                        {t("form.enquiryType")}
+                    </label>
+                    <select
+                        id="enquiryType"
+                        name="enquiryType"
+                        required
+                        value={enquiryType}
+                        onChange={(e) => handleTypeChange(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md bg-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    >
+                        <option value="" disabled>
+                            {t("form.enquiryTypePlaceholder")}
+                        </option>
+                        {CONTACT_ENQUIRY_TYPES.map((type) => (
+                            <option key={type} value={type}>
+                                {t(`form.enquiryTypes.${type}`)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 {/* Message */}
                 <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-800 mb-1">
@@ -120,11 +160,15 @@ const ContactPage = () => {
                     <textarea
                         id="message"
                         name="message"
-                        rows={5}
+                        rows={8}
                         required
-                        defaultValue={initialMessage}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
                         className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black resize-none"
                     />
+                    {isDraft ? (
+                        <p className="mt-1 text-sm text-gray-500">{t("form.draftHint")}</p>
+                    ) : null}
                 </div>
 
                 {/* Submit Button */}

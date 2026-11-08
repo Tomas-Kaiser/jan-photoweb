@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { NextResponse } from 'next/server';
+import { isContactEnquiryType } from '@/app/lib/contact-enquiry';
 
 const MIN_SUBMIT_MS = 3000;
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
@@ -51,6 +52,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false }, { status: 400 });
   }
 
+  const enquiryType = formData.get('enquiryType')?.toString();
+  const interestedIn = isContactEnquiryType(enquiryType)
+    ? `Interested in: ${enquiryType}\n`
+    : '';
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
     replyTo: email,
     to: process.env.CONTACT_TO || process.env.GMAIL_USER,
     subject: `New Contact Form Submission from ${name}`,
-    text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+    text: `Name: ${name}\nEmail: ${email}\n${interestedIn}\nMessage:\n${message}`,
   };
 
   try {

@@ -142,9 +142,25 @@
       "name": "Name",
       "email": "Email",
       "message": "Message",
-      "couplesMessage": "I would like to enquire about a couples photoshoot.",
-      "weddingMessage": "I would like to enquire about wedding photography.",
-      "voucherMessage": "I would like to request a gift voucher.",
+      "enquiryType": "What are you looking for?",
+      "enquiryTypePlaceholder": "Choose an option",
+      "enquiryTypes": {
+        "couples": "Couples photoshoot",
+        "wedding": "Wedding photography",
+        "portrait": "Portrait session",
+        "personal-workshops": "Personal workshop",
+        "voucher": "Gift voucher",
+        "other": "Something else"
+      },
+      "drafts": {
+        "couples": "Hello,\n\nwe would like to book a couples photoshoot.\n\nPreferred date:\nLocation:\n\nThank you!",
+        "wedding": "Hello,\n\nwe are getting married and would like to ask about wedding photography.\n\nWedding date:\nVenue:\nNumber of guests:\n\nThank you!",
+        "portrait": "Hello,\n\nI would like to book a portrait session.\n\nPreferred date:\nPurpose of the photos:\n\nThank you!",
+        "personal-workshops": "Hello,\n\nI would like to book a personal photography workshop.\n\nMy experience so far:\nWhat I would like to learn:\n\nThank you!",
+        "voucher": "Hello,\n\nI would like to buy a gift voucher.\n\nType of shoot:\nNeeded by:\n\nThank you!",
+        "other": "Hello,\n\nI have an idea for a shoot:\n\n\nThank you!"
+      },
+      "draftHint": "Here's a message to start from. Fill in the details or change anything you like.",
       "btn": "Send Message",
       "sending": "Sending…",
       "success": "Thanks for reaching out! I'll get back to you soon.",
