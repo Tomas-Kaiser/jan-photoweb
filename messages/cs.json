@@ -673,7 +673,13 @@
       "finalsMessagePlaceholder": "Vzkaz pro klienta, zobrazený na jeho stránce s finálními fotkami (nepovinné)",
       "pageContentSave": "Uložit",
       "pageContentSaved": "Uloženo.",
-      "pageContentSaveFailed": "Uložení se nezdařilo."
+      "pageContentSaveFailed": "Uložení se nezdařilo.",
+      "previewButton": "Náhled stránky s finálními fotkami",
+      "previewLabel": "Náhled",
+      "previewPhoneView": "Zobrazení na mobilu",
+      "previewBackToAdmin": "Zpět do administrace",
+      "previewClosePhone": "Zavřít",
+      "previewDownloadsDisabled": "V náhledu je stahování vypnuté."
     },
     "contacts": {
       "pageTitle": "Kontakty",

@@ -673,7 +673,13 @@
       "finalsMessagePlaceholder": "A note for the client, shown on their finals page (optional)",
       "pageContentSave": "Save",
       "pageContentSaved": "Saved.",
-      "pageContentSaveFailed": "Failed to save."
+      "pageContentSaveFailed": "Failed to save.",
+      "previewButton": "Preview finals page",
+      "previewLabel": "Preview",
+      "previewPhoneView": "Phone view",
+      "previewBackToAdmin": "Back to admin",
+      "previewClosePhone": "Close",
+      "previewDownloadsDisabled": "Downloads are turned off in the preview."
     },
     "contacts": {
       "pageTitle": "Contacts",

@@ -82,7 +82,8 @@ export default function SiteChrome({ isAdmin, children }: Props) {
       className={`flex min-h-screen flex-col ${isProofPage ? "bg-brand-cream" : ""}`}
     >
       {showProofChrome ? <ProofHeader /> : null}
-      {!isProofPage ? <NavBar isAdmin={isAdmin} /> : null}
+      {/* Also hidden for the admin's preview of a client finals page. */}
+      {!isProofPage && !hideProofChrome ? <NavBar isAdmin={isAdmin} /> : null}
       <main className="flex-1">
         <ProofChromeContext.Provider value={setHideProofChrome}>
           {children}

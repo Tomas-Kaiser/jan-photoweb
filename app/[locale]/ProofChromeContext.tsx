@@ -10,6 +10,8 @@ export const ProofChromeContext = createContext<SetHideProofChrome | null>(null)
 // minimal ProofHeader/ProofFooter while it's mounted — automatically
 // restored on unmount. Finals/selection/thank-you all share the same
 // /proof/[token] URL, so this can't be done by pathname alone.
+// Outside proof pages it hides the NavBar instead, so the admin's preview
+// of the finals page looks the same as the client's.
 export function useHideProofChrome(hidden: boolean) {
   const setHidden = useContext(ProofChromeContext);
 

@@ -43,6 +43,10 @@ type Props = {
   heroDesktopSrc: string | null;
   // A guest signup's emailed link, opened on the finals.
   linkVerification: LinkVerification | null;
+  // The admin's preview of this page: it looks the same, but downloads
+  // only explain that they're off, and the news & offers box is left out
+  // so a test signup can't create a real contact.
+  preview?: boolean;
 };
 
 export default function FinalsGalleryClient({
@@ -55,8 +59,10 @@ export default function FinalsGalleryClient({
   heroMobileSrc,
   heroDesktopSrc,
   linkVerification,
+  preview = false,
 }: Props) {
   const t = useTranslations("finalDelivery");
+  const tAdmin = useTranslations("admin");
   const toast = useToast();
   useHideProofChrome(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -71,6 +77,11 @@ export default function FinalsGalleryClient({
     lightboxIndex !== null ? photos[lightboxIndex] : undefined;
 
   async function downloadPhoto(photo: Photo) {
+    if (preview) {
+      toast.showError(tAdmin("finalDelivery.previewDownloadsDisabled"));
+      return;
+    }
+
     setDownloadingId(photo.id);
 
     try {
@@ -92,6 +103,11 @@ export default function FinalsGalleryClient({
   }
 
   async function downloadAll() {
+    if (preview) {
+      toast.showError(tAdmin("finalDelivery.previewDownloadsDisabled"));
+      return;
+    }
+
     setDownloadingAll(true);
 
     try {
@@ -325,7 +341,12 @@ export default function FinalsGalleryClient({
           </div>
         </div>
 
-        <GuestSignupClient token={token} linkVerification={linkVerification} />
+        {preview ? null : (
+          <GuestSignupClient
+            token={token}
+            linkVerification={linkVerification}
+          />
+        )}
       </div>
 
       {/* Blocks right-click/save on the lightbox's zoomed preview — a

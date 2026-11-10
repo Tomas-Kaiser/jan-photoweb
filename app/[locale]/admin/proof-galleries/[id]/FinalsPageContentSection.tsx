@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useRouter } from "@/app/i18n/routing";
+import { Link, useRouter } from "@/app/i18n/routing";
 import { getCloudflareImageUrl } from "@/app/lib/cloudflare-images";
 import { uploadPhotoToCloudflare } from "@/app/utils/upload-photo-to-cloudflare";
 import { updateProofGallery } from "@/app/utils/proof-gallery-admin-api";
@@ -133,9 +133,19 @@ export default function FinalsPageContentSection({
 
   return (
     <section className="rounded-3xl border border-brand-gold/15 bg-white p-6 shadow-[0_10px_35px_-20px_rgba(1,68,33,0.3)] sm:p-7">
-      <h2 className="font-display text-2xl font-semibold text-brand-green">
-        {t("finalDelivery.pageContentTitle")}
-      </h2>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h2 className="font-display text-2xl font-semibold text-brand-green">
+          {t("finalDelivery.pageContentTitle")}
+        </h2>
+        <Link
+          href={`/admin/proof-galleries/${galleryId}/finals-preview`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex rounded-full border border-brand-green/30 px-4 py-2 text-sm font-semibold text-brand-green transition hover:bg-brand-cream"
+        >
+          {t("finalDelivery.previewButton")}
+        </Link>
+      </div>
       <p className="mb-5 mt-1 text-sm text-gray-500">
         {t("finalDelivery.pageContentHint")}
       </p>

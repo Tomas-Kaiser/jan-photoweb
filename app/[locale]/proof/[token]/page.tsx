@@ -13,14 +13,13 @@ import {
 import { db } from "@/app/db";
 import { finalPhotos, proofPhotos } from "@/app/db/schema";
 import {
-  getCloudflareImageUrl,
   getCloudflareImageUrlCapped,
   getWatermarkedProofImageUrl,
 } from "@/app/lib/cloudflare-images";
 import { formatMoneyFromCents } from "@/app/lib/format-money";
 import { finalPhotoOrder } from "@/app/lib/final-photo-order";
-import { getFinalDeliveryDeletionDate } from "@/app/lib/final-delivery-retention";
 import { loadClientGallery } from "@/app/lib/client-gallery";
+import { loadFinalsPageContent } from "@/app/lib/finals-page";
 import { findLinkVerificationPurpose } from "@/app/lib/client-registration";
 import { siteUrl } from "@/app/lib/site-url";
 import ProofSelectionClient from "./ProofSelectionClient";
@@ -155,25 +154,7 @@ export default async function ProofGalleryPage({
     .orderBy(asc(proofPhotos.sortOrder), asc(proofPhotos.createdAt));
 
   if (view === "finals") {
-    const finalPhotoRows = await db
-      .select()
-      .from(finalPhotos)
-      .where(eq(finalPhotos.galleryId, gallery.id))
-      .orderBy(...finalPhotoOrder);
-
-    const finals = finalPhotoRows.map((photo) => ({
-      id: photo.id,
-      fileName: photo.fileName,
-      // "detail" (not "card") for the gallery grid itself — the justified
-      // layout needs each tile's real aspect ratio, and "card" has
-      // historically only ever been used for forced-square crops
-      // elsewhere in this app, so it isn't trustworthy here.
-      gridSrc: getCloudflareImageUrl(photo.previewCloudflareId, "detail"),
-      detailSrc: getCloudflareImageUrl(photo.previewCloudflareId, "detail"),
-      fullSrc: getCloudflareImageUrl(photo.previewCloudflareId, "full"),
-      width: photo.width ?? 1200,
-      height: photo.height ?? 1200,
-    }));
+    const content = await loadFinalsPageContent(gallery, locale);
 
     return (
       <>
@@ -184,37 +165,7 @@ export default async function ProofGalleryPage({
         </noscript>
         <FinalsGalleryClient
           token={token}
-          clientName={gallery.clientName}
-          eventDateLabel={
-            gallery.eventDate
-              ? gallery.eventDate.toLocaleDateString(locale, {
-                  dateStyle: "long",
-                  timeZone: "UTC",
-                })
-              : null
-          }
-          finalsMessage={gallery.finalsMessage}
-          deletionDateLabel={
-            gallery.finalsPublishedAt
-              ? getFinalDeliveryDeletionDate(
-                  gallery.finalsPublishedAt,
-                ).toLocaleDateString(locale, {
-                  dateStyle: "long",
-                  timeZone: "Europe/Prague",
-                })
-              : null
-          }
-          photos={finals}
-          heroMobileSrc={
-            gallery.heroMobileCloudflareId
-              ? getCloudflareImageUrl(gallery.heroMobileCloudflareId, "full")
-              : null
-          }
-          heroDesktopSrc={
-            gallery.heroDesktopCloudflareId
-              ? getCloudflareImageUrl(gallery.heroDesktopCloudflareId, "full")
-              : null
-          }
+          {...content}
           linkVerification={linkPurpose === "guest" ? linkVerification : null}
         />
       </>
