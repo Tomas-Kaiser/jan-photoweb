@@ -359,6 +359,10 @@
     "downloadingAll": "Stahování…",
     "downloadButton": "Stáhnout",
     "downloadFailed": "Stahování se nezdařilo. Zkuste to prosím znovu.",
+    "saveToPhotosButton": "Uložit do Fotek",
+    "saveToPhotosPreparing": "Připravuji…",
+    "saveToPhotosReady": "Klepněte pro uložení",
+    "saveToPhotosFailed": "Fotku se nepodařilo připravit k uložení. Zkuste to prosím znovu, nebo použijte Stáhnout.",
     "deletionNotice": "Fotky zde budou k dispozici do {date}. Stáhněte si je prosím do té doby."
   },
   "admin": {

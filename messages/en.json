@@ -359,6 +359,10 @@
     "downloadingAll": "Downloading…",
     "downloadButton": "Download",
     "downloadFailed": "Download failed. Please try again.",
+    "saveToPhotosButton": "Save to Photos",
+    "saveToPhotosPreparing": "Preparing…",
+    "saveToPhotosReady": "Tap to save",
+    "saveToPhotosFailed": "Couldn't prepare the photo for saving. Please try again, or use Download.",
     "deletionNotice": "These photos will be available here until {date}. Please download them before then."
   },
   "admin": {

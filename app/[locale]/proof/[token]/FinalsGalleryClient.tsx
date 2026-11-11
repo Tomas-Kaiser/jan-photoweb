@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { RowsPhotoAlbum } from "react-photo-album";
@@ -11,6 +11,11 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import { useToast } from "@/app/components/Toast";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { Link } from "@/app/i18n/routing";
+import {
+  canSaveToPhotos,
+  imageMimeType,
+  isShareCancelled,
+} from "@/app/utils/save-to-photos";
 import { useHideProofChrome } from "../../ProofChromeContext";
 import type { LinkVerification } from "./EmailVerification";
 import GuestSignupClient from "./GuestSignupClient";
@@ -68,6 +73,21 @@ export default function FinalsGalleryClient({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
+  // Detected after mount: the server can't know, and rendering it during
+  // hydration would mismatch.
+  const [showSaveToPhotos, setShowSaveToPhotos] = useState(false);
+  const [preparingId, setPreparingId] = useState<string | null>(null);
+  // "Save to Photos" takes two taps: the first fetches the original, the
+  // second opens the share sheet. iOS only opens it right after a tap, and
+  // fetching a large original can take longer than that allows.
+  const [preparedPhoto, setPreparedPhoto] = useState<{
+    id: string;
+    file: File;
+  } | null>(null);
+
+  useEffect(() => {
+    setShowSaveToPhotos(canSaveToPhotos());
+  }, []);
 
   const hero = photos[0];
   const heroMobile = heroMobileSrc ?? hero?.fullSrc;
@@ -75,6 +95,19 @@ export default function FinalsGalleryClient({
   const slides = photos.map((photo) => ({ src: photo.detailSrc }));
   const lightboxPhoto =
     lightboxIndex !== null ? photos[lightboxIndex] : undefined;
+
+  async function fetchDownloadUrl(photo: Photo): Promise<string> {
+    const res = await fetch(
+      `/api/proof/${token}/final-photos/${photo.id}/download-url`,
+    );
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw new Error(data?.error || t("downloadFailed"));
+    }
+
+    return data.url;
+  }
 
   async function downloadPhoto(photo: Photo) {
     if (preview) {
@@ -85,20 +118,54 @@ export default function FinalsGalleryClient({
     setDownloadingId(photo.id);
 
     try {
-      const res = await fetch(
-        `/api/proof/${token}/final-photos/${photo.id}/download-url`,
-      );
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(data?.error || t("downloadFailed"));
-      }
-
-      window.location.href = data.url;
+      window.location.href = await fetchDownloadUrl(photo);
     } catch (err) {
       toast.showError(err instanceof Error ? err.message : t("downloadFailed"));
     } finally {
       setDownloadingId(null);
+    }
+  }
+
+  async function prepareSaveToPhotos(photo: Photo) {
+    if (preview) {
+      toast.showError(tAdmin("finalDelivery.previewDownloadsDisabled"));
+      return;
+    }
+
+    setPreparingId(photo.id);
+    // Hold one original at a time; they can be tens of megabytes.
+    setPreparedPhoto(null);
+
+    try {
+      const url = await fetchDownloadUrl(photo);
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(t("saveToPhotosFailed"));
+      }
+
+      const blob = await res.blob();
+      const file = new File([blob], photo.fileName, {
+        type: imageMimeType(photo.fileName, blob.type),
+      });
+      setPreparedPhoto({ id: photo.id, file });
+    } catch {
+      // A network or CORS failure reads as a bare TypeError; point the
+      // client at the plain download, which doesn't depend on either.
+      toast.showError(t("saveToPhotosFailed"));
+    } finally {
+      setPreparingId(null);
+    }
+  }
+
+  async function sharePreparedPhoto(file: File) {
+    try {
+      await navigator.share({ files: [file] });
+      setPreparedPhoto(null);
+    } catch (err) {
+      if (!isShareCancelled(err)) {
+        toast.showError(t("saveToPhotosFailed"));
+      }
     }
   }
 
@@ -358,7 +425,10 @@ export default function FinalsGalleryClient({
       <div onContextMenu={(e) => e.preventDefault()}>
         <Lightbox
           open={lightboxIndex !== null}
-          close={() => setLightboxIndex(null)}
+          close={() => {
+            setLightboxIndex(null);
+            setPreparedPhoto(null);
+          }}
           slides={slides}
           index={lightboxIndex ?? 0}
           on={{ view: ({ index }) => setLightboxIndex(index) }}
@@ -377,6 +447,28 @@ export default function FinalsGalleryClient({
                         ? t("downloadingAll")
                         : t("downloadButton")}
                     </button>
+                    {showSaveToPhotos ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          preparedPhoto?.id === lightboxPhoto.id
+                            ? sharePreparedPhoto(preparedPhoto.file)
+                            : prepareSaveToPhotos(lightboxPhoto)
+                        }
+                        disabled={preparingId === lightboxPhoto.id}
+                        className={`cursor-pointer border-l border-white/30 px-6 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                          preparedPhoto?.id === lightboxPhoto.id
+                            ? "bg-brand-green hover:bg-brand-green/90"
+                            : "bg-neutral-900/90 hover:bg-neutral-900"
+                        }`}
+                      >
+                        {preparingId === lightboxPhoto.id
+                          ? t("saveToPhotosPreparing")
+                          : preparedPhoto?.id === lightboxPhoto.id
+                            ? t("saveToPhotosReady")
+                            : t("saveToPhotosButton")}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               ) : null,
