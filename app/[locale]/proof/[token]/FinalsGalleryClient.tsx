@@ -25,7 +25,6 @@ type Photo = {
   id: string;
   fileName: string;
   gridSrc: string;
-  detailSrc: string;
   fullSrc: string;
   width: number;
   height: number;
@@ -92,7 +91,7 @@ export default function FinalsGalleryClient({
   const hero = photos[0];
   const heroMobile = heroMobileSrc ?? hero?.fullSrc;
   const heroDesktop = heroDesktopSrc ?? hero?.fullSrc;
-  const slides = photos.map((photo) => ({ src: photo.detailSrc }));
+  const slides = photos.map((photo) => ({ src: photo.fullSrc }));
   const lightboxPhoto =
     lightboxIndex !== null ? photos[lightboxIndex] : undefined;
 

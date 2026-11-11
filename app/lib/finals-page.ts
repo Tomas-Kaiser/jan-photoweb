@@ -20,12 +20,12 @@ export async function loadFinalsPageContent(gallery: Gallery, locale: string) {
   const photos = finalPhotoRows.map((photo) => ({
     id: photo.id,
     fileName: photo.fileName,
-    // "detail" (not "card") for the gallery grid itself — the justified
-    // layout needs each tile's real aspect ratio, and "card" has
-    // historically only ever been used for forced-square crops
-    // elsewhere in this app, so it isn't trustworthy here.
-    gridSrc: getCloudflareImageUrl(photo.previewCloudflareId, "detail"),
-    detailSrc: getCloudflareImageUrl(photo.previewCloudflareId, "detail"),
+    // "full" for the grid too, deliberately: finals are the delivered
+    // product, so tiles show the best preview quality rather than a
+    // lighter variant. (Not "card" in any case — the justified layout
+    // needs each tile's real aspect ratio, and "card" has only ever been
+    // used for forced-square crops elsewhere in this app.)
+    gridSrc: getCloudflareImageUrl(photo.previewCloudflareId, "full"),
     fullSrc: getCloudflareImageUrl(photo.previewCloudflareId, "full"),
     width: photo.width ?? 1200,
     height: photo.height ?? 1200,
